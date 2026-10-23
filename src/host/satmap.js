@@ -5,16 +5,17 @@
   var cfg = window.OC_CONFIG || {};
   function css(n) { return getComputedStyle(document.documentElement).getPropertyValue(n).trim(); }
   function esc(s) { return String(s).replace(/[&<>"']/g, function (c) { return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]; }); }
-  function colorOf(c) { return c.t === "c" ? (c.b >= 0 ? css("--roast") : css("--signal")) : c.k === 0 ? css("--amber") : css("--berry"); }
+  function colorOf(c) { if (c.t === "f") return css("--food") || "#3A63A8"; return c.t === "c" ? (c.b >= 0 ? css("--roast") : css("--signal")) : c.k === 0 ? css("--amber") : css("--berry"); }
   function zoomFor(r) { return r >= 1000 ? 15 : r >= 500 ? 16 : 17; }
   function popup(c) {
     var links = (window.OC_links ? window.OC_links(c) : []).map(function (l) {
       return '<a href="' + esc(l[3]) + '" target="_blank" rel="noopener">' + esc(l[0]) + "</a>";
     }).join(" · ");
     return "<b>" + esc(c.name) + "</b><br>" + esc(window.OC_kind ? window.OC_kind(c) : "") + " · " + Math.round(c.m) + "m" +
-      (c.fl ? " · " + esc(c.fl === "지" ? "지하" : c.fl + "층") : "") + "<br>" + esc(c.addr) + "<br>" + links;
+      (c.fl ? " · " + esc(c.fl === "지" ? "지하" : c.fl + "층") : "") + (c.addr ? "<br>" + esc(c.addr) : "") + "<br>" + links;
   }
   var lastKey = "";
+  function foodsFor(state, foods) { return state.showFood && foods ? foods.filter(function (c) { return c.m <= state.r * 1.1; }).slice(0, 1500) : []; }
 
   /* ---------- 카카오 지도 (스카이뷰) ---------- */
   function startKakao() {
@@ -36,16 +37,16 @@
             box.style.cssText = "background:#fff;color:#111;font:13px/1.5 sans-serif;padding:8px 10px;border-radius:6px;box-shadow:0 2px 8px rgba(0,0,0,.3);max-width:240px";
             box.innerHTML = popup(c); info.setContent(box); info.setPosition(pos); info.setMap(map);
           },
-          draw: function (state, cafes, sweets) {
+          draw: function (state, cafes, sweets, stations, foods) {
             objs.forEach(function (o) { o.setMap(null); }); objs = []; info.setMap(null);
             var center = new kakao.maps.LatLng(state.lat, state.lon);
             var key = state.lat.toFixed(5) + state.lon.toFixed(5) + state.r;
             if (key !== lastKey) { map.setCenter(center); map.setLevel(state.r >= 1000 ? 5 : state.r >= 500 ? 4 : 3); lastKey = key; }
             var circle = new kakao.maps.Circle({ center: center, radius: state.r, strokeWeight: 2, strokeColor: "#ffffff", strokeStyle: "dash", fillColor: "#ffffff", fillOpacity: 0.08 });
             circle.setMap(map); objs.push(circle);
-            cafes.concat(sweets).forEach(function (c) {
+            foodsFor(state, foods).concat(cafes, sweets).forEach(function (c) {
               var d = document.createElement("div");
-              d.style.cssText = "width:11px;height:11px;border:2px solid #fff;cursor:pointer;box-shadow:0 0 2px rgba(0,0,0,.6);background:" + colorOf(c) + ";border-radius:" + (c.t === "c" ? "50%" : "2px") + ";opacity:" + (c.m <= state.r ? 1 : 0.5);
+              d.style.cssText = (c.t === "f" ? "width:7px;height:7px;border:1px solid #fff;" : "width:11px;height:11px;border:2px solid #fff;") + "cursor:pointer;box-shadow:0 0 2px rgba(0,0,0,.6);background:" + colorOf(c) + ";border-radius:" + (c.t === "c" ? "50%" : "2px") + ";opacity:" + (c.m <= state.r ? 1 : 0.5);
               d.title = c.name;
               d.addEventListener("click", function (ev) {
                 ev.stopPropagation();
@@ -92,17 +93,17 @@
           info.setContent('<div style="background:#fff;color:#111;font:13px/1.5 sans-serif;padding:8px 10px;border-radius:6px;box-shadow:0 2px 8px rgba(0,0,0,.3);max-width:240px">' + popup(c) + "</div>");
           info.open(map, pos);
         },
-        draw: function (state, cafes, sweets, stations) {
+        draw: function (state, cafes, sweets, stations, foods) {
           objs.forEach(function (o) { o.setMap(null); }); objs = []; info.close();
           var center = new naver.maps.LatLng(state.lat, state.lon);
           var key = state.lat.toFixed(5) + state.lon.toFixed(5) + state.r;
           if (key !== lastKey) { map.setCenter(center); map.setZoom(zoomFor(state.r)); lastKey = key; }
           objs.push(new naver.maps.Circle({ map: map, center: center, radius: state.r, strokeColor: css("--signal") || "#0E6B5C", strokeWeight: 2, strokeStyle: "shortdash", fillColor: css("--signal") || "#0E6B5C", fillOpacity: 0.08, clickable: false }));
-          cafes.concat(sweets).forEach(function (c) {
-            var round = c.t === "c" ? "50%" : "2px", op = c.m <= state.r ? 1 : 0.5;
+          foodsFor(state, foods).concat(cafes, sweets).forEach(function (c) {
+            var round = c.t === "b" ? "2px" : "50%", op = c.m <= state.r ? 1 : 0.5, sz = c.t === "f" ? 7 : 12, bw = c.t === "f" ? 1 : 2;
             var mk = new naver.maps.Marker({
-              map: map, position: new naver.maps.LatLng(c.la, c.lo), title: c.name, zIndex: c.t === "c" && c.b >= 0 ? 3 : 2,
-              icon: { content: '<div style="width:12px;height:12px;border:2px solid #fff;box-shadow:0 0 2px rgba(0,0,0,.55);border-radius:' + round + ';opacity:' + op + ';background:' + colorOf(c) + '"></div>', anchor: new naver.maps.Point(8, 8) }
+              map: map, position: new naver.maps.LatLng(c.la, c.lo), title: c.name, zIndex: c.t === "f" ? 1 : c.t === "c" && c.b >= 0 ? 3 : 2,
+              icon: { content: '<div style="width:' + sz + 'px;height:' + sz + 'px;border:' + bw + 'px solid #fff;box-shadow:0 0 2px rgba(0,0,0,.55);border-radius:' + round + ';opacity:' + op + ';background:' + colorOf(c) + '"></div>', anchor: new naver.maps.Point(sz / 2 + bw, sz / 2 + bw) }
             });
             naver.maps.Event.addListener(mk, "click", function () {
               info.setContent('<div style="background:#fff;color:#111;font:13px/1.5 sans-serif;padding:8px 10px;border-radius:6px;box-shadow:0 2px 8px rgba(0,0,0,.3);max-width:240px">' + popup(c) + "</div>");
@@ -137,8 +138,11 @@
     window.OCMAP = {
       ready: true,
       focus: function (c) { map.setView([c.la, c.lo], 19); L.popup({ offset: [0, -4] }).setLatLng([c.la, c.lo]).setContent(popup(c)).openOn(map); },
-      draw: function (state, cafes, sweets, stations) {
+      draw: function (state, cafes, sweets, stations, foods) {
         layer.clearLayers();
+        foodsFor(state, foods).forEach(function (c) {
+          L.circleMarker([c.la, c.lo], { radius: 3, color: "#fff", weight: 1, fillColor: colorOf(c), fillOpacity: c.m <= state.r ? 0.9 : 0.4 }).bindPopup(popup(c)).addTo(layer);
+        });
         var key = state.lat.toFixed(5) + state.lon.toFixed(5) + state.r;
         if (key !== lastKey) { map.setView([state.lat, state.lon], zoomFor(state.r)); lastKey = key; }
         L.circle([state.lat, state.lon], { radius: state.r, color: "#fff", weight: 2, dashArray: "6 5", fillColor: "#fff", fillOpacity: 0.08, interactive: false }).addTo(layer);

@@ -38,12 +38,12 @@ SW = {'빵/도넛', '아이스크림/빙수', '떡/한과'}
 LM = re.compile(r'백화점|대형 마트|대형마트|쇼핑|아울렛|면세|종합 병원|종합병원|영화관')
 
 def aggregate(zf):
-    agg, grid, bld, cafes, sweets, lms, rows = {}, {}, {}, [], [], [], 0
+    agg, grid, bld, cafes, sweets, lms, foods, rows = {}, {}, {}, [], [], [], [], 0
     for info in zf.infolist():
         if not info.filename.lower().endswith('.csv'): continue
         with zf.open(info) as fh:
             rd = csv.reader(io.TextIOWrapper(fh, encoding='utf-8-sig', newline=''))
-            H = next(rd); I = {k: H.index(k) for k in ['상호명','지점명','상권업종대분류명','상권업종소분류명','시도명','시군구명','시군구코드','행정동코드','행정동명','도로명','도로명주소','건물명','층정보','경도','위도']}
+            H = next(rd); I = {k: H.index(k) for k in ['상호명','지점명','상권업종대분류명','상권업종중분류명','상권업종소분류명','시도명','시군구명','시군구코드','행정동코드','행정동명','도로명','도로명주소','건물명','층정보','경도','위도']}
             for f in rd:
                 if not f: continue
                 rows += 1
@@ -77,6 +77,7 @@ def aggregate(zf):
                 gi = {0: 1, 1: 2, 4: 3, 9: 4, 3: 5, 8: 6, 2: 7}.get(mi)
                 if gi: g[gi] += 1
                 if sub in SW: sweets.append([code, f'{la:.5f}', f'{lo:.5f}', nm2, sub, fl, addr])
+                elif cat == '음식' and sub != '카페': foods.append([f'{la:.5f}', f'{lo:.5f}', nm2, f[I['상권업종중분류명']].strip(), sub])
                 if LM.search(sub): lms.append([code, f'{la:.5f}', f'{lo:.5f}', nm2, sub, addr])
                 bn = (f[I['건물명']] or '').strip()
                 if bn:
@@ -84,7 +85,7 @@ def aggregate(zf):
                     if b2 is None: b2 = bld[k2] = [0, 0.0, 0.0, addr, 0, code]
                     b2[0] += 1; b2[1] += la; b2[2] += lo
                     if sub == '카페': b2[4] += 1
-    return agg, grid, bld, cafes, sweets, lms, rows
+    return agg, grid, bld, cafes, sweets, lms, foods, rows
 
 def latest_population():
     S.get("https://jumin.mois.go.kr/statMonth.do", timeout=60)
@@ -122,14 +123,15 @@ if __name__ == '__main__':
         json.dump({'changed': False, 'ver': ver, 'pop': popym}, open(f'{OUT}/version.json', 'w')); sys.exit(0)
     open(f'{OUT}/pop.txt', 'w', encoding='utf-8').write(f'POP|{popym}|' + ';'.join(pop) + '|END')
     print('상가 다운로드', nm, flush=True)
-    agg, grid, bld, cafes, sweets, lms, rows = aggregate(download_store(atch, sn, nm))
+    agg, grid, bld, cafes, sweets, lms, foods, rows = aggregate(download_store(atch, sn, nm))
     dong = [[code, r['s'], r['g'], r['d'], r['n'], round(r['la']/r['ll'], 5) if r['ll'] else None, round(r['lo']/r['ll'], 5) if r['ll'] else None,
              r['mj'], r['cafe'], r['f1'], r['sub'], r['br'], sorted(r['rd'].items(), key=lambda x: -x[1])[:3]] for code, r in agg.items()]
     with open(f'{OUT}/extract.txt', 'w', encoding='utf-8') as w:
         w.write(f'#VER\n{ver}\n#ROWS\n{rows}\n#DONG\n' + json.dumps(dong, ensure_ascii=False) + '\n#CAFES\n')
         w.write('\n'.join('\t'.join(x) for x in cafes) + '\n#GRID\n')
         w.write('\n'.join(f'{k[0]},{k[1]},' + ','.join(map(str, g)) for k, g in grid.items()) + '\n#SWEET\n')
-        w.write('\n'.join('\t'.join(x) for x in sweets) + '\n#LM\n' + '\n'.join('\t'.join(x) for x in lms) + '\n#BLD\n')
+        w.write('\n'.join('\t'.join(x) for x in sweets) + '\n#LM\n' + '\n'.join('\t'.join(x) for x in lms) + '\n#FOOD\n')
+        w.write('\n'.join('\t'.join(x) for x in foods) + '\n#BLD\n')
         w.write('\n'.join('\t'.join([k.split('|')[0], k.split('|', 1)[1], str(b[0]), f'{b[1]/b[0]:.5f}', f'{b[2]/b[0]:.5f}', b[3], str(b[4]), b[5]]) for k, b in bld.items() if b[0] >= 2))
     json.dump({'changed': True, 'ver': ver, 'pop': popym, 'rows': rows, 'cafes': len(cafes)}, open(f'{OUT}/version.json', 'w'))
     print('완료', ver, popym, rows, len(cafes))

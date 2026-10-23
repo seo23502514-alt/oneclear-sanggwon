@@ -17,6 +17,7 @@
   --roast: #9A4F24;
   --roast-soft: #F3E4D9;
   --berry: #8E3B8A;
+  --food: #3A63A8;
   --amber: #C98A00;
   --good: #1F7A4D;
   --warn: #B26A00;
@@ -29,13 +30,13 @@
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]) {
     --paper: #111815; --sheet: #18211D; --ink: #E7EEEA; --muted: #9AAAA2; --line: #2C3833;
-    --grid: rgba(231, 238, 234, 0.05); --signal: #4FC3AC; --signal-soft: #173A33; --roast: #E39A6B; --roast-soft: #3A2A20; --berry: #D58BD1; --amber: #F0B429;
+    --grid: rgba(231, 238, 234, 0.05); --signal: #4FC3AC; --signal-soft: #173A33; --roast: #E39A6B; --roast-soft: #3A2A20; --berry: #D58BD1; --amber: #F0B429; --food: #7FA6E8;
     --good: #5CC98F; --warn: #E3A23B; --bad: #EF7468; color-scheme: dark;
   }
 }
 :root[data-theme="dark"] {
   --paper: #111815; --sheet: #18211D; --ink: #E7EEEA; --muted: #9AAAA2; --line: #2C3833;
-  --grid: rgba(231, 238, 234, 0.05); --signal: #4FC3AC; --signal-soft: #173A33; --roast: #E39A6B; --roast-soft: #3A2A20; --berry: #D58BD1; --amber: #F0B429;
+  --grid: rgba(231, 238, 234, 0.05); --signal: #4FC3AC; --signal-soft: #173A33; --roast: #E39A6B; --roast-soft: #3A2A20; --berry: #D58BD1; --amber: #F0B429; --food: #7FA6E8;
   --good: #5CC98F; --warn: #E3A23B; --bad: #EF7468; color-scheme: dark;
 }
 
@@ -142,6 +143,8 @@ button:hover { border-color: var(--signal); }
 .legend { display: flex; flex-wrap: wrap; gap: 6px 16px; font-size: 12px; color: var(--muted); }
 .legend i { display: inline-block; width: 10px; height: 10px; border-radius: 50%; margin-right: 6px; vertical-align: -1px; }
 .legend .sq { border-radius: 2px; }
+.foodtoggle { display: inline-flex; align-items: center; gap: 4px; cursor: pointer; font-size: 12px; font-weight: 400; }
+.foodtoggle input { margin: 0; }
 .maplinks { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; font-size: 13px; color: var(--muted); }
 .mapbtn { display: inline-flex; align-items: center; gap: 6px; font: 600 13px var(--font-body); text-decoration: none; color: var(--ink); border: 1px solid var(--line); border-radius: 999px; padding: 5px 12px; background: var(--sheet); }
 .mapbtn:hover { border-color: var(--signal); }
@@ -306,6 +309,7 @@ footer { font-size: 12px; color: var(--muted); display: grid; gap: 4px; }
           <span><i style="background: var(--signal)"></i>개인 카페</span>
           <span><i class="sq" style="background: var(--amber)"></i>빵집</span>
           <span><i class="sq" style="background: var(--berry)"></i>디저트·떡집</span>
+          <label class="foodtoggle"><input type="checkbox" id="showFood" checked> <i style="background: var(--food)"></i>음식점 점 보기</label>
           <span><i class="sq" style="background: var(--muted); opacity: .45"></i>가게가 많은 블록</span>
         </div>
         <div class="maplinks" id="mapLinks"></div>
@@ -346,6 +350,7 @@ footer { font-size: 12px; color: var(--muted); display: grid; gap: 4px; }
           <button type="button" data-f="dc" aria-pressed="false">디저트 카페</button>
           <button type="button" data-f="bk" aria-pressed="false">빵집</button>
           <button type="button" data-f="sw" aria-pressed="false">디저트·떡집</button>
+          <button type="button" data-f="food" aria-pressed="false">음식점</button>
         </div>
         <div class="table-scroll near-scroll">
           <table class="rtable" id="nearTable">
@@ -529,7 +534,7 @@ footer { font-size: 12px; color: var(--muted); display: grid; gap: 4px; }
   var GRID_CATS = [["음식",1,0],["소매",2,1],["교육·학원",3,4],["병원·약국",4,9],["사무실",5,3],["미용·수리",7,2],["숙박",6,8]];
 
   var DB = null, META = null, ST = [], NAT = {};
-  var state = { dong: null, lat: 0, lon: 0, r: 500, custom: false, near: [], nearShown: 300, nearFilter: "all" };
+  var state = { dong: null, lat: 0, lon: 0, r: 500, custom: false, near: [], nearShown: 300, nearFilter: "all", showFood: true };
   try { var rs = parseInt(localStorage.getItem("oc-r"), 10); if ([300, 500, 1000].indexOf(rs) >= 0) state.r = rs; } catch (e) {}
 
   function token(name) { return getComputedStyle(document.documentElement).getPropertyValue(name).trim(); }
@@ -554,10 +559,11 @@ footer { font-size: 12px; color: var(--muted); display: grid; gap: 4px; }
   }
   function tilesFor(lat, lon, rm) {
     var dLat = rm / 110540 + 0.002, dLon = rm / (111320 * Math.cos(lat * Math.PI / 180)) + 0.002;
-    var c = {}, g = {};
+    var c = {}, g = {}, rk = {};
     [lat - dLat, lat + dLat].forEach(function (la) {
       [lon - dLon, lon + dLon].forEach(function (lo) {
         c[Math.floor(la * 2) + "_" + Math.floor(lo * 2)] = 1;
+        rk[Math.floor(la * 4) + "_" + Math.floor(lo * 4)] = 1;
         g[Math.floor(la * 1000 / 500) + "_" + Math.floor(lo * 800 / 400)] = 1;
       });
     });
@@ -566,8 +572,9 @@ footer { font-size: 12px; color: var(--muted); display: grid; gap: 4px; }
       Promise.all(ck.map(function (k) { return loadTile("c", k); })),
       Promise.all(Object.keys(g).map(function (k) { return loadTile("g", k); })),
       Promise.all(ck.map(function (k) { return loadTile("b", k); })),
-      Promise.all(ck.map(function (k) { return loadTile("k", k); }))
-    ]).then(function (r) { var cat = function (x) { return [].concat.apply([], x); }; return { cafes: cat(r[0]), grid: cat(r[1]), sweets: cat(r[2]), labels: cat(r[3]) }; });
+      Promise.all(ck.map(function (k) { return loadTile("k", k); })),
+      Promise.all(Object.keys(rk).map(function (k) { return loadTile("r", k); }))
+    ]).then(function (r) { var cat = function (x) { return [].concat.apply([], x); }; return { cafes: cat(r[0]), grid: cat(r[1]), sweets: cat(r[2]), labels: cat(r[3]), foods: cat(r[4]) }; });
   }
   function meters(la0, lo0, la, lo) {
     var dx = (lo - lo0) * 111320 * Math.cos(la0 * Math.PI / 180), dy = (la - la0) * 110540;
@@ -764,6 +771,12 @@ footer { font-size: 12px; color: var(--muted); display: grid; gap: 4px; }
         var la = c[0] / 1e5, lo = c[1] / 1e5, m = meters(state.lat, state.lon, la, lo);
         if (m <= 2600) sweets.push({ t: "b", la: la, lo: lo, name: c[2], k: c[3], b: c[4], fl: c[5], addr: c[6], code: c[7], m: m });
       });
+      var foods = [];
+      t.foods.forEach(function (c) {
+        var la = c[0] / 1e5, lo = c[1] / 1e5, m = meters(state.lat, state.lon, la, lo);
+        if (m <= 2600) foods.push({ t: "f", la: la, lo: lo, name: c[2], mid: c[3], sub: c[4], m: m, addr: "" });
+      });
+      foods.sort(function (a, b) { return a.m - b.m; });
       t.labels.forEach(function (c) {
         var la = c[0] / 1e5, lo = c[1] / 1e5, m = meters(state.lat, state.lon, la, lo);
         if (m <= 2800) labels.push({ la: la, lo: lo, name: c[2], n: c[3], m: m });
@@ -774,13 +787,14 @@ footer { font-size: 12px; color: var(--muted); display: grid; gap: 4px; }
         if (m <= 2800) grid.push({ la: la, lo: lo, g: g, m: m });
       });
       cafes.sort(function (a, b) { return a.m - b.m; });
-      render(cafes, grid, sweets);
-      drawMap(cafes, grid, sweets, labels);
+      render(cafes, grid, sweets, foods);
+      drawMap(cafes, grid, sweets, labels, foods);
       $("mapLoading").hidden = true;
     });
   }
 
-  function render(cafes, grid, sweets) {
+  function render(cafes, grid, sweets, foods) {
+    foods = foods || [];
     var d = state.dong, R = state.r, rl = R >= 1000 ? "1km" : R + "m";
     var inC = cafes.filter(function (c) { return c.m <= R; });
     var inG = grid.filter(function (c) { return c.m <= R; });
@@ -796,6 +810,9 @@ footer { font-size: 12px; color: var(--muted); display: grid; gap: 4px; }
     var nBk = inS.filter(function (c) { return c.k === 0; }).length, nDs = inS.filter(function (c) { return c.k === 1; }).length, nTk = inS.filter(function (c) { return c.k === 2; }).length;
     var nBkFr = inS.filter(function (c) { return c.k === 0 && c.b >= 0; }).length;
     var nDc = inC.filter(function (c) { return c.ds; }).length;
+    var inF = foods.filter(function (c) { return c.m <= R; });
+    var fm = {}; inF.forEach(function (c) { fm[c.mid] = (fm[c.mid] || 0) + 1; });
+    var fTop = Object.keys(fm).sort(function (a, b) { return fm[b] - fm[a]; }).slice(0, 6).map(function (k) { return (META.foodMids[k] || "").trim() + " " + fm[k]; });
 
     $("kCafeLabel").textContent = "반경 " + rl + " 카페";
     $("kCafe").innerHTML = fmt(inC.length) + "<small>곳</small>";
@@ -805,7 +822,7 @@ footer { font-size: 12px; color: var(--muted); display: grid; gap: 4px; }
     $("kFrC").textContent = "빵집 " + nBk + " · 디저트 " + nDs + " · 떡집 " + nTk + (nDc ? " · 디저트 카페 " + nDc : "");
     $("kStoreLabel").textContent = "반경 " + rl + " 전체 가게";
     $("kStore").innerHTML = fmt(stores) + "<small>곳</small>";
-    $("kStoreC").textContent = "카페 1곳당 가게 " + (inC.length ? (stores / inC.length).toFixed(0) : "-") + "곳";
+    $("kStoreC").textContent = "음식점 " + fmt(inF.length) + "곳 · 카페 1곳당 가게 " + (inC.length ? (stores / inC.length).toFixed(0) : "-") + "곳";
 
     // 동 단위 지표
     var per = d[13] ? d[8] / d[13] * 1000 : null;
@@ -885,6 +902,9 @@ footer { font-size: 12px; color: var(--muted); display: grid; gap: 4px; }
     var s3 = document.createElement("span"); s3.className = "hint"; s3.style.width = "100%";
     s3.textContent = "빵집 " + nBk + "곳" + (nBk ? " (개인 " + (nBk - nBkFr) + ")" : "") + " · 디저트 " + nDs + " · 떡집 " + nTk + (stop.length ? " · " + stop.join(", ") : "");
     ml.appendChild(s3);
+    var s4 = document.createElement("span"); s4.className = "hint"; s4.style.width = "100%";
+    s4.textContent = "음식점 " + fmt(inF.length) + "곳" + (fTop.length ? ": " + fTop.join(" · ") : "");
+    ml.appendChild(s4);
 
     // 업종 막대
     $("barsLabel").textContent = "반경 " + rl + " 가게 구성 (검은 선은 전국 평균)";
@@ -908,8 +928,9 @@ footer { font-size: 12px; color: var(--muted); display: grid; gap: 4px; }
     renderMapLinks();
     $("nearTitle").textContent = "반경 " + rl + " 카페·빵집·디저트 " + fmt(state.near.length) + "곳";
     var nIndie = inC.filter(function (c) { return c.b < 0; }).length;
-    var counts = { all: state.near.length, indie: nIndie, fr: inC.length - nIndie, dc: nDc, bk: nBk, sw: nDs + nTk };
-    var names = { all: "전체", indie: "개인 카페", fr: "프랜차이즈 카페", dc: "디저트 카페", bk: "빵집", sw: "디저트·떡집" };
+    state.nearFood = inF;
+    var counts = { all: state.near.length, indie: nIndie, fr: inC.length - nIndie, dc: nDc, bk: nBk, sw: nDs + nTk, food: inF.length };
+    var names = { all: "카페·빵집·디저트", indie: "개인 카페", fr: "프랜차이즈 카페", dc: "디저트 카페", bk: "빵집", sw: "디저트·떡집", food: "음식점" };
     [].forEach.call(document.querySelectorAll("#nearSeg button"), function (b) { b.textContent = names[b.dataset.f] + " " + fmt(counts[b.dataset.f]); });
 
     // 옆 동네
@@ -933,7 +954,7 @@ footer { font-size: 12px; color: var(--muted); display: grid; gap: 4px; }
   }
   var lastReport = null;
 
-  function dotColorVar(c) { return c.t === "c" ? (c.b >= 0 ? "var(--roast)" : "var(--signal)") : c.k === 0 ? "var(--amber)" : "var(--berry)"; }
+  function dotColorVar(c) { if (c.t === "f") return "var(--food)"; return c.t === "c" ? (c.b >= 0 ? "var(--roast)" : "var(--signal)") : c.k === 0 ? "var(--amber)" : "var(--berry)"; }
   var NAVER = "#03C75A", KAKAO = "#F2C200", GOOGLE = "#4285F4";
   function enc(x) { return encodeURIComponent(x); }
   function linksFor(name, lat, lon, query) {
@@ -970,7 +991,7 @@ footer { font-size: 12px; color: var(--muted); display: grid; gap: 4px; }
   function renderNear() {
     var body = $("nearBody"); body.innerHTML = "";
     var f = state.nearFilter;
-    var all = state.near.filter(function (c) {
+    var all = f === "food" ? (state.nearFood || []) : state.near.filter(function (c) {
       if (f === "all") return true;
       if (f === "indie") return c.t === "c" && c.b < 0;
       if (f === "fr") return c.t === "c" && c.b >= 0;
@@ -988,18 +1009,18 @@ footer { font-size: 12px; color: var(--muted); display: grid; gap: 4px; }
       if (c.t === "b") dot.style.borderRadius = "2px";
       td.appendChild(dot); td.appendChild(document.createTextNode(c.name));
       var ml = document.createElement("span"); ml.className = "minilinks";
-      var dd = CODE[c.code], sgg = dd ? dd[2] : "";
+      var dd = CODE[c.code], sgg = dd ? dd[2] : (state.dong ? state.dong[2] : "");
       linksFor(c.name, c.la, c.lo, c.name + " " + sgg + " " + c.addr).forEach(function (l) {
         var a = document.createElement("a"); a.href = l[3]; a.target = "_blank"; a.rel = "noopener"; a.textContent = l[1]; a.title = l[0] + "에서 보기"; a.setAttribute("aria-label", c.name + " " + l[0] + "에서 보기");
         a.addEventListener("click", function (ev) { ev.stopPropagation(); });
         ml.appendChild(a);
       });
       td.appendChild(ml);
-      var kind = c.t === "c" ? (c.b >= 0 ? BRANDS[c.b] : c.ds ? "디저트 카페" : "개인 카페") : SKIND[c.k] + (c.b >= 0 ? " · " + SBRANDS[c.b] : "");
-      var sm = document.createElement("span"); sm.className = "small-muted"; sm.textContent = kind + " · " + c.addr; td.appendChild(sm);
+      var kind = c.t === "f" ? (META.foodMids[c.mid] || "").trim() + " · " + (META.foodSubs[c.sub] || "") : c.t === "c" ? (c.b >= 0 ? BRANDS[c.b] : c.ds ? "디저트 카페" : "개인 카페") : SKIND[c.k] + (c.b >= 0 ? " · " + SBRANDS[c.b] : "");
+      var sm = document.createElement("span"); sm.className = "small-muted"; sm.textContent = kind + (c.addr ? " · " + c.addr : ""); td.appendChild(sm);
       tr.appendChild(td);
       var a = document.createElement("td"); a.className = "r"; a.textContent = fmt(c.m) + "m"; tr.appendChild(a);
-      var f = document.createElement("td"); f.className = "r"; f.textContent = c.fl === "지" ? "지하" : c.fl ? c.fl + "층" : "-"; tr.appendChild(f);
+      var fl2 = document.createElement("td"); fl2.className = "r"; fl2.textContent = c.fl === "지" ? "지하" : c.fl ? c.fl + "층" : "-"; tr.appendChild(fl2);
       body.appendChild(tr);
     });
     var more = $("nearMore");
@@ -1025,10 +1046,11 @@ footer { font-size: 12px; color: var(--muted); display: grid; gap: 4px; }
 
   /* ---------------- 지도 ---------------- */
   var mapCv = $("localMap"), mapView = null, lastDraw = null, view = { z: 1, lat: null, lon: null };
-  function redrawNow() { if (lastDraw) drawMap(lastDraw[0], lastDraw[1], lastDraw[2], lastDraw[3]); }
-  function drawMap(cafes, grid, sweets, labels) {
+  function redrawNow() { if (lastDraw) drawMap(lastDraw[0], lastDraw[1], lastDraw[2], lastDraw[3], lastDraw[4]); }
+  function drawMap(cafes, grid, sweets, labels, foods) {
+    foods = foods || [];
     sweets = sweets || []; labels = labels || [];
-    lastDraw = [cafes, grid, sweets, labels];
+    lastDraw = [cafes, grid, sweets, labels, foods];
     var rect = mapCv.getBoundingClientRect(); if (!rect.width) return;
     var dpr = window.devicePixelRatio || 1, W = rect.width, H = rect.height;
     mapCv.width = Math.round(W * dpr); mapCv.height = Math.round(H * dpr);
@@ -1061,6 +1083,14 @@ footer { font-size: 12px; color: var(--muted); display: grid; gap: 4px; }
       ctx.globalAlpha = c.m <= state.r ? 1 : 0.35; ctx.fill();
       ctx.globalAlpha = 1; ctx.lineWidth = 1; ctx.strokeStyle = paper; ctx.stroke();
     });
+    if (state.showFood) {
+      ctx.fillStyle = token("--food");
+      foods.forEach(function (c) {
+        var x = X(c.lo), y = Y(c.la); if (x < -3 || y < -3 || x > W + 3 || y > H + 3) return;
+        ctx.globalAlpha = c.m <= state.r ? 0.85 : 0.3; ctx.beginPath(); ctx.arc(x, y, 2.2, 0, Math.PI * 2); ctx.fill();
+      });
+      ctx.globalAlpha = 1;
+    }
     sweets.forEach(function (c) {
       var x = X(c.lo), y = Y(c.la); if (x < -5 || y < -5 || x > W + 5 || y > H + 5) return;
       ctx.fillStyle = c.k === 0 ? token("--amber") : token("--berry");
@@ -1149,8 +1179,9 @@ footer { font-size: 12px; color: var(--muted); display: grid; gap: 4px; }
     analyze();
   });
   var rt;
-  function redraw() { clearTimeout(rt); rt = setTimeout(function () { if (lastDraw) drawMap(lastDraw[0], lastDraw[1], lastDraw[2], lastDraw[3]); }, 80); }
+  function redraw() { clearTimeout(rt); rt = setTimeout(function () { if (lastDraw) drawMap(lastDraw[0], lastDraw[1], lastDraw[2], lastDraw[3], lastDraw[4]); }, 80); }
   window.addEventListener("resize", redraw);
+  $("showFood").addEventListener("change", function () { state.showFood = this.checked; redrawNow(); });
   $("zIn").addEventListener("click", function () { zoomAt(1.5); });
   $("zOut").addEventListener("click", function () { zoomAt(1 / 1.5); });
   $("zReset").addEventListener("click", function () { view.z = 1; view.lat = null; view.lon = null; redrawNow(); });

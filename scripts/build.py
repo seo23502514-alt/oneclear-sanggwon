@@ -12,7 +12,7 @@ ext, popf, stf, page, out = sys.argv[1:6]
 raw = open(ext, encoding='utf-8').read()
 sec, cur = {}, None
 for line in raw.split('\n'):
-    if line.startswith('#') and line[1:] in ('VER','ROWS','DONG','CAFES','GRID','SWEET','LM','BLD'):
+    if line.startswith('#') and line[1:] in ('VER','ROWS','DONG','CAFES','GRID','SWEET','LM','FOOD','BLD'):
         cur = line[1:]; sec[cur] = []; continue
     if line: sec[cur].append(line)
 ver = sec['VER'][0]; rows = int(sec['ROWS'][0])
@@ -73,6 +73,17 @@ kt = collections.defaultdict(list)
 for nm, la, lo, n, c, di, addr in B:
     if n >= 8: kt[tile(la/1e5, lo/1e5)].append([la, lo, nm, n])
 for k, v in kt.items(): json.dump(v, open(f'{out}/t/k{k}.json', 'w'), ensure_ascii=False, separators=(',', ':'))
+# 음식점 (카페·빵집·디저트 제외) — 0.25도 타일
+mids, subs = [], []
+ft = collections.defaultdict(list)
+for l in sec.get('FOOD', []):
+    la, lo, nm, mid, sub = l.split('\t'); la = float(la); lo = float(lo)
+    if mid not in mids: mids.append(mid)
+    if sub not in subs: subs.append(sub)
+    ft[f'{math.floor(la*4)}_{math.floor(lo*4)}'].append([round(la*1e5), round(lo*1e5), nm, mids.index(mid), subs.index(sub)])
+for k, v in ft.items(): json.dump(v, open(f'{out}/t/r{k}.json', 'w'), ensure_ascii=False, separators=(',', ':'))
+meta['foodMids'] = mids; meta['foodSubs'] = subs
+json.dump({'meta': meta, 'd': D}, open(out + '/dongs.json', 'w'), ensure_ascii=False, separators=(',', ':'))
 shutil.copy(stf, out + '/stations.json')
 
 # 페이지 문구 날짜·숫자 갱신
