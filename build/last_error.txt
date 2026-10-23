@@ -1,0 +1,11 @@
+data.go.kr 페이지 156734
+/opt/hostedtoolcache/Python/3.12.15/x64/lib/python3.12/site-packages/openpyxl/styles/stylesheet.py:237: UserWarning: Workbook contains no default style, apply openpyxl's default
+  warn("Workbook contains no default style, apply openpyxl's default")
+Traceback (most recent call last):
+  File "/home/runner/work/oneclear-sanggwon/oneclear-sanggwon/scripts/fetch_data.py", line 113, in <module>
+    popym, pop = latest_population()
+                 ^^^^^^^^^^^^^^^^^^^
+  File "/home/runner/work/oneclear-sanggwon/oneclear-sanggwon/scripts/fetch_data.py", line 109, in latest_population
+    raise RuntimeError('주민등록 인구 통계를 받지 못했습니다')
+RuntimeError: 주민등록 인구 통계를 받지 못했습니다
+Fri Oct 23 14:20:05 UTC 2026
