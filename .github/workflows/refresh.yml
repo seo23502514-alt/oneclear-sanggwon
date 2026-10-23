@@ -33,7 +33,9 @@ jobs:
       - name: 새 데이터 확인·다운로드
         env:
           FORCE: ${{ github.event_name == 'push' || inputs.force }}
-        run: python scripts/fetch_data.py work
+        run: |
+          mkdir -p work
+          python scripts/fetch_data.py work 2>&1 | tee work/log.txt; exit ${PIPESTATUS[0]}
       - name: 빌드
         run: |
           if python -c "import json,sys;sys.exit(0 if json.load(open('work/version.json'))['changed'] else 1)"; then
@@ -61,3 +63,12 @@ jobs:
           git add docs build
           V=$(python -c "import json;m=json.load(open('docs/dongs.json'))['meta'];print(m['v'],m['pop'])")
           git diff --staged --quiet || (git commit -m "data: 상가 ${V} 반영" && git push)
+      - name: 실패 기록 남기기
+        if: failure()
+        run: |
+          mkdir -p build
+          cp work/log.txt build/last_error.txt 2>/dev/null || echo "로그 없음" > build/last_error.txt
+          date -u >> build/last_error.txt
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add build/last_error.txt && git commit -m "갱신 실패 기록" && git push

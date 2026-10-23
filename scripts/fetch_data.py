@@ -14,6 +14,7 @@ BASE = "https://www.data.go.kr"; PK = "15083033"; DETAIL = f"{BASE}/data/{PK}/fi
 
 def latest_store_version():
     html = S.get(DETAIL, timeout=60).text
+    print("data.go.kr 페이지", len(html), flush=True)
     detail_pk = next(p for p in re.findall(r"fn_fileDataDown\(\s*'%s'\s*,\s*'([^']*)'" % PK, html) if p.strip())
     r = S.post(f"{BASE}/tcs/dss/selectFileDataDownload.do?recommendDataYn=Y", data={"publicDataPk": PK, "publicDataDetailPk": detail_pk},
                headers={"X-Requested-With": "XMLHttpRequest", "Referer": DETAIL}, timeout=60).json()
