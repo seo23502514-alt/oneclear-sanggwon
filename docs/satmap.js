@@ -15,7 +15,7 @@
       (c.fl ? " · " + esc(c.fl === "지" ? "지하" : c.fl + "층") : "") + (c.addr ? "<br>" + esc(c.addr) : "") + "<br>" + links;
   }
   var lastKey = "";
-  function foodsFor(state, foods) { return state.showFood && foods ? foods.filter(function (c) { return c.m <= state.r * 1.1; }).slice(0, 1500) : []; }
+  function foodsFor(state, foods) { return state.showFood && foods ? foods.filter(function (c) { return c.m <= state.r; }).slice(0, 400) : []; }
 
   /* ---------- 카카오 지도 (스카이뷰) ---------- */
   function startKakao() {

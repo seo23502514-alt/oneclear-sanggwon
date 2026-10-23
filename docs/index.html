@@ -318,7 +318,7 @@ footer { font-size: 12px; color: var(--muted); display: grid; gap: 4px; }
           <span><i style="background: var(--signal)"></i>개인 카페</span>
           <span><i class="sq" style="background: var(--amber)"></i>빵집</span>
           <span><i class="sq" style="background: var(--berry)"></i>디저트·떡집</span>
-          <label class="foodtoggle"><input type="checkbox" id="showFood" checked> <i style="background: var(--food)"></i>음식점 점 보기</label>
+          <label class="foodtoggle"><input type="checkbox" id="showFood"> <i style="background: var(--food)"></i>음식점 점 보기</label>
           <span><i class="sq" style="background: var(--muted); opacity: .45"></i>가게가 많은 블록</span>
         </div>
         <div class="maplinks" id="mapLinks"></div>
@@ -543,7 +543,7 @@ footer { font-size: 12px; color: var(--muted); display: grid; gap: 4px; }
   var GRID_CATS = [["음식",1,0],["소매",2,1],["교육·학원",3,4],["병원·약국",4,9],["사무실",5,3],["미용·수리",7,2],["숙박",6,8]];
 
   var DB = null, META = null, ST = [], NAT = {};
-  var state = { dong: null, lat: 0, lon: 0, r: 500, custom: false, near: [], nearShown: 300, nearFilter: "all", showFood: true };
+  var state = { dong: null, lat: 0, lon: 0, r: 500, custom: false, near: [], nearShown: 300, nearFilter: "all", showFood: false, foodOn: false };
   try { var rs = parseInt(localStorage.getItem("oc-r"), 10); if ([300, 500, 1000].indexOf(rs) >= 0) state.r = rs; } catch (e) {}
 
   function token(name) { return getComputedStyle(document.documentElement).getPropertyValue(name).trim(); }
@@ -581,7 +581,7 @@ footer { font-size: 12px; color: var(--muted); display: grid; gap: 4px; }
       Promise.all(ck.map(function (k) { return loadTile("c", k); })),
       Promise.all(Object.keys(g).map(function (k) { return loadTile("g", k); })),
       Promise.all(ck.map(function (k) { return loadTile("k", k); })),
-      Promise.all(Object.keys(rk).map(function (k) { return loadTile("r", k); }))
+      state.foodOn ? Promise.all(Object.keys(rk).map(function (k) { return loadTile("r", k); })) : Promise.resolve([])
     ]).then(function (r) { var cat = function (x) { return [].concat.apply([], x); }; var ct = r[0].map(function (x) { return Array.isArray(x) ? { c: x, b: [] } : x; });
       return { cafes: cat(ct.map(function (x) { return x.c || []; })), grid: cat(r[1]), sweets: cat(ct.map(function (x) { return x.b || []; })), labels: cat(r[2]), foods: cat(r[3]) }; });
   }
@@ -763,9 +763,9 @@ footer { font-size: 12px; color: var(--muted); display: grid; gap: 4px; }
     return best;
   }
 
-  function analyze() {
+  function analyze(keepView) {
     var my = ++seq;
-    view.z = 1; view.lat = null; view.lon = null; state.focus = null;
+    if (!keepView) { view.z = 1; view.lat = null; view.lon = null; state.focus = null; }
     $("mapLoading").hidden = false;
     var R = state.r;
     tilesFor(state.lat, state.lon, Math.max(R, 2600)).then(function (t) {
@@ -831,7 +831,8 @@ footer { font-size: 12px; color: var(--muted); display: grid; gap: 4px; }
     $("kFrC").textContent = "빵집 " + nBk + " · 디저트 " + nDs + " · 떡집 " + nTk + (nDc ? " · 디저트 카페 " + nDc : "");
     $("kStoreLabel").textContent = "반경 " + rl + " 전체 가게";
     $("kStore").innerHTML = fmt(stores) + "<small>곳</small>";
-    $("kStoreC").textContent = "음식점 " + fmt(inF.length) + "곳 · 카페 1곳당 가게 " + (inC.length ? (stores / inC.length).toFixed(0) : "-") + "곳";
+    var foodN = state.foodOn ? inF.length : Math.max(0, inG.reduce(function (a, c) { return a + c.g[3]; }, 0) - inC.length - inS.length);
+    $("kStoreC").textContent = "음식점 " + (state.foodOn ? "" : "약 ") + fmt(foodN) + "곳 · 카페 1곳당 가게 " + (inC.length ? (stores / inC.length).toFixed(0) : "-") + "곳";
 
     // 동 단위 지표
     var per = d[13] ? d[8] / d[13] * 1000 : null;
@@ -912,7 +913,12 @@ footer { font-size: 12px; color: var(--muted); display: grid; gap: 4px; }
     s3.textContent = "빵집 " + nBk + "곳" + (nBk ? " (개인 " + (nBk - nBkFr) + ")" : "") + " · 디저트 " + nDs + " · 떡집 " + nTk + (stop.length ? " · " + stop.join(", ") : "");
     ml.appendChild(s3);
     var s4 = document.createElement("span"); s4.className = "hint"; s4.style.width = "100%";
-    s4.textContent = "음식점 " + fmt(inF.length) + "곳" + (fTop.length ? ": " + fTop.join(" · ") : "");
+    if (state.foodOn) s4.textContent = "음식점 " + fmt(inF.length) + "곳" + (fTop.length ? ": " + fTop.join(" · ") : "");
+    else {
+      s4.textContent = "음식점 약 " + fmt(foodN) + "곳 ";
+      var fb = document.createElement("button"); fb.type = "button"; fb.className = "chip-btn"; fb.textContent = "종류별로 보기";
+      fb.addEventListener("click", function () { enableFood(); }); s4.appendChild(fb);
+    }
     ml.appendChild(s4);
 
     // 업종 막대
@@ -938,7 +944,7 @@ footer { font-size: 12px; color: var(--muted); display: grid; gap: 4px; }
     $("nearTitle").textContent = "반경 " + rl + " 카페·빵집·디저트 " + fmt(state.near.length) + "곳";
     var nIndie = inC.filter(function (c) { return c.b < 0; }).length;
     state.nearFood = inF;
-    var counts = { all: state.near.length, indie: nIndie, fr: inC.length - nIndie, dc: nDc, bk: nBk, sw: nDs + nTk, food: inF.length };
+    var counts = { all: state.near.length, indie: nIndie, fr: inC.length - nIndie, dc: nDc, bk: nBk, sw: nDs + nTk, food: state.foodOn ? inF.length : foodN };
     var names = { all: "카페·빵집·디저트", indie: "개인 카페", fr: "프랜차이즈 카페", dc: "디저트 카페", bk: "빵집", sw: "디저트·떡집", food: "음식점" };
     [].forEach.call(document.querySelectorAll("#nearSeg button"), function (b) { b.textContent = names[b.dataset.f] + " " + fmt(counts[b.dataset.f]); });
 
@@ -1040,6 +1046,7 @@ footer { font-size: 12px; color: var(--muted); display: grid; gap: 4px; }
     b.addEventListener("click", function () {
       state.nearFilter = b.dataset.f; state.nearShown = 300;
       [].forEach.call(document.querySelectorAll("#nearSeg button"), function (x) { x.setAttribute("aria-pressed", String(x === b)); });
+      if (b.dataset.f === "food" && !state.foodOn) { enableFood(); return; }
       renderNear();
     });
   });
@@ -1055,7 +1062,9 @@ footer { font-size: 12px; color: var(--muted); display: grid; gap: 4px; }
 
   /* ---------------- 지도 ---------------- */
   var mapCv = $("localMap"), mapView = null, lastDraw = null, view = { z: 1, lat: null, lon: null };
-  function redrawNow() { if (lastDraw) drawMap(lastDraw[0], lastDraw[1], lastDraw[2], lastDraw[3], lastDraw[4]); }
+  var rafId = 0;
+  function redrawNow() { if (rafId) return; rafId = requestAnimationFrame(function () { rafId = 0; if (lastDraw) drawMap(lastDraw[0], lastDraw[1], lastDraw[2], lastDraw[3], lastDraw[4]); }); }
+  function enableFood() { if (state.foodOn) return; state.foodOn = true; $("mapLoading").hidden = false; analyze(true); }
   function drawMap(cafes, grid, sweets, labels, foods) {
     foods = foods || [];
     sweets = sweets || []; labels = labels || [];
@@ -1097,7 +1106,7 @@ footer { font-size: 12px; color: var(--muted); display: grid; gap: 4px; }
       ctx.fillStyle = token("--food");
       foods.forEach(function (c) {
         var x = X(c.lo), y = Y(c.la); if (x < -3 || y < -3 || x > W + 3 || y > H + 3) return;
-        ctx.globalAlpha = c.m <= state.r ? 0.85 : 0.3; ctx.beginPath(); ctx.arc(x, y, 2.2, 0, Math.PI * 2); ctx.fill();
+        ctx.globalAlpha = c.m <= state.r ? 0.85 : 0.3; ctx.fillRect(x - 1.6, y - 1.6, 3.2, 3.2);
       });
       ctx.globalAlpha = 1;
     }
@@ -1198,7 +1207,7 @@ footer { font-size: 12px; color: var(--muted); display: grid; gap: 4px; }
   var rt;
   function redraw() { clearTimeout(rt); rt = setTimeout(function () { if (lastDraw) drawMap(lastDraw[0], lastDraw[1], lastDraw[2], lastDraw[3], lastDraw[4]); }, 80); }
   window.addEventListener("resize", redraw);
-  $("showFood").addEventListener("change", function () { state.showFood = this.checked; redrawNow(); });
+  $("showFood").addEventListener("change", function () { state.showFood = this.checked; if (this.checked && !state.foodOn) enableFood(); else redrawNow(); });
   $("zIn").addEventListener("click", function () { zoomAt(1.5); });
   $("zOut").addEventListener("click", function () { zoomAt(1 / 1.5); });
   $("zReset").addEventListener("click", function () { view.z = 1; view.lat = null; view.lon = null; redrawNow(); });
