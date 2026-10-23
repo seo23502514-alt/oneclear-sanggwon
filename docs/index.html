@@ -580,10 +580,10 @@ footer { font-size: 12px; color: var(--muted); display: grid; gap: 4px; }
     return Promise.all([
       Promise.all(ck.map(function (k) { return loadTile("c", k); })),
       Promise.all(Object.keys(g).map(function (k) { return loadTile("g", k); })),
-      Promise.all(ck.map(function (k) { return loadTile("b", k); })),
       Promise.all(ck.map(function (k) { return loadTile("k", k); })),
       Promise.all(Object.keys(rk).map(function (k) { return loadTile("r", k); }))
-    ]).then(function (r) { var cat = function (x) { return [].concat.apply([], x); }; return { cafes: cat(r[0]), grid: cat(r[1]), sweets: cat(r[2]), labels: cat(r[3]), foods: cat(r[4]) }; });
+    ]).then(function (r) { var cat = function (x) { return [].concat.apply([], x); }; var ct = r[0].map(function (x) { return Array.isArray(x) ? { c: x, b: [] } : x; });
+      return { cafes: cat(ct.map(function (x) { return x.c || []; })), grid: cat(r[1]), sweets: cat(ct.map(function (x) { return x.b || []; })), labels: cat(r[2]), foods: cat(r[3]) }; });
   }
   function meters(la0, lo0, la, lo) {
     var dx = (lo - lo0) * 111320 * Math.cos(la0 * Math.PI / 180), dy = (la - la0) * 110540;
