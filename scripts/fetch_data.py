@@ -98,9 +98,11 @@ def latest_population():
         r = S.post("https://jumin.mois.go.kr/downloadExcel2.do?searchYearMonth=month&xlsStats=3", data=d, timeout=300)
         if r.status_code != 200 or len(r.content) < 8000: continue
         import openpyxl
-        wb = openpyxl.load_workbook(io.BytesIO(r.content), read_only=True)
+        wb = openpyxl.load_workbook(io.BytesIO(r.content))
         out = []
-        for row in wb.worksheets[0].iter_rows(values_only=True):
+        rows_all = list(wb.worksheets[0].iter_rows(values_only=True))
+        print('주민 통계', yy, mm, len(r.content), 'bytes', len(rows_all), 'rows', rows_all[:4], flush=True)
+        for row in rows_all:
             c = str(row[0] or '').strip()
             if re.fullmatch(r'\d{10}', c) and c[5:] != '00000':
                 pop = str(row[2] or '0').replace(',', '').strip(); hh = str(row[3] or '0').replace(',', '').strip()
