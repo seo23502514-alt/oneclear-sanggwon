@@ -41,7 +41,6 @@ for l in sec['CAFES']:
     code, la, lo, name, b, fl, addr = l.split('\t'); la = float(la); lo = float(lo)
     ct[tile(la, lo)].append([round(la*1e5), round(lo*1e5), name, int(b), fl, addr, code])
     names.append([name, round(la*1e5), round(lo*1e5), 'c', idx.get(code, -1)])
-for k, v in ct.items(): json.dump(v, open(f'{out}/t/c{k}.json', 'w'), ensure_ascii=False, separators=(',', ':'))
 gt = collections.defaultdict(list)
 for l in sec['GRID']:
     a = list(map(int, l.split(','))); gt[f'{math.floor(a[0]/500)}_{math.floor(a[1]/400)}'].append(a)
@@ -55,7 +54,8 @@ for l in sec['SWEET']:
     la = float(la); lo = float(lo); b = next((i for i, rx in enumerate(SB) if re.search(rx, nm)), -1)
     bt[tile(la, lo)].append([round(la*1e5), round(lo*1e5), nm, KIND[sub], b, fl, addr, code])
     names.append([nm, round(la*1e5), round(lo*1e5), 'b%d' % KIND[sub], idx.get(code, -1)])
-for k, v in bt.items(): json.dump(v, open(f'{out}/t/b{k}.json', 'w'), ensure_ascii=False, separators=(',', ':'))
+# 카페(c)와 빵집·디저트(b)를 한 파일에
+for k in set(ct) | set(bt): json.dump({'c': ct.get(k, []), 'b': bt.get(k, [])}, open(f'{out}/t/c{k}.json', 'w'), ensure_ascii=False, separators=(',', ':'))
 for l in sec.get('LM', []):
     code, la, lo, nm, sub, addr = l.split('\t')
     names.append([nm, round(float(la)*1e5), round(float(lo)*1e5), 'L:' + sub, idx.get(code, -1)])
