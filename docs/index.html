@@ -1,0 +1,1392 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>원클리어 카페 상권진단</title>
+<link rel="stylesheet" href="leaflet/leaflet.css">
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Nanum+Myeongjo:wght@700;800&family=IBM+Plex+Sans+KR:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
+<style>
+/* Layout: 측량 도면 같은 격자 바탕. 맨 위 동네 검색 → 동네 리포트(지도 + 숫자) → 손익 계산기 → 지역 비교 → 출처 */
+:root {
+  --paper: #F4F6F3;
+  --sheet: #FFFFFF;
+  --ink: #18221E;
+  --muted: #5C6A63;
+  --line: #D6DDD8;
+  --grid: rgba(24, 34, 30, 0.045);
+  --signal: #0E6B5C;
+  --signal-soft: #DCEEE9;
+  --roast: #9A4F24;
+  --roast-soft: #F3E4D9;
+  --berry: #8E3B8A;
+  --amber: #C98A00;
+  --good: #1F7A4D;
+  --warn: #B26A00;
+  --bad: #B3362B;
+  --font-display: "Nanum Myeongjo", "Noto Serif KR", "AppleMyungjo", serif;
+  --font-body: "IBM Plex Sans KR", "Apple SD Gothic Neo", "Malgun Gothic", system-ui, sans-serif;
+  --font-data: "IBM Plex Mono", ui-monospace, "SFMono-Regular", Consolas, monospace;
+  --r: 6px;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --paper: #111815; --sheet: #18211D; --ink: #E7EEEA; --muted: #9AAAA2; --line: #2C3833;
+    --grid: rgba(231, 238, 234, 0.05); --signal: #4FC3AC; --signal-soft: #173A33; --roast: #E39A6B; --roast-soft: #3A2A20; --berry: #D58BD1; --amber: #F0B429;
+    --good: #5CC98F; --warn: #E3A23B; --bad: #EF7468; color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --paper: #111815; --sheet: #18211D; --ink: #E7EEEA; --muted: #9AAAA2; --line: #2C3833;
+  --grid: rgba(231, 238, 234, 0.05); --signal: #4FC3AC; --signal-soft: #173A33; --roast: #E39A6B; --roast-soft: #3A2A20; --berry: #D58BD1; --amber: #F0B429;
+  --good: #5CC98F; --warn: #E3A23B; --bad: #EF7468; color-scheme: dark;
+}
+
+* { box-sizing: border-box; }
+[hidden] { display: none !important; }
+body {
+  background-color: var(--paper);
+  background-image:
+    linear-gradient(var(--grid) 1px, transparent 1px),
+    linear-gradient(90deg, var(--grid) 1px, transparent 1px);
+  background-size: 24px 24px;
+  color: var(--ink);
+  font-family: var(--font-body);
+  font-size: 15px;
+  line-height: 1.6;
+  word-break: keep-all;
+  overflow-wrap: anywhere;
+}
+.wrap {
+  max-width: 1120px;
+  margin: 0 auto;
+  padding-block: 28px 64px;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+  display: grid;
+  gap: 40px;
+}
+.wrap > *, .report > *, .section > *, .masthead > * { min-width: 0; }
+h1, h2, h3 { margin: 0; text-wrap: balance; }
+p { margin: 0; }
+a { color: var(--signal); text-underline-offset: 3px; }
+a:focus-visible, button:focus-visible, input:focus-visible, select:focus-visible { outline: 2px solid var(--signal); outline-offset: 2px; }
+.num { font-family: var(--font-data); font-variant-numeric: tabular-nums; }
+.eyebrow { font-family: var(--font-data); font-size: 12px; letter-spacing: 0.06em; color: var(--muted); }
+.hint { font-size: 12px; color: var(--muted); }
+.sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+h2 { font-family: var(--font-display); font-weight: 800; font-size: 22px; }
+.card-title { font-size: 16px; font-weight: 700; }
+
+/* 머리 + 검색 */
+.masthead { display: grid; gap: 16px; }
+.brand { display: flex; align-items: center; gap: 10px; font-weight: 600; color: var(--muted); font-size: 13px; }
+.brand-mark { width: 22px; height: 22px; border: 2px solid var(--signal); border-radius: 50%; position: relative; flex: none; }
+.brand-mark::after { content: ""; position: absolute; inset: 5px; border-radius: 50%; background: var(--signal); }
+h1 { font-family: var(--font-display); font-weight: 800; font-size: clamp(28px, 4.6vw, 44px); line-height: 1.25; letter-spacing: -0.01em; max-width: 18em; }
+.lede { color: var(--muted); font-size: 16px; max-width: 60ch; }
+.search { position: relative; max-width: 640px; }
+.search-box { display: flex; align-items: center; gap: 8px; background: var(--sheet); border: 2px solid var(--ink); border-radius: 10px; padding: 6px 6px 6px 14px; }
+.search-box:focus-within { border-color: var(--signal); }
+.search-box svg { flex: none; color: var(--muted); }
+#q { flex: 1; min-width: 0; border: 0; background: transparent; color: var(--ink); font: 500 17px/1.4 var(--font-body); padding: 8px 0; }
+#q:focus { outline: none; }
+#q::placeholder { color: var(--muted); }
+.search-box button { flex: none; }
+.suggest { position: absolute; left: 0; right: 0; top: calc(100% + 6px); z-index: 20; background: var(--sheet); border: 1px solid var(--line); border-radius: 10px; box-shadow: 0 12px 32px rgba(0,0,0,0.12); max-height: 340px; overflow: auto; padding: 4px; }
+.suggest button { display: flex; width: 100%; justify-content: space-between; gap: 12px; border: 0; background: transparent; text-align: left; padding: 9px 10px; border-radius: 6px; font: 500 15px var(--font-body); color: var(--ink); cursor: pointer; }
+.suggest button span { color: var(--muted); font-size: 12px; white-space: nowrap; }
+.suggest button.on, .suggest button:hover { background: var(--signal-soft); }
+.suggest .empty { padding: 10px; color: var(--muted); font-size: 14px; }
+.quick { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; font-size: 13px; color: var(--muted); }
+.chip-btn { font: 500 13px var(--font-body); border: 1px solid var(--line); background: var(--sheet); color: var(--ink); border-radius: 999px; padding: 4px 12px; cursor: pointer; }
+.chip-btn:hover { border-color: var(--signal); }
+
+button {
+  font: 600 14px var(--font-body); border-radius: var(--r); padding: 9px 14px; cursor: pointer;
+  border: 1px solid var(--line); background: var(--sheet); color: var(--ink);
+}
+button.primary { background: var(--signal); border-color: var(--signal); color: var(--sheet); }
+button:hover { border-color: var(--signal); }
+
+.sheet { background: var(--sheet); border: 1px solid var(--line); border-radius: var(--r); padding: 22px; display: grid; gap: 18px; min-width: 0; align-content: start; }
+.sheet-head { display: flex; justify-content: space-between; align-items: baseline; gap: 8px 12px; flex-wrap: wrap; }
+
+/* 리포트 */
+.report { display: grid; gap: 20px; }
+.report-head { display: flex; justify-content: space-between; align-items: end; gap: 12px 24px; flex-wrap: wrap; border-bottom: 2px solid var(--ink); padding-bottom: 14px; }
+.place { display: grid; gap: 4px; min-width: 0; }
+.place-sub { font-size: 14px; color: var(--muted); }
+.place-name { font-family: var(--font-display); font-weight: 800; font-size: clamp(26px, 4vw, 36px); line-height: 1.2; }
+.seg { display: inline-flex; border: 1px solid var(--line); border-radius: 999px; padding: 3px; background: var(--sheet); }
+.seg button { border: 0; border-radius: 999px; padding: 6px 14px; font-size: 13px; background: transparent; }
+.seg button[aria-pressed="true"] { background: var(--ink); color: var(--sheet); }
+.kpis { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); border-bottom: 1px solid var(--line); }
+.kpi { padding: 4px 16px 14px 0; display: grid; gap: 2px; align-content: start; min-width: 0; }
+.kpi + .kpi { padding-left: 16px; border-left: 1px solid var(--line); }
+.kpi .v { font-family: var(--font-data); font-size: clamp(22px, 3vw, 30px); font-weight: 600; letter-spacing: -0.02em; }
+.kpi .v small { font-size: 14px; font-weight: 500; margin-left: 2px; }
+.kpi .k { font-size: 13px; color: var(--muted); }
+.kpi .c { font-size: 12px; }
+@media (max-width: 760px) {
+  .kpis { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .kpi:nth-child(3) { padding-left: 0; border-left: 0; }
+  .kpi:nth-child(n+3) { border-top: 1px solid var(--line); padding-top: 12px; }
+}
+.up { color: var(--bad); } .down { color: var(--good); } .flat { color: var(--muted); }
+
+.split { display: grid; grid-template-columns: minmax(0, 1.05fr) minmax(0, 1fr); gap: 24px; align-items: start; }
+@media (max-width: 900px) { .split { grid-template-columns: minmax(0, 1fr); } }
+.map-box { position: relative; width: 100%; aspect-ratio: 1 / 1; max-width: 100%; border-radius: var(--r); overflow: hidden; background: var(--paper); border: 1px solid var(--line); }
+#localMap { width: 100%; height: 100%; display: block; cursor: crosshair; touch-action: none; }
+.zoombar { display: none; position: absolute; top: 10px; right: 10px; display: grid; gap: 4px; z-index: 3; }
+.zoombar button { width: 34px; height: 34px; padding: 0; font: 600 18px/1 var(--font-body); border-radius: 6px; background: var(--sheet); color: var(--ink); border: 1px solid var(--line); box-shadow: 0 1px 3px rgba(0,0,0,.12); }
+.map-loading { position: absolute; inset: 0; display: grid; place-items: center; font-size: 13px; color: var(--muted); }
+.legend { display: flex; flex-wrap: wrap; gap: 6px 16px; font-size: 12px; color: var(--muted); }
+.legend i { display: inline-block; width: 10px; height: 10px; border-radius: 50%; margin-right: 6px; vertical-align: -1px; }
+.legend .sq { border-radius: 2px; }
+.maplinks { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; font-size: 13px; color: var(--muted); }
+.mapbtn { display: inline-flex; align-items: center; gap: 6px; font: 600 13px var(--font-body); text-decoration: none; color: var(--ink); border: 1px solid var(--line); border-radius: 999px; padding: 5px 12px; background: var(--sheet); }
+.mapbtn:hover { border-color: var(--signal); }
+.mapbtn i { width: 8px; height: 8px; border-radius: 2px; display: inline-block; }
+.minilinks { display: inline-flex; gap: 4px; margin-left: 6px; vertical-align: 1px; }
+.minilinks a { font: 600 10px var(--font-data); text-decoration: none; color: var(--muted); border: 1px solid var(--line); border-radius: 4px; padding: 0 5px; line-height: 16px; }
+.minilinks a:hover { color: var(--signal); border-color: var(--signal); }
+
+.summary { display: grid; gap: 10px; }
+.summary-title { font-family: var(--font-display); font-weight: 800; font-size: 20px; line-height: 1.35; }
+.tags { display: flex; flex-wrap: wrap; gap: 6px; }
+.tag { font-size: 12px; font-weight: 600; padding: 3px 10px; border-radius: 999px; background: var(--signal-soft); color: var(--signal); }
+.tag.roast { background: var(--roast-soft); color: var(--roast); }
+.points { margin: 0; padding-left: 18px; display: grid; gap: 6px; font-size: 14px; }
+
+.bars { display: grid; gap: 9px; }
+.bar-row { display: grid; grid-template-columns: 76px minmax(0, 1fr) 72px; gap: 10px; align-items: center; font-size: 13px; }
+.bar-track { position: relative; height: 10px; background: var(--line); border-radius: 999px; }
+.bar-track > i { position: absolute; left: 0; top: 0; bottom: 0; background: var(--signal); border-radius: 999px; }
+.bar-track > b { position: absolute; top: -3px; bottom: -3px; width: 2px; background: var(--ink); border-radius: 1px; }
+.bar-row .r { text-align: right; font-family: var(--font-data); font-variant-numeric: tabular-nums; }
+
+.mix { display: flex; height: 14px; border-radius: 999px; overflow: hidden; background: var(--line); }
+.mix i { display: block; height: 100%; }
+.mix-legend { display: flex; flex-wrap: wrap; gap: 4px 14px; font-size: 13px; }
+.mix-legend span::before { content: ""; display: inline-block; width: 9px; height: 9px; border-radius: 2px; margin-right: 6px; background: var(--c); }
+
+.table-scroll { overflow: auto; border-top: 2px solid var(--ink); }
+.rtable { width: 100%; border-collapse: collapse; font-size: 14px; }
+.rtable th { position: sticky; top: 0; background: var(--sheet); text-align: left; font-size: 12px; font-weight: 600; color: var(--muted); padding: 8px 6px; border-bottom: 1px solid var(--line); white-space: nowrap; }
+.rtable td { padding: 8px 6px; border-bottom: 1px solid var(--line); vertical-align: middle; }
+.rtable .r { text-align: right; font-family: var(--font-data); font-variant-numeric: tabular-nums; white-space: nowrap; }
+.rtable tr.clickable { cursor: pointer; }
+.rtable tr.clickable:hover td { background: var(--paper); }
+.rtable tr.me td { background: var(--signal-soft); }
+.brand-dot { display: inline-block; width: 8px; height: 8px; border-radius: 50%; margin-right: 6px; vertical-align: 1px; }
+.small-muted { font-size: 12px; color: var(--muted); display: block; }
+#nearTable tr.clickable td:first-child { cursor: pointer; }
+.near-scroll { max-height: 640px; }
+#nearSeg { justify-self: start; flex-wrap: wrap; border-radius: 12px; }
+.more { justify-self: start; }
+
+/* 계산기 */
+.tool { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.05fr); gap: 24px; align-items: start; }
+@media (max-width: 900px) { .tool { grid-template-columns: minmax(0, 1fr); } }
+.sample-tag { font-size: 12px; color: var(--roast); border: 1px solid currentColor; border-radius: 999px; padding: 1px 10px; }
+fieldset { border: 0; padding: 0; margin: 0; display: grid; gap: 12px; }
+legend { font-weight: 700; font-size: 13px; padding: 0; margin-bottom: 4px; color: var(--signal); }
+.fields { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px 14px; }
+@media (max-width: 480px) { .fields { grid-template-columns: minmax(0, 1fr); } }
+.field { display: grid; gap: 4px; min-width: 0; }
+.field.wide { grid-column: 1 / -1; }
+label { font-size: 13px; font-weight: 500; }
+.input-wrap { display: flex; align-items: center; border: 1px solid var(--line); border-radius: var(--r); background: var(--paper); }
+.input-wrap:focus-within { border-color: var(--signal); }
+.input-wrap input { flex: 1; min-width: 0; border: 0; background: transparent; color: var(--ink); font: 500 15px/1.4 var(--font-data); padding: 9px 10px; font-variant-numeric: tabular-nums; }
+.input-wrap input[type="text"] { font-family: var(--font-body); }
+.input-wrap input:focus { outline: none; }
+.unit { font-size: 12px; color: var(--muted); padding-right: 10px; white-space: nowrap; }
+.actions { display: flex; gap: 10px; flex-wrap: wrap; }
+.diag { position: sticky; top: calc(env(safe-area-inset-top, 0px) + 16px); }
+@media (max-width: 900px) { .diag { position: static; } }
+.score-row { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 18px; align-items: center; }
+.dial { width: 112px; height: 112px; }
+.dial-track { fill: none; stroke: var(--line); stroke-width: 10; }
+.dial-fill { fill: none; stroke: var(--signal); stroke-width: 10; stroke-linecap: round; transition: stroke-dashoffset 0.5s ease, stroke 0.3s; }
+.dial-num { font-family: var(--font-data); font-size: 30px; font-weight: 600; fill: var(--ink); }
+.dial-sub { font-family: var(--font-body); font-size: 11px; fill: var(--muted); }
+.verdict { display: grid; gap: 6px; min-width: 0; }
+.verdict-title { font-family: var(--font-display); font-weight: 800; font-size: 20px; }
+.chip { justify-self: start; font-size: 12px; font-weight: 600; padding: 2px 10px; border-radius: 999px; border: 1px solid currentColor; }
+.chip.good { color: var(--good); } .chip.warn { color: var(--warn); } .chip.bad { color: var(--bad); }
+.meters { display: grid; gap: 14px; }
+.meter { display: grid; gap: 6px; }
+.meter-top { display: flex; justify-content: space-between; gap: 10px; font-size: 13px; }
+.meter-top b { font-weight: 600; }
+.bar { height: 8px; background: var(--line); border-radius: 999px; overflow: hidden; }
+.bar > i { display: block; height: 100%; width: 0; background: var(--signal); border-radius: 999px; transition: width 0.5s ease; }
+.bar > i.warn { background: var(--warn); } .bar > i.bad { background: var(--bad); } .bar > i.good { background: var(--good); }
+.meter-note { font-size: 12px; color: var(--muted); }
+.ledger { display: grid; grid-template-columns: minmax(0, 1fr) auto; border-top: 1px solid var(--line); }
+.ledger div { padding: 8px 0; border-bottom: 1px solid var(--line); font-size: 14px; }
+.ledger div:nth-child(even) { text-align: right; font-family: var(--font-data); font-variant-numeric: tabular-nums; font-weight: 500; }
+.callout { border-left: 3px solid var(--roast); padding: 10px 14px; background: var(--paper); font-size: 14px; display: grid; gap: 4px; border-radius: 0 var(--r) var(--r) 0; }
+.callout b { color: var(--roast); }
+.toast { font-size: 13px; color: var(--good); min-height: 1.2em; }
+
+/* 지역 비교 */
+.region-grid { display: grid; grid-template-columns: minmax(0, 1fr); gap: 12px; }
+.controls { display: flex; gap: 8px; flex-wrap: wrap; }
+select { font: 500 14px var(--font-body); color: var(--ink); background: var(--paper); border: 1px solid var(--line); border-radius: var(--r); padding: 7px 10px; max-width: 100%; }
+.cols { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; }
+@media (max-width: 820px) { .cols { grid-template-columns: minmax(0, 1fr); } }
+.source { border-top: 2px solid var(--ink); padding-top: 12px; display: grid; gap: 6px; align-content: start; }
+.source h3 { font-size: 16px; font-weight: 700; }
+.source p { font-size: 14px; color: var(--muted); }
+.contact { background: var(--ink); color: var(--paper); border-radius: var(--r); padding: 24px; display: grid; gap: 12px; }
+.contact h2 { color: var(--paper); }
+.contact p { color: var(--paper); opacity: 0.85; max-width: 62ch; }
+.contact a { color: var(--paper); font-weight: 600; }
+.channels { display: flex; gap: 10px 20px; flex-wrap: wrap; font-size: 14px; }
+footer { font-size: 12px; color: var(--muted); display: grid; gap: 4px; }
+.section { display: grid; gap: 16px; }
+@media (prefers-reduced-motion: reduce) { .dial-fill, .bar > i { transition: none; } }
+</style>
+
+</head>
+<body>
+<div class="wrap">
+
+  <header class="masthead">
+    <div class="brand"><span class="brand-mark" aria-hidden="true"></span>ONE CLEAR 원클리어</div>
+    <h1>어느 동네에 카페를 내실 건가요?</h1>
+    <p class="lede">동네, 지하철역, 매장이나 건물 이름을 넣으면 그 주변 카페·빵집·디저트 가게가 몇 곳인지, 어떤 브랜드가 있는지, 주변에 어떤 가게가 몰려 있는지 바로 보여 드립니다. 전국 상가 277만 곳을 행정동 단위로 정리했습니다.</p>
+    <div class="search" id="searchWrap">
+      <div class="search-box">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>
+        <label class="sr" for="q">동네 이름이나 지하철역</label>
+        <input id="q" type="search" autocomplete="off" placeholder="동네, 지하철역, 매장·건물 이름 (예: 철산동, 강남역, 테크노마트)" role="combobox" aria-expanded="false" aria-controls="suggest" aria-autocomplete="list">
+        <button type="button" class="primary" id="goBtn">분석</button>
+      </div>
+      <div class="suggest" id="suggest" role="listbox" hidden></div>
+    </div>
+    <div class="quick" id="quick"><span>바로 보기</span></div>
+  </header>
+
+  <section class="report" id="report" aria-live="polite">
+    <div class="report-head">
+      <div class="place">
+        <span class="place-sub" id="placeSub">데이터를 불러오는 중입니다</span>
+        <span class="place-name" id="placeName">&nbsp;</span>
+      </div>
+      <div class="seg" role="group" aria-label="분석 반경" id="radiusSeg">
+        <button type="button" data-r="300" aria-pressed="false">300m</button>
+        <button type="button" data-r="500" aria-pressed="true">500m</button>
+        <button type="button" data-r="1000" aria-pressed="false">1km</button>
+      </div>
+    </div>
+
+    <div class="kpis">
+      <div class="kpi"><span class="k" id="kCafeLabel">반경 500m 카페</span><span class="v num" id="kCafe">-</span><span class="c hint" id="kCafeC"></span></div>
+      <div class="kpi"><span class="k" id="kFrLabel">빵집·디저트</span><span class="v num" id="kFr">-</span><span class="c hint" id="kFrC"></span></div>
+      <div class="kpi"><span class="k" id="kStoreLabel">반경 500m 전체 가게</span><span class="v num" id="kStore">-</span><span class="c hint" id="kStoreC"></span></div>
+      <div class="kpi"><span class="k">동 주민 1천 명당 카페</span><span class="v num" id="kPer">-</span><span class="c" id="kPerC"></span></div>
+    </div>
+
+    <div class="split">
+      <div class="sheet">
+        <div class="sheet-head">
+          <h3 class="card-title">주변 지도</h3>
+          <span class="hint">휠로 확대·축소, 끌어서 이동, 누르면 그 자리로 다시 분석</span>
+        </div>
+        <div class="map-box">
+          <canvas id="localMap" role="img" aria-label="선택한 동네 주변 가게와 카페 위치"></canvas>
+          <div id="satMap" style="position:absolute;inset:0;z-index:4"></div>
+          <div class="map-loading" id="mapLoading">지도를 그리는 중</div>
+          <div class="zoombar" role="group" aria-label="지도 확대 축소">
+            <button type="button" id="zIn" aria-label="확대">+</button>
+            <button type="button" id="zOut" aria-label="축소">−</button>
+            <button type="button" id="zReset" aria-label="처음 위치로" title="처음 위치로">⟲</button>
+          </div>
+        </div>
+        <div class="legend">
+          <span><i style="background: var(--roast)"></i>프랜차이즈 카페</span>
+          <span><i style="background: var(--signal)"></i>개인 카페</span>
+          <span><i class="sq" style="background: var(--amber)"></i>빵집</span>
+          <span><i class="sq" style="background: var(--berry)"></i>디저트·떡집</span>
+          <span><i class="sq" style="background: var(--muted); opacity: .45"></i>가게가 많은 블록</span>
+        </div>
+        <div class="maplinks" id="mapLinks"></div>
+      </div>
+
+      <div class="sheet">
+        <div class="summary">
+          <span class="eyebrow">한 줄 요약</span>
+          <p class="summary-title" id="sumTitle">-</p>
+          <div class="tags" id="tags"></div>
+          <ul class="points" id="points"></ul>
+        </div>
+        <div class="summary">
+          <span class="eyebrow" id="mixLabel">반경 안 카페 구성</span>
+          <div class="mix" id="mix"></div>
+          <div class="mix-legend" id="mixLegend"></div>
+        </div>
+        <div class="summary">
+          <span class="eyebrow" id="barsLabel">반경 안 가게 구성 (검은 선은 전국 평균)</span>
+          <div class="bars" id="bars"></div>
+        </div>
+        <div class="actions">
+          <button type="button" class="primary" id="toCalc">이 동네 숫자로 손익 계산</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="split">
+      <div class="sheet">
+        <div class="sheet-head">
+          <h3 class="card-title" id="nearTitle">가까운 카페</h3>
+          <span class="hint">가까운 순 · 누르면 지도에서 크게</span>
+        </div>
+        <div class="seg" role="group" aria-label="카페 종류" id="nearSeg">
+          <button type="button" data-f="all" aria-pressed="true">전체</button>
+          <button type="button" data-f="indie" aria-pressed="false">개인 카페</button>
+          <button type="button" data-f="fr" aria-pressed="false">프랜차이즈 카페</button>
+          <button type="button" data-f="dc" aria-pressed="false">디저트 카페</button>
+          <button type="button" data-f="bk" aria-pressed="false">빵집</button>
+          <button type="button" data-f="sw" aria-pressed="false">디저트·떡집</button>
+        </div>
+        <div class="table-scroll near-scroll">
+          <table class="rtable" id="nearTable">
+            <thead><tr><th scope="col">가게</th><th scope="col" class="r">거리</th><th scope="col" class="r">층</th></tr></thead>
+            <tbody id="nearBody"></tbody>
+          </table>
+        </div>
+        <button type="button" class="more" id="nearMore" hidden>더 보기</button>
+      </div>
+      <div class="sheet">
+        <div class="sheet-head">
+          <h3 class="card-title">옆 동네와 비교</h3>
+          <span class="hint">중심에서 3km 안의 행정동</span>
+        </div>
+        <div class="table-scroll">
+          <table class="rtable">
+            <thead><tr><th scope="col">동</th><th scope="col" class="r">카페</th><th scope="col" class="r">주민</th><th scope="col" class="r">1곳당 주민</th></tr></thead>
+            <tbody id="nbBody"></tbody>
+          </table>
+        </div>
+        <p class="hint" id="roadsNote"></p>
+      </div>
+    </div>
+  </section>
+
+  <section class="tool section" id="calc" aria-label="손익 계산기">
+    <form class="sheet" id="form" autocomplete="off">
+      <div class="sheet-head">
+        <h2>손익 계산</h2>
+        <span class="sample-tag" id="sampleTag">예시 값</span>
+      </div>
+      <fieldset>
+        <legend>동네</legend>
+        <div class="fields">
+          <div class="field wide">
+            <label for="place">분석할 곳</label>
+            <div class="input-wrap"><input id="place" type="text" value="예시 동네"></div>
+          </div>
+          <div class="field">
+            <label for="cafes">동네 카페 수</label>
+            <div class="input-wrap"><input id="cafes" inputmode="numeric" value="40"><span class="unit">곳</span></div>
+          </div>
+          <div class="field">
+            <label for="flow">가게 앞 하루 유동인구</label>
+            <div class="input-wrap"><input id="flow" inputmode="numeric" value="12000"><span class="unit">명/일</span></div>
+          </div>
+          <div class="field">
+            <label for="resident">동네 주민 수</label>
+            <div class="input-wrap"><input id="resident" inputmode="numeric" value="20000"><span class="unit">명</span></div>
+          </div>
+          <div class="field">
+            <label for="worker">동네 직장인 수</label>
+            <div class="input-wrap"><input id="worker" inputmode="numeric" value="0"><span class="unit">명</span></div>
+          </div>
+        </div>
+        <p class="hint">위에서 동네를 고르고 '이 동네 숫자로 손익 계산'을 누르면 카페 수와 주민 수가 채워집니다. 유동인구와 직장인 수는 소상공인 상권정보시스템에서 확인해 넣어 주세요.</p>
+      </fieldset>
+      <fieldset>
+        <legend>비용과 가격</legend>
+        <div class="fields">
+          <div class="field"><label for="rent">월 임대료 (관리비 포함)</label><div class="input-wrap"><input id="rent" inputmode="numeric" value="350"><span class="unit">만원</span></div></div>
+          <div class="field"><label for="labor">월 인건비 (대표 급여 포함)</label><div class="input-wrap"><input id="labor" inputmode="numeric" value="600"><span class="unit">만원</span></div></div>
+          <div class="field"><label for="etc">기타 고정비</label><div class="input-wrap"><input id="etc" inputmode="numeric" value="150"><span class="unit">만원</span></div></div>
+          <div class="field"><label for="days">월 영업일</label><div class="input-wrap"><input id="days" inputmode="numeric" value="30"><span class="unit">일</span></div></div>
+          <div class="field"><label for="price">평균 객단가 (잔당)</label><div class="input-wrap"><input id="price" inputmode="numeric" value="4500"><span class="unit">원</span></div></div>
+          <div class="field"><label for="cost">잔당 재료비 (원두·우유·컵)</label><div class="input-wrap"><input id="cost" inputmode="numeric" value="1200"><span class="unit">원</span></div></div>
+          <div class="field wide"><label for="save">한 잔에 줄이고 싶은 원가</label><div class="input-wrap"><input id="save" inputmode="numeric" value="200"><span class="unit">원</span></div></div>
+        </div>
+      </fieldset>
+      <div class="actions">
+        <button type="submit" class="primary">다시 계산</button>
+        <button type="button" id="clearBtn">비우고 새로 입력</button>
+      </div>
+    </form>
+
+    <aside class="sheet diag" aria-live="polite">
+      <div class="sheet-head">
+        <h2>결과</h2>
+        <span class="eyebrow" id="placeOut">예시 동네</span>
+      </div>
+      <div class="score-row">
+        <svg class="dial" viewBox="0 0 120 120" role="img" aria-label="종합 점수">
+          <circle class="dial-track" cx="60" cy="60" r="50"></circle>
+          <circle class="dial-fill" id="dialFill" cx="60" cy="60" r="50" transform="rotate(-90 60 60)" stroke-dasharray="314.16" stroke-dashoffset="314.16"></circle>
+          <text class="dial-num" id="scoreNum" x="60" y="66" text-anchor="middle">0</text>
+          <text class="dial-sub" x="60" y="84" text-anchor="middle">/ 100점</text>
+        </svg>
+        <div class="verdict">
+          <span class="chip good" id="verdictChip">판정</span>
+          <span class="verdict-title" id="verdictTitle">계산 중</span>
+          <p class="hint" id="verdictText"></p>
+        </div>
+      </div>
+      <div class="meters">
+        <div class="meter"><div class="meter-top"><span>카페 1곳당 배후 인구</span><b class="num" id="mDemandV">-</b></div><div class="bar"><i id="mDemand"></i></div><span class="meter-note" id="mDemandN"></span></div>
+        <div class="meter"><div class="meter-top"><span>지나가는 사람 중 사야 하는 비율</span><b class="num" id="mProfitV">-</b></div><div class="bar"><i id="mProfit"></i></div><span class="meter-note" id="mProfitN"></span></div>
+        <div class="meter"><div class="meter-top"><span>본전 매출 중 임대료 비중</span><b class="num" id="mCostV">-</b></div><div class="bar"><i id="mCost"></i></div><span class="meter-note" id="mCostN"></span></div>
+      </div>
+      <div class="ledger">
+        <div>월 고정비 합계</div><div id="oFixed">-</div>
+        <div>한 잔 팔면 남는 돈</div><div id="oMargin">-</div>
+        <div>본전 판매량</div><div id="oBep">-</div>
+        <div>본전 월 매출</div><div id="oBepSales">-</div>
+      </div>
+      <div class="callout"><b>원가를 줄이면</b><span id="saveText">-</span></div>
+      <div class="actions"><button type="button" id="copyBtn">결과 복사</button></div>
+      <p class="toast" id="toast" role="status"></p>
+    </aside>
+  </section>
+
+  <section class="section" aria-labelledby="regionTitle">
+    <div class="sheet-head">
+      <h2 id="regionTitle">지역별 카페 수</h2>
+      <div class="controls">
+        <label class="sr" for="sidoSel">시·도</label><select id="sidoSel"></select>
+        <label class="sr" for="sggSel">시·군·구</label><select id="sggSel"></select>
+        <label class="sr" for="sortSel">정렬</label>
+        <select id="sortSel">
+          <option value="per">1곳당 주민 많은 순</option>
+          <option value="perAsc">1곳당 주민 적은 순</option>
+          <option value="cafes">카페 많은 순</option>
+        </select>
+      </div>
+    </div>
+    <div class="sheet">
+      <div class="table-scroll" style="max-height: 480px">
+        <table class="rtable">
+          <thead><tr><th scope="col">지역</th><th scope="col" class="r">카페</th><th scope="col" class="r">주민</th><th scope="col" class="r">1곳당 주민</th></tr></thead>
+          <tbody id="rtBody"></tbody>
+        </table>
+      </div>
+      <p class="hint" id="rtNote"></p>
+    </div>
+  </section>
+
+  <section class="section" aria-labelledby="howTitle">
+    <h2 id="howTitle">이렇게 읽으세요</h2>
+    <div class="cols">
+      <div class="source">
+        <h3>행정동 기준입니다</h3>
+        <p>'철산동'은 철산1·2·3·4동처럼 행정동으로 나뉩니다. 검색하면 해당하는 행정동이 모두 나옵니다. 지도를 누르면 동 경계와 상관없이 그 자리 반경으로 다시 셉니다.</p>
+      </div>
+      <div class="source">
+        <h3>주민 수만 보면 틀립니다</h3>
+        <p>역 앞, 오피스, 관광지는 사는 사람보다 오가는 사람이 훨씬 많습니다. '오피스 상권'이나 '관광·숙박' 표시가 뜨면 주민 1천 명당 카페 수는 참고만 하세요.</p>
+      </div>
+      <div class="source">
+        <h3>브랜드는 상호명으로 찾았습니다</h3>
+        <p>메가커피, 컴포즈, 스타벅스 등 16개 브랜드를 가게 이름으로 골라냈습니다. 이름에 브랜드가 빠진 매장은 개인 카페로 잡힐 수 있습니다.</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="contact" aria-labelledby="contactTitle">
+    <h2 id="contactTitle">원가, 같이 보실래요?</h2>
+    <p>원클리어는 카페에 원두와 원재료를 납품합니다. 장비 배치, 시즌 메뉴, 한 잔 원가 맞추는 일도 같이 해 드려요. 위 결과를 복사해서 보내 주시면 그 숫자 놓고 바로 얘기하겠습니다.</p>
+    <div class="channels">
+      <span>스마트스토어 <a href="https://smartstore.naver.com/oneclear01" target="_blank" rel="noopener">smartstore.naver.com/oneclear01</a></span>
+      <span>블로그 <a href="https://blog.naver.com/oneclear01" target="_blank" rel="noopener">blog.naver.com/oneclear01</a></span>
+    </div>
+  </section>
+
+  <footer>
+    <span>가게·카페: 소상공인시장진흥공단 상가(상권)정보 2026년 6월 30일 기준 (공공데이터포털). 주민·세대: 행정안전부 주민등록 인구통계 2026년 9월 말 기준.</span>
+    <span>입력한 숫자는 저장되지 않습니다.</span>
+  </footer>
+</div>
+
+<script>
+(function () {
+  "use strict";
+  var $ = function (id) { return document.getElementById(id); };
+  var fmt = function (n) { return Math.round(n).toLocaleString("ko-KR"); };
+  var BRANDS = ["메가커피","컴포즈","이디야","스타벅스","빽다방","투썸플레이스","더벤티","공차","할리스","파스쿠찌","커피빈","엔제리너스","폴바셋","매머드","텐퍼센트","하삼동"];
+  var LOW = [0,1,4,6,13,14,15], MID = [2,7], HIGH = [3,5,8,9,10,11,12];
+  var SBRANDS = ["파리바게뜨","뚜레쥬르","던킨","크리스피크림","배스킨라빈스","설빙"];
+  var SKIND = ["빵집", "디저트", "떡집"];
+  var DESSERT_RX = /디저트|케이크|케잌|마카롱|베이커리|베이크|빵|도넛|쿠키|와플|젤라또|빙수|타르트|크로플|스콘|파티스리|브레드|bakery|dessert|cake|patisserie|bake/i;
+  var MAJ = ["음식","소매","수리·개인","과학·기술","교육","시설관리·임대","예술·스포츠","부동산","숙박","보건의료"];
+  // 격자 칸 순서: 전체, 음식, 소매, 교육, 의료, 사무(과학·기술), 숙박, 수리·개인
+  var GRID_CATS = [["음식",1,0],["소매",2,1],["교육·학원",3,4],["병원·약국",4,9],["사무실",5,3],["미용·수리",7,2],["숙박",6,8]];
+
+  var DB = null, META = null, ST = [], NAT = {};
+  var state = { dong: null, lat: 0, lon: 0, r: 500, custom: false, near: [], nearShown: 300, nearFilter: "all" };
+  try { var rs = parseInt(localStorage.getItem("oc-r"), 10); if ([300, 500, 1000].indexOf(rs) >= 0) state.r = rs; } catch (e) {}
+
+  function token(name) { return getComputedStyle(document.documentElement).getPropertyValue(name).trim(); }
+
+  /* ---------------- 데이터 ---------------- */
+  var tileCache = {};
+  function loadTile(kind, key) {
+    var k = kind + key;
+    if (!tileCache[k]) {
+      var url = "t/" + kind + key + (kind === "g" ? ".csv" : ".json");
+      tileCache[k] = fetch(url).then(function (r) {
+        if (!r.ok) return kind === "g" ? "" : [];
+        return kind === "g" ? r.text() : r.json();
+      }).then(function (d) {
+        if (kind === "g") {
+          return d ? d.split("\n").map(function (l) { return l.split(",").map(Number); }) : [];
+        }
+        return d;
+      }).catch(function () { return []; });
+    }
+    return tileCache[k];
+  }
+  function tilesFor(lat, lon, rm) {
+    var dLat = rm / 110540 + 0.002, dLon = rm / (111320 * Math.cos(lat * Math.PI / 180)) + 0.002;
+    var c = {}, g = {};
+    [lat - dLat, lat + dLat].forEach(function (la) {
+      [lon - dLon, lon + dLon].forEach(function (lo) {
+        c[Math.floor(la * 2) + "_" + Math.floor(lo * 2)] = 1;
+        g[Math.floor(la * 1000 / 500) + "_" + Math.floor(lo * 800 / 400)] = 1;
+      });
+    });
+    var ck = Object.keys(c);
+    return Promise.all([
+      Promise.all(ck.map(function (k) { return loadTile("c", k); })),
+      Promise.all(Object.keys(g).map(function (k) { return loadTile("g", k); })),
+      Promise.all(ck.map(function (k) { return loadTile("b", k); })),
+      Promise.all(ck.map(function (k) { return loadTile("k", k); }))
+    ]).then(function (r) { var cat = function (x) { return [].concat.apply([], x); }; return { cafes: cat(r[0]), grid: cat(r[1]), sweets: cat(r[2]), labels: cat(r[3]) }; });
+  }
+  function meters(la0, lo0, la, lo) {
+    var dx = (lo - lo0) * 111320 * Math.cos(la0 * Math.PI / 180), dy = (la - la0) * 110540;
+    return Math.sqrt(dx * dx + dy * dy);
+  }
+
+  /* ---------------- 동 목록 · 검색 ---------------- */
+  // 동 레코드: [code, sidoIdx, 시군구, 동, lat, lon, 가게수, 대분류10, 카페, 1층카페, 소분류4, 브랜드{}, 카페많은길, 주민, 세대]
+  function full(d) { return META.sidos[d[1]] + " " + d[2] + " " + d[3]; }
+  function shortSido(s) {
+    return s.replace("특별자치도", "").replace("특별자치시", "").replace("통합특별시", "").replace("특별시", "").replace("광역시", "")
+      .replace("경상남도", "경남").replace("경상북도", "경북").replace("충청남도", "충남").replace("충청북도", "충북").replace("경기도", "경기");
+  }
+  function norm(s) { return s.replace(/\s+/g, "").replace(/제(\d)/g, "$1"); }
+  // 역 레코드: [역이름, [노선], lat, lon, 다른이름, 시도 시군구]
+  function stationLabel(s) { return s[0] + "역"; }
+  function search(q) {
+    var raw = q.trim().split(/\s+/).filter(Boolean).map(norm);
+    if (!raw.length) return [];
+    var wantStation = /역$/.test(raw[raw.length - 1]) || raw.some(function (w) { return /호선|선$/.test(w); });
+    var res = [];
+    // 동
+    for (var i = 0; i < DB.length; i++) {
+      var d = DB[i];
+      var dn = norm(d[3]), hay = norm(META.sidos[d[1]] + shortSido(META.sidos[d[1]]) + d[2]) + dn;
+      var ok = raw.every(function (w) { return hay.indexOf(w) >= 0 || dn.indexOf(w.replace(/동$/, "")) >= 0 && w.length > 1; });
+      if (!ok) continue;
+      var last = raw[raw.length - 1];
+      var score = (dn === last ? 0 : dn.indexOf(last.replace(/동$/, "")) === 0 ? 1 : 2) * 100000 - d[13] / 100 + (wantStation ? 300000 : 0);
+      res.push([score, { t: "d", d: d }]);
+    }
+    // 역
+    for (var j = 0; j < ST.length; j++) {
+      var s = ST[j];
+      var sn = norm(s[0]), sh = norm(s[0] + s[4] + s[5] + shortSido(s[5]) + s[1].join(""));
+      var ok2 = raw.every(function (w) { var w2 = w.replace(/역$/, ""); return w2 && (sh.indexOf(w2) >= 0); });
+      if (!ok2) continue;
+      var l2 = raw[raw.length - 1].replace(/역$/, "");
+      var sc = (sn === l2 ? 0 : sn.indexOf(l2) === 0 ? 1 : 2) * 100000 - s[1].length * 10 + (wantStation ? -50000 : 50000);
+      res.push([sc, { t: "s", s: s, i: j }]);
+    }
+    res.sort(function (a, b) { return a[0] - b[0]; });
+    var main = res.slice(0, 40).map(function (x) { return x[1]; });
+    var exact = res.length && res[0][0] < 100000;
+    var pl = raw.join("").length >= 2 ? searchPlaces(raw, exact ? 12 : 30) : [];
+    return exact ? main.slice(0, 12).concat(pl, main.slice(12)) : pl.length ? pl.slice(0, 20).concat(main.slice(0, 20), pl.slice(20)) : main;
+  }
+
+  /* 매장명 · 건물명 (처음 검색할 때 한 번 불러옴) */
+  var PL = null, plLoading = null;
+  function loadPlaces() {
+    if (plLoading) return plLoading;
+    plLoading = Promise.all([
+      fetch("names.json").then(function (r) { return r.ok ? r.json() : []; }).catch(function () { return []; }),
+      fetch("buildings.json").then(function (r) { return r.ok ? r.json() : []; }).catch(function () { return []; })
+    ]).then(function (r) {
+      var nm = r[0], bd = r[1];
+      var lc = function (x) { return norm(x).toLowerCase(); };
+      PL = {
+        nm: nm, nmHay: nm.map(function (n) { var d = DB[n[4]]; return lc(n[0] + (d ? d[2] + d[3] : "")); }), nmName: nm.map(function (n) { return lc(n[0]); }),
+        bd: bd, bdHay: bd.map(function (b) { var d = DB[b[5]]; return lc(b[0] + (d ? d[2] + d[3] : "") + (b[6] || "")); }), bdName: bd.map(function (b) { return lc(b[0]); })
+      };
+      if (document.activeElement === q && q.value.trim()) renderSuggest();
+    });
+    return plLoading;
+  }
+  function placeLabel(t) { return t === "c" ? "카페" : t === "b0" ? "빵집" : t === "b1" ? "디저트" : t === "b2" ? "떡집" : t.indexOf("L:") === 0 ? t.slice(2) : "가게"; }
+  function searchPlaces(raw, limit) {
+    if (!PL) return [];
+    var toks = raw.map(function (w) { return w.toLowerCase(); }), out = [];
+    var first = toks[0];
+    for (var i = 0; i < PL.bd.length && out.length < 400; i++) {
+      var h = PL.bdHay[i]; if (h.indexOf(first) < 0) continue;
+      if (!toks.every(function (w) { return h.indexOf(w) >= 0; })) continue;
+      out.push([(PL.bdName[i] === toks.join("") ? 0 : PL.bdName[i].indexOf(first) === 0 ? 1 : 2) * 1e6 - PL.bd[i][3], { t: "bd", p: PL.bd[i] }]);
+    }
+    for (var j = 0; j < PL.nm.length && out.length < 900; j++) {
+      var h2 = PL.nmHay[j]; if (h2.indexOf(first) < 0) continue;
+      if (!toks.every(function (w) { return h2.indexOf(w) >= 0; })) continue;
+      out.push([(PL.nmName[j] === toks.join("") ? 0.5 : PL.nmName[j].indexOf(first) === 0 ? 1.5 : 2.5) * 1e6, { t: "nm", p: PL.nm[j] }]);
+    }
+    out.sort(function (a, b) { return a[0] - b[0]; });
+    return out.slice(0, limit).map(function (x) { return x[1]; });
+  }
+
+  var sug = $("suggest"), q = $("q"), sugIdx = -1, sugList = [];
+  function renderSuggest() {
+    var v = q.value;
+    sugList = v.trim() ? search(v) : [];
+    sug.innerHTML = "";
+    if (!v.trim()) { sug.hidden = true; q.setAttribute("aria-expanded", "false"); return; }
+    if (!PL && v.trim().length >= 2) { loadPlaces(); var e0 = document.createElement("div"); e0.className = "empty"; e0.textContent = "매장·건물 이름을 불러오는 중입니다…"; sug.appendChild(e0); }
+    if (!sugList.length && PL) {
+      var e = document.createElement("div"); e.className = "empty"; e.textContent = "찾는 곳이 없어요. 동네, 지하철역, 매장 이름, 건물 이름으로 넣어 보세요.";
+      sug.appendChild(e);
+    }
+    sugList.forEach(function (it, i) {
+      var b = document.createElement("button"); b.type = "button"; b.setAttribute("role", "option");
+      if (i === sugIdx) b.className = "on";
+      var a = document.createElement("strong"); a.style.fontWeight = "500";
+      var c = document.createElement("span");
+      if (it.t === "d") {
+        var d = it.d;
+        a.textContent = shortSido(META.sidos[d[1]]) + " " + d[2] + " " + d[3];
+        c.textContent = "카페 " + fmt(d[8]) + " · 주민 " + fmt(d[13]);
+      } else if (it.t === "bd" || it.t === "nm") {
+        var pp = it.p, dd = DB[it.t === "bd" ? pp[5] : pp[4]];
+        a.textContent = pp[0];
+        c.textContent = (it.t === "bd" ? "건물 · 가게 " + fmt(pp[3]) + "곳" : placeLabel(pp[3])) + (dd ? " · " + dd[2] + " " + dd[3] : "");
+      } else {
+        var s = it.s;
+        a.textContent = stationLabel(s) + (s[4] ? " (" + s[4] + ")" : "");
+        c.textContent = "지하철 " + s[1].join(" · ");
+      }
+      b.appendChild(a); b.appendChild(c);
+      b.addEventListener("mousedown", function (ev) { ev.preventDefault(); pick(it); });
+      sug.appendChild(b);
+    });
+    sug.hidden = false; q.setAttribute("aria-expanded", "true");
+  }
+  function pick(it) {
+    sug.hidden = true; q.setAttribute("aria-expanded", "false");
+    if (it.t === "s") { q.value = stationLabel(it.s); openStation(it.i, true); return; }
+    if (it.t === "bd" || it.t === "nm") {
+      var pp = it.p; q.value = pp[0];
+      openPoint(pp[1] / 1e5, pp[2] / 1e5, pp[0], it.t === "bd" ? "건물 · 가게 " + fmt(pp[3]) + "곳" : placeLabel(pp[3]), true);
+      return;
+    }
+    var d = it.d;
+    q.value = shortSido(META.sidos[d[1]]) + " " + d[2] + " " + d[3];
+    openDong(d, true);
+  }
+  var qt;
+  q.addEventListener("input", function () { sugIdx = -1; clearTimeout(qt); qt = setTimeout(renderSuggest, PL ? 90 : 0); });
+  q.addEventListener("focus", function () { if (q.value.trim() && DB) renderSuggest(); });
+  q.addEventListener("blur", function () { setTimeout(function () { sug.hidden = true; }, 120); });
+  q.addEventListener("keydown", function (e) {
+    if (e.key === "ArrowDown") { sugIdx = Math.min(sugList.length - 1, sugIdx + 1); renderSuggest(); e.preventDefault(); }
+    else if (e.key === "ArrowUp") { sugIdx = Math.max(0, sugIdx - 1); renderSuggest(); e.preventDefault(); }
+    else if (e.key === "Enter") { e.preventDefault(); var l = search(q.value); if (l.length) pick(l[Math.max(0, sugIdx)]); }
+    else if (e.key === "Escape") { sug.hidden = true; }
+  });
+  $("goBtn").addEventListener("click", function () { var l = search(q.value); if (l.length) pick(l[0]); else { renderSuggest(); q.focus(); } });
+
+  /* ---------------- 리포트 ---------------- */
+  var seq = 0, lastData = null;
+  function openDong(d, scroll) {
+    state.dong = d; state.lat = d[4]; state.lon = d[5]; state.custom = false; state.station = null; state.place = null; state.nearShown = 300;
+    try { history.replaceState(null, "", "#d" + d[0]); } catch (e) {}
+    $("placeSub").textContent = META.sidos[d[1]] + " " + d[2] + " · 행정동";
+    $("placeName").textContent = d[3];
+    analyze();
+    if (scroll) $("report").scrollIntoView({ behavior: "smooth", block: "start" });
+  }
+  function openStation(i, scroll) {
+    var st = ST[i]; if (!st) return;
+    state.lat = st[2]; state.lon = st[3]; state.custom = true; state.station = st; state.place = null; state.nearShown = 300;
+    state.dong = nearestDong(st[2], st[3]);
+    try { history.replaceState(null, "", "#s" + i); } catch (e) {}
+    $("placeSub").textContent = "지하철 " + st[1].join(" · ") + " · " + META.sidos[state.dong[1]] + " " + state.dong[2] + " " + state.dong[3];
+    $("placeName").textContent = stationLabel(st);
+    analyze();
+    if (scroll) $("report").scrollIntoView({ behavior: "smooth", block: "start" });
+  }
+  function openPoint(lat, lon, title, kind, scroll) {
+    state.lat = lat; state.lon = lon; state.custom = true; state.station = null; state.place = title; state.nearShown = 300;
+    state.dong = nearestDong(lat, lon);
+    try { history.replaceState(null, "", "#p" + lat.toFixed(5) + "_" + lon.toFixed(5)); } catch (e) {}
+    $("placeSub").textContent = kind + " · " + META.sidos[state.dong[1]] + " " + state.dong[2] + " " + state.dong[3];
+    $("placeName").textContent = title;
+    analyze();
+    if (scroll) $("report").scrollIntoView({ behavior: "smooth", block: "start" });
+  }
+  function nearestDong(lat, lon) {
+    var best = null, bd = 1e12;
+    for (var i = 0; i < DB.length; i++) { var d = DB[i]; if (d[4] == null) continue; var m = meters(lat, lon, d[4], d[5]); if (m < bd) { bd = m; best = d; } }
+    return best;
+  }
+
+  function analyze() {
+    var my = ++seq;
+    view.z = 1; view.lat = null; view.lon = null; state.focus = null;
+    $("mapLoading").hidden = false;
+    var R = state.r;
+    tilesFor(state.lat, state.lon, Math.max(R, 2600)).then(function (t) {
+      if (my !== seq) return;
+      lastData = t;
+      var cafes = [], grid = [], sweets = [], labels = [];
+      t.cafes.forEach(function (c) {
+        var la = c[0] / 1e5, lo = c[1] / 1e5, m = meters(state.lat, state.lon, la, lo);
+        if (m <= 2600) cafes.push({ t: "c", la: la, lo: lo, name: c[2], b: c[3], fl: c[4], addr: c[5], code: c[6], m: m, ds: c[3] < 0 && DESSERT_RX.test(c[2]) });
+      });
+      t.sweets.forEach(function (c) {
+        var la = c[0] / 1e5, lo = c[1] / 1e5, m = meters(state.lat, state.lon, la, lo);
+        if (m <= 2600) sweets.push({ t: "b", la: la, lo: lo, name: c[2], k: c[3], b: c[4], fl: c[5], addr: c[6], code: c[7], m: m });
+      });
+      t.labels.forEach(function (c) {
+        var la = c[0] / 1e5, lo = c[1] / 1e5, m = meters(state.lat, state.lon, la, lo);
+        if (m <= 2800) labels.push({ la: la, lo: lo, name: c[2], n: c[3], m: m });
+      });
+      sweets.sort(function (a, b) { return a.m - b.m; });
+      t.grid.forEach(function (g) {
+        var la = (g[0] + 0.5) / 1000, lo = (g[1] + 0.5) / 800, m = meters(state.lat, state.lon, la, lo);
+        if (m <= 2800) grid.push({ la: la, lo: lo, g: g, m: m });
+      });
+      cafes.sort(function (a, b) { return a.m - b.m; });
+      render(cafes, grid, sweets);
+      drawMap(cafes, grid, sweets, labels);
+      $("mapLoading").hidden = true;
+    });
+  }
+
+  function render(cafes, grid, sweets) {
+    var d = state.dong, R = state.r, rl = R >= 1000 ? "1km" : R + "m";
+    var inC = cafes.filter(function (c) { return c.m <= R; });
+    var inG = grid.filter(function (c) { return c.m <= R; });
+    var area = Math.PI * Math.pow(R / 1000, 2);
+    var fr = inC.filter(function (c) { return c.b >= 0; });
+    var low = inC.filter(function (c) { return LOW.indexOf(c.b) >= 0; }).length;
+    var mid = inC.filter(function (c) { return MID.indexOf(c.b) >= 0; }).length;
+    var high = inC.filter(function (c) { return HIGH.indexOf(c.b) >= 0; }).length;
+    var indie = inC.length - fr.length;
+    var stores = inG.reduce(function (a, c) { return a + c.g[2]; }, 0);
+    var cat = GRID_CATS.map(function (gc) { return inG.reduce(function (a, c) { return a + c.g[gc[1] + 2]; }, 0); });
+    var inS = sweets.filter(function (c) { return c.m <= R; });
+    var nBk = inS.filter(function (c) { return c.k === 0; }).length, nDs = inS.filter(function (c) { return c.k === 1; }).length, nTk = inS.filter(function (c) { return c.k === 2; }).length;
+    var nBkFr = inS.filter(function (c) { return c.k === 0 && c.b >= 0; }).length;
+    var nDc = inC.filter(function (c) { return c.ds; }).length;
+
+    $("kCafeLabel").textContent = "반경 " + rl + " 카페";
+    $("kCafe").innerHTML = fmt(inC.length) + "<small>곳</small>";
+    $("kCafeC").textContent = "프랜차이즈 " + (inC.length ? Math.round(fr.length / inC.length * 100) : 0) + "%" + (inC.length ? " · 가장 가까운 곳 " + fmt(inC[0].m) + "m" : "");
+    $("kFrLabel").textContent = "반경 " + rl + " 빵집·디저트";
+    $("kFr").innerHTML = fmt(inS.length) + "<small>곳</small>";
+    $("kFrC").textContent = "빵집 " + nBk + " · 디저트 " + nDs + " · 떡집 " + nTk + (nDc ? " · 디저트 카페 " + nDc : "");
+    $("kStoreLabel").textContent = "반경 " + rl + " 전체 가게";
+    $("kStore").innerHTML = fmt(stores) + "<small>곳</small>";
+    $("kStoreC").textContent = "카페 1곳당 가게 " + (inC.length ? (stores / inC.length).toFixed(0) : "-") + "곳";
+
+    // 동 단위 지표
+    var per = d[13] ? d[8] / d[13] * 1000 : null;
+    var sg = sggStats(d[1], d[2]);
+    var sgPer = sg.pop ? sg.cafes / sg.pop * 1000 : null;
+    $("kPer").innerHTML = per == null ? "-" : per.toFixed(1) + "<small>곳</small>";
+    var kc = $("kPerC");
+    if (per == null) { kc.className = "c hint"; kc.textContent = "주민 통계 없음"; }
+    else {
+      var diff = per / NAT.per - 1;
+      kc.className = "c " + (diff > 0.15 ? "up" : diff < -0.15 ? "down" : "flat");
+      kc.textContent = "전국 " + NAT.per.toFixed(1) + " · " + d[2] + " " + (sgPer ? sgPer.toFixed(1) : "-") + (state.custom ? " (" + d[3] + " 기준)" : "");
+    }
+
+    // 상권 성격
+    var tags = [];
+    var shares = {};
+    GRID_CATS.forEach(function (gc, i) { shares[gc[0]] = stores ? cat[i] / stores : 0; });
+    var ratio = function (name, majIdx) { return NAT.share[majIdx] ? shares[name] / NAT.share[majIdx] : 0; };
+    var storesPerRes = d[13] ? d[6] / d[13] * 1000 : 999;
+    if (stores >= 80) {
+      if (ratio("사무실", 3) >= 1.6) tags.push(["오피스 상권", 1]);
+      if (ratio("음식", 0) >= 1.2) tags.push(["먹자 상권", 0]);
+      if (ratio("교육·학원", 4) >= 1.6) tags.push(["학원가", 0]);
+      if (ratio("병원·약국", 9) >= 1.7) tags.push(["병원가", 0]);
+      if (ratio("숙박", 8) >= 2.2) tags.push(["관광·숙박", 1]);
+      if (ratio("소매", 1) >= 1.35) tags.push(["시장·소매 상권", 0]);
+    }
+    if (storesPerRes < NAT.storesPerRes * 0.6) tags.unshift(["주거 중심 동네", 0]);
+    else if (storesPerRes > NAT.storesPerRes * 2.5) tags.unshift(["유입 인구가 많은 동네", 1]);
+    if (stores < 80) tags.push(["가게가 적은 곳", 0]);
+    if (!tags.length) tags.push(["생활 밀착형", 0]);
+    var tg = $("tags"); tg.innerHTML = "";
+    tags.slice(0, 4).forEach(function (t) { var s = document.createElement("span"); s.className = "tag" + (t[1] ? " roast" : ""); s.textContent = t[0]; tg.appendChild(s); });
+
+    // 한 줄 요약과 포인트
+    var outside = tags.some(function (t) { return t[1]; });
+    var title, pts = [];
+    var density = inC.length / area;
+    if (per != null && !outside) {
+      if (per < NAT.per * 0.75) title = density > 60 ? "카페는 많아 보여도 주민 수에 비하면 적은 편입니다" : "주민에 비해 카페가 적은 편입니다";
+      else if (per > NAT.per * 1.4 || density > 80) title = "이미 카페가 빽빽한 동네입니다";
+      else title = "카페 수는 전국 평균 수준입니다";
+    } else {
+      title = density > 80 ? "오가는 사람이 많고 카페도 빽빽합니다" : "주민보다 오가는 사람을 봐야 하는 동네입니다";
+    }
+    if (per != null) pts.push(d[3] + " 주민 " + fmt(d[13]) + "명에 카페 " + fmt(d[8]) + "곳, 1곳당 " + fmt(d[13] / Math.max(1, d[8])) + "명입니다. 전국 평균은 " + fmt(1000 / NAT.per) + "명입니다.");
+    if (low >= 3) pts.push("반경 안에 저가 프랜차이즈가 " + low + "곳 있습니다. 아메리카노 가격으로 붙으면 힘들어요. 디저트나 시그니처 음료로 차별화가 필요합니다.");
+    else if (low === 0 && inC.length >= 5) pts.push("반경 안에 저가 프랜차이즈가 없습니다. 테이크아웃 가성비 수요가 비어 있을 수 있어요.");
+    if (high >= 2) pts.push("스타벅스·투썸 같은 프리미엄 매장이 " + high + "곳 있어 객단가 높은 손님이 다니는 길입니다.");
+    if (inC.length && indie / inC.length >= 0.75) pts.push("카페 " + Math.round(indie / inC.length * 100) + "%가 개인 카페입니다. 원두 맛과 공간으로 경쟁하는 동네예요.");
+    if (nBk >= 5) pts.push("빵집이 " + nBk + "곳(프랜차이즈 " + nBkFr + ")이나 됩니다. 베이커리 메뉴보다 음료 완성도로 승부하는 편이 낫습니다.");
+    else if (nBk === 0 && inC.length >= 3) pts.push("반경 안에 빵집이 없습니다. 구움과자·베이커리를 같이 내면 아침·간식 수요를 잡을 수 있어요.");
+    if (nDc >= 5) pts.push("이름에 디저트·케이크·베이커리가 들어간 카페가 " + nDc + "곳 있어 디저트 경쟁이 셉니다.");
+    var hh = d[14] ? d[13] / d[14] : 0;
+    if (hh && hh < 1.75) pts.push("세대당 " + hh.toFixed(2) + "명으로 1~2인 가구가 많습니다. 아침 테이크아웃과 소용량 디저트가 맞습니다.");
+    else if (hh >= 2.4) pts.push("세대당 " + hh.toFixed(2) + "명으로 가족 단위 동네입니다. 주말 매장 체류형 손님을 생각해 보세요.");
+    if (outside) pts.push("주민 수보다 직장인·방문객이 매출을 좌우합니다. 평일 점심과 주말 유동인구를 직접 세어 보세요.");
+    $("sumTitle").textContent = title;
+    var pl = $("points"); pl.innerHTML = "";
+    pts.slice(0, 5).forEach(function (p) { var li = document.createElement("li"); li.textContent = p; pl.appendChild(li); });
+
+    // 카페 구성 막대
+    $("mixLabel").textContent = "반경 " + rl + " 카페 " + fmt(inC.length) + "곳 구성";
+    var mixParts = [["저가 프랜차이즈", low, "var(--roast)"], ["중가", mid, "var(--warn)"], ["프리미엄", high, "var(--ink)"], ["개인 카페", indie, "var(--signal)"]];
+    var mix = $("mix"), ml = $("mixLegend"); mix.innerHTML = ""; ml.innerHTML = "";
+    mixParts.forEach(function (m) {
+      if (inC.length && m[1]) { var i = document.createElement("i"); i.style.width = (m[1] / inC.length * 100) + "%"; i.style.background = m[2]; i.title = m[0] + " " + m[1]; mix.appendChild(i); }
+      var s = document.createElement("span"); s.style.setProperty("--c", m[2]); s.textContent = m[0] + " " + m[1]; ml.appendChild(s);
+    });
+    // 브랜드 상위
+    var bc = {}; fr.forEach(function (c) { bc[c.b] = (bc[c.b] || 0) + 1; });
+    var top = Object.keys(bc).sort(function (a, b) { return bc[b] - bc[a]; }).slice(0, 5).map(function (k) { return BRANDS[k] + " " + bc[k]; });
+    if (top.length) { var s2 = document.createElement("span"); s2.className = "hint"; s2.style.width = "100%"; s2.textContent = "브랜드: " + top.join(", "); ml.appendChild(s2); }
+    var sbc = {}; inS.forEach(function (c) { if (c.b >= 0) sbc[c.b] = (sbc[c.b] || 0) + 1; });
+    var stop = Object.keys(sbc).sort(function (a, b) { return sbc[b] - sbc[a]; }).map(function (k) { return SBRANDS[k] + " " + sbc[k]; });
+    var s3 = document.createElement("span"); s3.className = "hint"; s3.style.width = "100%";
+    s3.textContent = "빵집 " + nBk + "곳" + (nBk ? " (개인 " + (nBk - nBkFr) + ")" : "") + " · 디저트 " + nDs + " · 떡집 " + nTk + (stop.length ? " · " + stop.join(", ") : "");
+    ml.appendChild(s3);
+
+    // 업종 막대
+    $("barsLabel").textContent = "반경 " + rl + " 가게 구성 (검은 선은 전국 평균)";
+    var bars = $("bars"); bars.innerHTML = "";
+    var maxS = 0.6;
+    GRID_CATS.forEach(function (gc, i) {
+      var sh = stores ? cat[i] / stores : 0, ns = NAT.share[gc[2]];
+      var row = document.createElement("div"); row.className = "bar-row";
+      var a = document.createElement("span"); a.textContent = gc[0];
+      var tr = document.createElement("div"); tr.className = "bar-track";
+      var f = document.createElement("i"); f.style.width = Math.min(100, sh / maxS * 100) + "%";
+      var nm = document.createElement("b"); nm.style.left = Math.min(100, ns / maxS * 100) + "%";
+      tr.appendChild(f); tr.appendChild(nm);
+      var r = document.createElement("span"); r.className = "r"; r.textContent = Math.round(sh * 100) + "% · " + fmt(cat[i]);
+      row.appendChild(a); row.appendChild(tr); row.appendChild(r); bars.appendChild(row);
+    });
+
+    // 가까운 카페 목록
+    state.near = inC.concat(inS).sort(function (a, b) { return a.m - b.m; });
+    renderNear();
+    renderMapLinks();
+    $("nearTitle").textContent = "반경 " + rl + " 카페·빵집·디저트 " + fmt(state.near.length) + "곳";
+    var nIndie = inC.filter(function (c) { return c.b < 0; }).length;
+    var counts = { all: state.near.length, indie: nIndie, fr: inC.length - nIndie, dc: nDc, bk: nBk, sw: nDs + nTk };
+    var names = { all: "전체", indie: "개인 카페", fr: "프랜차이즈 카페", dc: "디저트 카페", bk: "빵집", sw: "디저트·떡집" };
+    [].forEach.call(document.querySelectorAll("#nearSeg button"), function (b) { b.textContent = names[b.dataset.f] + " " + fmt(counts[b.dataset.f]); });
+
+    // 옆 동네
+    var nb = DB.filter(function (x) { return x[4] != null && meters(state.lat, state.lon, x[4], x[5]) <= 3000; })
+      .map(function (x) { return { d: x, m: meters(state.lat, state.lon, x[4], x[5]) }; })
+      .sort(function (a, b) { return a.m - b.m; }).slice(0, 14);
+    var body = $("nbBody"); body.innerHTML = "";
+    nb.forEach(function (o) {
+      var x = o.d, tr = document.createElement("tr"); tr.className = "clickable" + (x === d ? " me" : "");
+      tr.addEventListener("click", function () { q.value = shortSido(META.sidos[x[1]]) + " " + x[2] + " " + x[3]; openDong(x, true); });
+      var td = document.createElement("td"); td.textContent = x[3];
+      if (x[2] !== d[2]) { var sm = document.createElement("span"); sm.className = "small-muted"; sm.textContent = x[2]; td.appendChild(sm); }
+      tr.appendChild(td);
+      [fmt(x[8]), fmt(x[13]), x[8] && x[13] ? fmt(x[13] / x[8]) + "명" : "-"].forEach(function (v) { var c = document.createElement("td"); c.className = "r"; c.textContent = v; tr.appendChild(c); });
+      body.appendChild(tr);
+    });
+    var roads = d[12] || [];
+    $("roadsNote").textContent = roads.length ? d[3] + "에서 카페가 많은 길: " + roads.map(function (r) { return r[0] + " " + r[1] + "곳"; }).join(", ") : "";
+
+    lastReport = { name: state.station ? stationLabel(state.station) : state.place || d[3], d: d, R: R, inC: inC.length, fr: fr.length, low: low, stores: stores, per: per };
+  }
+  var lastReport = null;
+
+  function dotColorVar(c) { return c.t === "c" ? (c.b >= 0 ? "var(--roast)" : "var(--signal)") : c.k === 0 ? "var(--amber)" : "var(--berry)"; }
+  var NAVER = "#03C75A", KAKAO = "#F2C200", GOOGLE = "#4285F4";
+  function enc(x) { return encodeURIComponent(x); }
+  function linksFor(name, lat, lon, query) {
+    return [
+      ["네이버지도", "N", NAVER, "https://map.naver.com/p/search/" + enc(query)],
+      ["카카오맵", "K", KAKAO, "https://map.kakao.com/link/map/" + enc(name.replace(/,/g, " ")) + "," + lat + "," + lon],
+      ["구글지도", "G", GOOGLE, "https://www.google.com/maps/search/?api=1&query=" + enc(query)]
+    ];
+  }
+  function renderMapLinks() {
+    var box = $("mapLinks"); box.innerHTML = "";
+    var d = state.dong;
+    var place = state.station ? stationLabel(state.station) : state.place ? state.place : d[2] + " " + d[3];
+    var lab = document.createElement("span"); lab.textContent = place + " 주변 카페를"; box.appendChild(lab);
+    [
+      ["네이버지도", NAVER, "https://map.naver.com/p/search/" + enc(place + " 카페")],
+      ["카카오맵", KAKAO, "https://map.kakao.com/link/search/" + enc(place + " 카페")],
+      ["구글지도", GOOGLE, "https://www.google.com/maps/search/" + enc("카페") + "/@" + state.lat.toFixed(6) + "," + state.lon.toFixed(6) + ",16z"]
+    ].forEach(function (l) {
+      var a = document.createElement("a"); a.className = "mapbtn"; a.href = l[2]; a.target = "_blank"; a.rel = "noopener";
+      var i = document.createElement("i"); i.style.background = l[1]; a.appendChild(i); a.appendChild(document.createTextNode(l[0]));
+      box.appendChild(a);
+    });
+    var tail = document.createElement("span"); tail.textContent = "에서 보기"; box.appendChild(tail);
+  }
+  function focusShop(c) {
+    state.focus = c;
+    view.z = 5; view.lat = c.la; view.lon = c.lo;
+    if (window.OCMAP && window.OCMAP.ready && window.OCMAP.focus) window.OCMAP.focus(c); else redrawNow();
+    renderNear();
+    var box = document.querySelector(".map-box"), r = box.getBoundingClientRect();
+    if (r.top < 0 || r.bottom > (window.innerHeight || 800)) box.scrollIntoView({ behavior: "smooth", block: "center" });
+  }
+  function renderNear() {
+    var body = $("nearBody"); body.innerHTML = "";
+    var f = state.nearFilter;
+    var all = state.near.filter(function (c) {
+      if (f === "all") return true;
+      if (f === "indie") return c.t === "c" && c.b < 0;
+      if (f === "fr") return c.t === "c" && c.b >= 0;
+      if (f === "dc") return c.t === "c" && c.ds;
+      if (f === "bk") return c.t === "b" && c.k === 0;
+      return c.t === "b" && c.k > 0;
+    });
+    var list = all.slice(0, state.nearShown);
+    if (!list.length) { var tr0 = document.createElement("tr"); var td0 = document.createElement("td"); td0.colSpan = 3; td0.className = "hint"; td0.textContent = "이 반경에는 해당하는 가게가 없습니다."; tr0.appendChild(td0); body.appendChild(tr0); }
+    list.forEach(function (c) {
+      var tr = document.createElement("tr"); tr.className = "clickable" + (state.focus === c ? " me" : ""); tr.title = "지도에서 크게 보기";
+      tr.addEventListener("click", function () { focusShop(c); });
+      var td = document.createElement("td");
+      var dot = document.createElement("span"); dot.className = "brand-dot"; dot.style.background = dotColorVar(c);
+      if (c.t === "b") dot.style.borderRadius = "2px";
+      td.appendChild(dot); td.appendChild(document.createTextNode(c.name));
+      var ml = document.createElement("span"); ml.className = "minilinks";
+      var dd = CODE[c.code], sgg = dd ? dd[2] : "";
+      linksFor(c.name, c.la, c.lo, c.name + " " + sgg + " " + c.addr).forEach(function (l) {
+        var a = document.createElement("a"); a.href = l[3]; a.target = "_blank"; a.rel = "noopener"; a.textContent = l[1]; a.title = l[0] + "에서 보기"; a.setAttribute("aria-label", c.name + " " + l[0] + "에서 보기");
+        a.addEventListener("click", function (ev) { ev.stopPropagation(); });
+        ml.appendChild(a);
+      });
+      td.appendChild(ml);
+      var kind = c.t === "c" ? (c.b >= 0 ? BRANDS[c.b] : c.ds ? "디저트 카페" : "개인 카페") : SKIND[c.k] + (c.b >= 0 ? " · " + SBRANDS[c.b] : "");
+      var sm = document.createElement("span"); sm.className = "small-muted"; sm.textContent = kind + " · " + c.addr; td.appendChild(sm);
+      tr.appendChild(td);
+      var a = document.createElement("td"); a.className = "r"; a.textContent = fmt(c.m) + "m"; tr.appendChild(a);
+      var f = document.createElement("td"); f.className = "r"; f.textContent = c.fl === "지" ? "지하" : c.fl ? c.fl + "층" : "-"; tr.appendChild(f);
+      body.appendChild(tr);
+    });
+    var more = $("nearMore");
+    more.hidden = all.length <= state.nearShown;
+    more.textContent = "더 보기 (" + fmt(all.length - state.nearShown) + "곳 남음)";
+  }
+  [].forEach.call(document.querySelectorAll("#nearSeg button"), function (b) {
+    b.addEventListener("click", function () {
+      state.nearFilter = b.dataset.f; state.nearShown = 300;
+      [].forEach.call(document.querySelectorAll("#nearSeg button"), function (x) { x.setAttribute("aria-pressed", String(x === b)); });
+      renderNear();
+    });
+  });
+  $("nearMore").addEventListener("click", function () { state.nearShown += 300; renderNear(); });
+
+  function sggCache() {
+    if (sggCache.m) return sggCache.m;
+    var m = {};
+    DB.forEach(function (d) { var k = d[1] + "|" + d[2]; var o = m[k] || (m[k] = { cafes: 0, pop: 0, n: 0, dongs: [] }); o.cafes += d[8]; o.pop += d[13]; o.n += d[6]; o.dongs.push(d); });
+    return (sggCache.m = m);
+  }
+  function sggStats(s, g) { return sggCache()[s + "|" + g] || { cafes: 0, pop: 0 }; }
+
+  /* ---------------- 지도 ---------------- */
+  var mapCv = $("localMap"), mapView = null, lastDraw = null, view = { z: 1, lat: null, lon: null };
+  function redrawNow() { if (lastDraw) drawMap(lastDraw[0], lastDraw[1], lastDraw[2], lastDraw[3]); }
+  function drawMap(cafes, grid, sweets, labels) {
+    sweets = sweets || []; labels = labels || [];
+    lastDraw = [cafes, grid, sweets, labels];
+    if (window.OCMAP && window.OCMAP.ready) { window.OCMAP.draw(state, cafes, sweets, ST); return; }
+    var rect = mapCv.getBoundingClientRect(); if (!rect.width) return;
+    var dpr = window.devicePixelRatio || 1, W = rect.width, H = rect.height;
+    mapCv.width = Math.round(W * dpr); mapCv.height = Math.round(H * dpr);
+    var ctx = mapCv.getContext("2d"); ctx.setTransform(dpr, 0, 0, dpr, 0, 0); ctx.clearRect(0, 0, W, H);
+    var half = Math.max(650, state.r * 1.3) / view.z;
+    var s = Math.min(W, H) / 2 / half; // px per m
+    var cLat = view.lat == null ? state.lat : view.lat, cLon = view.lon == null ? state.lon : view.lon;
+    var cosv = Math.cos(cLat * Math.PI / 180);
+    var X = function (lo) { return W / 2 + (lo - cLon) * 111320 * cosv * s; };
+    var Y = function (la) { return H / 2 - (la - cLat) * 110540 * s; };
+    mapView = { s: s, cosv: cosv, W: W, H: H, lat: cLat, lon: cLon };
+    var PX = X(state.lon), PY = Y(state.lat);
+    var cw = 0.00125 * 111320 * cosv * s, ch = 0.001 * 110540 * s;
+    ctx.fillStyle = token("--muted");
+    grid.forEach(function (c) {
+      var n = c.g[2]; ctx.globalAlpha = Math.min(0.7, 0.06 + 0.64 * Math.log(1 + n) / Math.log(1 + 300));
+      ctx.fillRect(X(c.g[1] / 800), Y((c.g[0] + 1) / 1000), cw + 0.5, ch + 0.5);
+    });
+    ctx.globalAlpha = 1;
+    // 반경
+    ctx.beginPath(); ctx.arc(PX, PY, state.r * s, 0, Math.PI * 2);
+    ctx.fillStyle = token("--signal"); ctx.globalAlpha = 0.07; ctx.fill(); ctx.globalAlpha = 1;
+    ctx.setLineDash([6, 5]); ctx.strokeStyle = token("--signal"); ctx.lineWidth = 2; ctx.stroke(); ctx.setLineDash([]);
+    // 카페
+    var paper = token("--sheet");
+    cafes.forEach(function (c) {
+      var x = X(c.lo), y = Y(c.la); if (x < -5 || y < -5 || x > W + 5 || y > H + 5) return;
+      ctx.beginPath(); ctx.arc(x, y, c.b >= 0 ? 4.2 : 3.4, 0, Math.PI * 2);
+      ctx.fillStyle = c.b >= 0 ? token("--roast") : token("--signal");
+      ctx.globalAlpha = c.m <= state.r ? 1 : 0.35; ctx.fill();
+      ctx.globalAlpha = 1; ctx.lineWidth = 1; ctx.strokeStyle = paper; ctx.stroke();
+    });
+    sweets.forEach(function (c) {
+      var x = X(c.lo), y = Y(c.la); if (x < -5 || y < -5 || x > W + 5 || y > H + 5) return;
+      ctx.fillStyle = c.k === 0 ? token("--amber") : token("--berry");
+      ctx.globalAlpha = c.m <= state.r ? 1 : 0.35;
+      ctx.fillRect(x - 3.2, y - 3.2, 6.4, 6.4);
+      ctx.globalAlpha = 1; ctx.lineWidth = 1; ctx.strokeStyle = paper; ctx.strokeRect(x - 3.2, y - 3.2, 6.4, 6.4);
+    });
+    // 이름표: 지하철역과 큰 건물
+    var placed = [];
+    function free(x, y, w, h) { for (var i = 0; i < placed.length; i++) { var p = placed[i]; if (x < p[0] + p[2] && x + w > p[0] && y < p[1] + p[3] && y + h > p[1]) return false; } return true; }
+    function label(x, y, text, strong) {
+      ctx.font = (strong ? "700 12px " : "600 11px ") + token("--font-body");
+      var w = ctx.measureText(text).width + 10, h = strong ? 20 : 18, lx = x - w / 2, ly = y - h - 6;
+      if (lx < 2 || ly < 2 || lx + w > W - 2 || !free(lx, ly, w, h)) return;
+      placed.push([lx, ly, w, h]);
+      ctx.globalAlpha = 0.92; ctx.fillStyle = strong ? token("--ink") : paper; ctx.fillRect(lx, ly, w, h); ctx.globalAlpha = 1;
+      if (!strong) { ctx.strokeStyle = token("--line"); ctx.lineWidth = 1; ctx.strokeRect(lx, ly, w, h); }
+      ctx.fillStyle = strong ? paper : token("--ink"); ctx.textBaseline = "middle"; ctx.fillText(text, lx + 5, ly + h / 2 + 0.5); ctx.textBaseline = "alphabetic";
+    }
+    ST.forEach(function (st) {
+      var x = X(st[3]), y = Y(st[2]); if (x < 0 || y < 0 || x > W || y > H) return;
+      ctx.fillStyle = token("--ink"); ctx.beginPath(); ctx.arc(x, y, 5, 0, Math.PI * 2); ctx.fill();
+      ctx.fillStyle = paper; ctx.beginPath(); ctx.arc(x, y, 2.2, 0, Math.PI * 2); ctx.fill();
+      label(x, y, st[0] + "역", true);
+    });
+    labels.slice().sort(function (a, b) { return b.n - a.n; }).slice(0, 40).forEach(function (b) {
+      var x = X(b.lo), y = Y(b.la); if (x < 0 || y < 0 || x > W || y > H) return;
+      if (placed.length > 14) return;
+      ctx.fillStyle = token("--muted"); ctx.fillRect(x - 2, y - 2, 4, 4);
+      label(x, y, b.name, false);
+    });
+    // 중심
+    ctx.strokeStyle = token("--ink"); ctx.lineWidth = 2;
+    ctx.beginPath(); ctx.moveTo(PX - 9, PY); ctx.lineTo(PX + 9, PY); ctx.moveTo(PX, PY - 9); ctx.lineTo(PX, PY + 9); ctx.stroke();
+    // 고른 가게 강조
+    if (state.focus) {
+      var fc = state.focus, fx = X(fc.lo), fy = Y(fc.la);
+      ctx.strokeStyle = token("--ink"); ctx.lineWidth = 3; ctx.beginPath(); ctx.arc(fx, fy, 11, 0, Math.PI * 2); ctx.stroke();
+      ctx.strokeStyle = paper; ctx.lineWidth = 1.5; ctx.beginPath(); ctx.arc(fx, fy, 13.5, 0, Math.PI * 2); ctx.stroke();
+      ctx.font = "700 13px " + token("--font-body");
+      var tw = ctx.measureText(fc.name).width + 14, tx = Math.max(4, Math.min(W - tw - 4, fx - tw / 2)), ty = Math.max(4, fy - 44);
+      ctx.fillStyle = token("--ink"); ctx.fillRect(tx, ty, tw, 24);
+      ctx.fillStyle = paper; ctx.textBaseline = "middle"; ctx.fillText(fc.name, tx + 7, ty + 12.5); ctx.textBaseline = "alphabetic";
+    }
+    // 축척
+    var bar = [50, 100, 200, 500, 1000].filter(function (v) { return v * s <= W * 0.3; }).pop() || 50, bx = 12, by = H - 14;
+    ctx.fillStyle = token("--ink"); ctx.fillRect(bx, by, bar * s, 3);
+    ctx.font = "600 11px " + token("--font-data"); ctx.fillText(bar >= 1000 ? "1km" : bar + "m", bx, by - 6);
+  }
+  window.OC_pickAt = function (lat, lon) { if (!DB) return; state.lat = lat; state.lon = lon; pickHere(); };
+  window.OC_kind = function (c) { return c.t === "c" ? (c.b >= 0 ? BRANDS[c.b] : c.ds ? "디저트 카페" : "개인 카페") : SKIND[c.k] + (c.b >= 0 ? " · " + SBRANDS[c.b] : ""); };
+  window.OC_links = function (c) { var dd = CODE[c.code]; return linksFor(c.name, c.la, c.lo, c.name + " " + (dd ? dd[2] : "") + " " + c.addr); };
+  window.OC_redraw = function () { if (lastDraw) drawMap(lastDraw[0], lastDraw[1], lastDraw[2], lastDraw[3]); };
+  function pxToLatLon(cx, cy) {
+    var r = mapCv.getBoundingClientRect();
+    var dx = (cx - r.left - mapView.W / 2) / mapView.s, dy = (cy - r.top - mapView.H / 2) / mapView.s;
+    return [mapView.lat - dy / 110540, mapView.lon + dx / (111320 * mapView.cosv)];
+  }
+  function zoomAt(f, cx, cy) {
+    if (!mapView) return;
+    var nz = Math.max(0.5, Math.min(8, view.z * f)); if (nz === view.z) return;
+    var r = mapCv.getBoundingClientRect();
+    if (cx == null) { cx = r.left + r.width / 2; cy = r.top + r.height / 2; }
+    var ll = pxToLatLon(cx, cy), k = view.z / nz;
+    // 커서 아래 지점이 그대로 있도록 중심을 옮김
+    view.lat = ll[0] + (mapView.lat - ll[0]) * k; view.lon = ll[1] + (mapView.lon - ll[1]) * k;
+    view.z = nz; redrawNow();
+  }
+  mapCv.addEventListener("wheel", function (e) { e.preventDefault(); zoomAt(e.deltaY < 0 ? 1.2 : 1 / 1.2, e.clientX, e.clientY); }, { passive: false });
+  var drag = null;
+  mapCv.addEventListener("pointerdown", function (e) { if (!mapView) return; drag = { x: e.clientX, y: e.clientY, lat: mapView.lat, lon: mapView.lon, moved: false }; try { mapCv.setPointerCapture(e.pointerId); } catch (er) {} });
+  mapCv.addEventListener("pointermove", function (e) {
+    if (!drag) return;
+    var dx = e.clientX - drag.x, dy = e.clientY - drag.y;
+    if (!drag.moved && Math.abs(dx) + Math.abs(dy) < 6) return;
+    drag.moved = true; mapCv.style.cursor = "grabbing";
+    view.lat = drag.lat + dy / mapView.s / 110540; view.lon = drag.lon - dx / mapView.s / (111320 * mapView.cosv);
+    redrawNow();
+  });
+  mapCv.addEventListener("pointerup", function (e) {
+    var d = drag; drag = null; mapCv.style.cursor = "";
+    if (!d || d.moved || !DB) return;
+    var ll = pxToLatLon(e.clientX, e.clientY);
+    state.lat = ll[0]; state.lon = ll[1];
+    pickHere();
+  });
+  function pickHere() {
+    var nd = nearestDong(state.lat, state.lon);
+    if (nd) state.dong = nd;
+    state.custom = true; state.station = null; state.place = null; state.nearShown = 300;
+    $("placeSub").textContent = META.sidos[state.dong[1]] + " " + state.dong[2] + " · 지도에서 고른 자리";
+    $("placeName").textContent = state.dong[3] + " 부근";
+    analyze();
+  }
+  var rt;
+  function redraw() { clearTimeout(rt); rt = setTimeout(function () { if (lastDraw) drawMap(lastDraw[0], lastDraw[1], lastDraw[2], lastDraw[3]); }, 80); }
+  window.addEventListener("resize", redraw);
+  $("zIn").addEventListener("click", function () { zoomAt(1.5); });
+  $("zOut").addEventListener("click", function () { zoomAt(1 / 1.5); });
+  $("zReset").addEventListener("click", function () { view.z = 1; view.lat = null; view.lon = null; redrawNow(); });
+  try { window.matchMedia("(prefers-color-scheme: dark)").addEventListener("change", redraw); } catch (e) {}
+  new MutationObserver(redraw).observe(document.documentElement, { attributes: true, attributeFilter: ["data-theme"] });
+
+  function setRadius(r) {
+    state.r = r; state.nearShown = 300;
+    try { localStorage.setItem("oc-r", String(r)); } catch (e) {}
+    [].forEach.call(document.querySelectorAll("#radiusSeg button"), function (b) { b.setAttribute("aria-pressed", String(+b.dataset.r === r)); });
+    if (state.dong) analyze();
+  }
+  [].forEach.call(document.querySelectorAll("#radiusSeg button"), function (b) { b.addEventListener("click", function () { setRadius(+b.dataset.r); }); });
+  setRadius(state.r);
+
+  $("toCalc").addEventListener("click", function () {
+    var d = state.dong; if (!d) return;
+    $("place").value = state.place ? state.place + " 주변 (" + d[2] + " " + d[3] + ")" : state.station ? stationLabel(state.station) + " 주변 (" + d[2] + " " + d[3] + ")" : META.sidos[d[1]].slice(0, 2) + " " + d[2] + " " + d[3] + (state.custom ? " 부근" : "");
+    $("cafes").value = d[8];
+    $("resident").value = d[13];
+    calcInput();
+    $("calc").scrollIntoView({ behavior: "smooth", block: "start" });
+  });
+
+  /* ---------------- 지역 비교 표 ---------------- */
+  var sidoSel = $("sidoSel"), sggSel = $("sggSel"), sortSel = $("sortSel");
+  function fillSido() {
+    var o = document.createElement("option"); o.value = ""; o.textContent = "전국 시·도"; sidoSel.appendChild(o);
+    META.sidos.forEach(function (s, i) { var e = document.createElement("option"); e.value = String(i); e.textContent = s; sidoSel.appendChild(e); });
+  }
+  function fillSgg() {
+    sggSel.innerHTML = "";
+    var o = document.createElement("option"); o.value = ""; o.textContent = "시·군·구 전체"; sggSel.appendChild(o);
+    sggSel.disabled = sidoSel.value === "";
+    if (sidoSel.value === "") return;
+    Object.keys(sggCache()).filter(function (k) { return k.split("|")[0] === sidoSel.value; }).map(function (k) { return k.split("|")[1]; }).sort()
+      .forEach(function (g) { var e = document.createElement("option"); e.value = g; e.textContent = g; sggSel.appendChild(e); });
+  }
+  function renderTable() {
+    var rows = [], m = sggCache(), level;
+    if (sidoSel.value === "") {
+      level = "sido";
+      META.sidos.forEach(function (s, i) {
+        var r = { name: s, cafes: 0, pop: 0, key: String(i) };
+        Object.keys(m).forEach(function (k) { if (k.split("|")[0] === String(i)) { r.cafes += m[k].cafes; r.pop += m[k].pop; } });
+        rows.push(r);
+      });
+    } else if (sggSel.value === "") {
+      level = "sgg";
+      Object.keys(m).filter(function (k) { return k.split("|")[0] === sidoSel.value; }).forEach(function (k) { rows.push({ name: k.split("|")[1], cafes: m[k].cafes, pop: m[k].pop, key: k.split("|")[1] }); });
+    } else {
+      level = "dong";
+      (m[sidoSel.value + "|" + sggSel.value] || { dongs: [] }).dongs.forEach(function (d) { rows.push({ name: d[3], cafes: d[8], pop: d[13], d: d }); });
+    }
+    rows.forEach(function (r) { r.per = r.cafes ? r.pop / r.cafes : 0; });
+    var mode = sortSel.value;
+    rows.sort(function (a, b) { return mode === "per" ? b.per - a.per : mode === "perAsc" ? a.per - b.per : b.cafes - a.cafes; });
+    var body = $("rtBody"); body.innerHTML = "";
+    rows.forEach(function (r) {
+      var tr = document.createElement("tr"); tr.className = "clickable";
+      tr.addEventListener("click", function () {
+        if (level === "sido") { sidoSel.value = r.key; fillSgg(); save(); renderTable(); }
+        else if (level === "sgg") { sggSel.value = r.key; save(); renderTable(); }
+        else { q.value = shortSido(META.sidos[r.d[1]]) + " " + r.d[2] + " " + r.d[3]; openDong(r.d, true); }
+      });
+      var td = document.createElement("td"); td.textContent = r.name; tr.appendChild(td);
+      [fmt(r.cafes), fmt(r.pop), r.per ? fmt(r.per) + "명" : "-"].forEach(function (v) { var c = document.createElement("td"); c.className = "r"; c.textContent = v; tr.appendChild(c); });
+      body.appendChild(tr);
+    });
+    $("rtNote").textContent = (level === "dong" ? "동을 누르면 위에서 분석합니다. " : level === "sgg" ? "시·군·구를 누르면 동별로 봅니다. " : "시·도를 누르면 시·군·구별로 봅니다. ") +
+      "전국 평균은 카페 1곳당 주민 " + fmt(1000 / NAT.per) + "명입니다.";
+  }
+  function save() { try { localStorage.setItem("oc-region", sidoSel.value + "|" + sggSel.value); } catch (e) {} }
+  sidoSel.addEventListener("change", function () { fillSgg(); save(); renderTable(); });
+  sggSel.addEventListener("change", function () { save(); renderTable(); });
+  sortSel.addEventListener("change", renderTable);
+
+  /* ---------------- 계산기 ---------------- */
+  var calcIds = ["place","cafes","flow","resident","worker","rent","labor","etc","days","price","cost","save"];
+  var el = {}; calcIds.forEach(function (id) { el[id] = $(id); });
+  function num(id) { var v = parseFloat(String(el[id].value).replace(/[^0-9.\-]/g, "")); return isFinite(v) ? v : 0; }
+  function won(n) { return Math.round(n).toLocaleString("ko-KR") + "원"; }
+  function manwon(n) { var m = n / 10000; if (m >= 10000) return (m / 10000).toFixed(1).replace(/\.0$/, "") + "억원"; return Math.round(m).toLocaleString("ko-KR") + "만원"; }
+  function clamp(v) { return Math.max(0, Math.min(100, v)); }
+  function lerp(x, x0, y0, x1, y1) { return y0 + (y1 - y0) * (x - x0) / (x1 - x0); }
+  function profitScore(c) { if (c <= 0.005) return 100; if (c <= 0.01) return lerp(c, 0.005, 100, 0.01, 75); if (c <= 0.02) return lerp(c, 0.01, 75, 0.02, 40); if (c <= 0.03) return lerp(c, 0.02, 40, 0.03, 10); return 5; }
+  function tone(s) { return s >= 70 ? "good" : s >= 45 ? "warn" : "bad"; }
+  function setBar(id, s) { var b = $(id); b.style.width = clamp(s) + "%"; b.className = tone(s); }
+  var lastCalc = null;
+  function compute() {
+    var r = {}, natPer = NAT.perCafe || 414;
+    r.cafes = Math.max(0, num("cafes")); r.pop = Math.max(0, num("resident")) + Math.max(0, num("worker")); r.flow = Math.max(0, num("flow"));
+    r.fixed = (num("rent") + num("labor") + num("etc")) * 10000; r.days = Math.max(1, num("days"));
+    r.price = num("price"); r.cost = num("cost"); r.margin = r.price - r.cost;
+    r.perCafe = r.pop / (r.cafes + 1); r.natPer = natPer; r.demand = clamp(r.perCafe / natPer / 2 * 100);
+    r.valid = r.margin > 0;
+    if (r.valid) {
+      r.bepCups = r.fixed / r.margin / r.days; r.bepSales = r.bepCups * r.price * r.days;
+      r.capture = r.flow > 0 ? r.bepCups / r.flow : Infinity; r.profit = isFinite(r.capture) ? profitScore(r.capture) : 0;
+      r.rentShare = r.bepSales > 0 ? num("rent") * 10000 / r.bepSales : 1; r.costScore = clamp(100 - (r.rentShare - 0.10) / 0.20 * 100);
+      var sv = Math.max(0, num("save")); r.cupsLess = r.bepCups - r.fixed / (r.margin + sv) / r.days; r.yearGain = sv * r.bepCups * r.days * 12;
+    } else { r.profit = 0; r.costScore = 0; }
+    r.total = Math.round(0.4 * r.demand + 0.4 * r.profit + 0.2 * r.costScore);
+    return r;
+  }
+  function calcRender() {
+    var r = compute(); lastCalc = r;
+    $("placeOut").textContent = el.place.value || "분석할 곳";
+    var dial = $("dialFill"); dial.style.strokeDashoffset = String(314.16 * (1 - r.total / 100));
+    dial.style.stroke = r.total >= 70 ? "var(--good)" : r.total >= 45 ? "var(--warn)" : "var(--bad)";
+    $("scoreNum").textContent = r.total;
+    var t = tone(r.total), chip = $("verdictChip"); chip.className = "chip " + t; chip.textContent = t === "good" ? "추천" : t === "warn" ? "보통" : "비추천";
+    var title = $("verdictTitle"), text = $("verdictText");
+    if (!r.valid) { title.textContent = "팔수록 손해입니다"; text.textContent = "한 잔 재료비가 판매가보다 높아요. 가격이나 재료비를 다시 봐 주세요."; }
+    else if (t === "good") { title.textContent = "해볼 만한 자리"; text.textContent = "사람도 충분하고 본전 부담도 낮습니다. 그 자리 이전 가게가 왜 나갔는지만 확인해 보세요."; }
+    else if (t === "warn") { title.textContent = "조건만 맞추면 가능"; text.textContent = "제일 짧은 막대가 약점입니다. 월세, 판매가, 원가 중 어디서 메울지 정하고 들어가세요."; }
+    else { title.textContent = "이 숫자로는 힘듭니다"; text.textContent = "카페에 비해 사람이 적거나 본전 잔수가 너무 높아요. 다른 동네도 넣어 비교해 보세요."; }
+    var ratio = r.perCafe / r.natPer;
+    $("mDemandV").textContent = fmt(r.perCafe) + "명";
+    $("mDemandN").textContent = "전국 평균(약 " + fmt(r.natPer) + "명)의 " + ratio.toFixed(1) + "배" + (ratio < 1 ? ", 카페가 많은 편" : "");
+    setBar("mDemand", r.demand);
+    if (r.valid) {
+      var pct = isFinite(r.capture) ? r.capture * 100 : Infinity;
+      $("mProfitV").textContent = isFinite(pct) ? pct.toFixed(2) + "%" : "-";
+      $("mProfitN").textContent = isFinite(pct) ? "하루 " + fmt(r.flow) + "명 지나가는데 " + fmt(Math.ceil(r.bepCups)) + "잔은 팔아야 본전" : "유동인구를 넣어 주세요";
+      setBar("mProfit", r.profit);
+      $("mCostV").textContent = (r.rentShare * 100).toFixed(1) + "%";
+      $("mCostN").textContent = r.rentShare > 0.25 ? "월세가 무거운 편" : r.rentShare > 0.15 ? "보통" : "월세 부담 적음";
+      setBar("mCost", r.costScore);
+      $("oFixed").textContent = manwon(r.fixed); $("oMargin").textContent = won(r.margin);
+      $("oBep").textContent = "하루 " + fmt(Math.ceil(r.bepCups)) + "잔"; $("oBepSales").textContent = manwon(r.bepSales);
+      var sv = Math.max(0, num("save"));
+      $("saveText").textContent = sv > 0 ? "한 잔에 " + fmt(sv) + "원만 줄여도 본전이 하루 " + r.cupsLess.toFixed(1) + "잔 내려가고, 1년이면 약 " + manwon(r.yearGain) + " 더 남습니다." : "줄이고 싶은 금액을 넣어 보세요.";
+    } else {
+      ["mProfitV","mCostV","oBep","oBepSales"].forEach(function (id) { $(id).textContent = "-"; });
+      $("oFixed").textContent = manwon(r.fixed); $("oMargin").textContent = won(r.margin);
+      $("mProfitN").textContent = ""; $("mCostN").textContent = ""; setBar("mProfit", 0); setBar("mCost", 0);
+      $("saveText").textContent = "판매가와 재료비를 먼저 확인하세요.";
+    }
+  }
+  function calcInput() { $("sampleTag").textContent = "직접 입력"; calcRender(); }
+  calcIds.forEach(function (id) { el[id].addEventListener("input", calcInput); });
+  $("form").addEventListener("submit", function (e) { e.preventDefault(); calcRender(); });
+  $("clearBtn").addEventListener("click", function () { ["place","cafes","flow","resident","worker","rent","price","cost"].forEach(function (id) { el[id].value = ""; }); $("sampleTag").textContent = "직접 입력"; el.place.focus(); calcRender(); });
+
+  var toast = $("toast");
+  function say(m) { toast.textContent = m; setTimeout(function () { toast.textContent = ""; }, 3000); }
+  function summaryText() {
+    var r = lastCalc || compute(), L = ["[원클리어 상권 계산] " + (el.place.value || "")];
+    if (lastReport) {
+      var d = lastReport.d;
+      L.push(lastReport.name + ": 반경 " + (lastReport.R >= 1000 ? "1km" : lastReport.R + "m") + " 카페 " + lastReport.inC + "곳(프랜차이즈 " + lastReport.fr + ", 저가 " + lastReport.low + ") · 가게 " + fmt(lastReport.stores) + "곳");
+      if (lastReport.per != null) L.push("주민 " + fmt(d[13]) + "명, 1천 명당 카페 " + lastReport.per.toFixed(1) + "곳 (전국 " + NAT.per.toFixed(1) + ")");
+    }
+    L.push("종합 " + r.total + "점 · " + $("verdictChip").textContent);
+    if (r.valid) { L.push("본전 하루 " + Math.ceil(r.bepCups) + "잔 · 월 매출 " + manwon(r.bepSales)); L.push($("saveText").textContent); }
+    return L.join("\n");
+  }
+  $("copyBtn").addEventListener("click", function () {
+    var text = summaryText();
+    function fallback() {
+      var ta = document.createElement("textarea"); ta.value = text; ta.setAttribute("readonly", ""); ta.style.position = "fixed"; ta.style.opacity = "0";
+      document.body.appendChild(ta); ta.select(); var ok = false; try { ok = document.execCommand("copy"); } catch (e) {}
+      document.body.removeChild(ta); say(ok ? "복사했어요." : "복사가 안 되네요. 결과를 직접 드래그해서 복사해 주세요.");
+    }
+    if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(text).then(function () { say("복사했어요."); }, fallback); else fallback();
+  });
+
+  /* ---------------- 시작 ---------------- */
+  var CODE = {};
+  Promise.all([
+    fetch("dongs.json").then(function (r) { return r.json(); }),
+    fetch("stations.json").then(function (r) { return r.ok ? r.json() : []; }).catch(function () { return []; })
+  ]).then(function (all) {
+    var data = all[0]; ST = all[1] || [];
+    META = data.meta; DB = data.d;
+    DB.forEach(function (d) { CODE[d[0]] = d; });
+    var tot = META.mj.reduce(function (a, b) { return a + b; }, 0);
+    NAT.share = META.mj.map(function (v) { return v / META.total; });
+    NAT.per = META.cafes / META.popTotal * 1000;
+    NAT.perCafe = META.popTotal / META.cafes;
+    NAT.storesPerRes = META.total / META.popTotal * 1000;
+    calcRender();
+    fillSido();
+    try { var sv = (localStorage.getItem("oc-region") || "").split("|"); if (sv[0] !== undefined && sv[0] !== "" && META.sidos[+sv[0]]) { sidoSel.value = sv[0]; fillSgg(); if (sv[1]) sggSel.value = sv[1]; } else fillSgg(); } catch (e) { fillSgg(); }
+    renderTable();
+    var quick = $("quick");
+    [["11","마포구","서교동"],["41","광명시","철산3동"],["11","강남구","역삼1동"],["41","수원시 팔달구","인계동"],["50","제주시","노형동"]].forEach(function (x) {
+      var d = DB.filter(function (y) { return y[0].slice(0, 2) === x[0] && y[2] === x[1] && y[3] === x[2]; })[0];
+      if (!d) return;
+      var b = document.createElement("button"); b.type = "button"; b.className = "chip-btn"; b.textContent = d[3];
+      b.addEventListener("click", function () { q.value = shortSido(META.sidos[d[1]]) + " " + d[2] + " " + d[3]; openDong(d, true); });
+      quick.appendChild(b);
+    });
+    [["철산"],["강남"],["서면"]].forEach(function (x) {
+      for (var i = 0; i < ST.length; i++) if (ST[i][0] === x[0]) {
+        (function (idx) {
+          var b = document.createElement("button"); b.type = "button"; b.className = "chip-btn"; b.textContent = ST[idx][0] + "역";
+          b.addEventListener("click", function () { q.value = ST[idx][0] + "역"; openStation(idx, true); });
+          quick.appendChild(b);
+        })(i);
+        break;
+      }
+    });
+    var hs = location.hash || "", h = hs.replace("#d", ""), start = null;
+    if (/^#s\d+$/.test(hs) && ST[+hs.slice(2)]) { openStation(+hs.slice(2), false); return; }
+    var pm = hs.match(/^#p(\d+\.\d+)_(\d+\.\d+)$/);
+    if (pm) { openPoint(+pm[1], +pm[2], "선택한 자리", "링크로 연 자리", false); return; }
+    if (/^\d{8}$/.test(h)) start = DB.filter(function (d) { return d[0] === h; })[0];
+    if (!start) start = DB.filter(function (d) { return d[2] === "마포구" && d[3] === "서교동"; })[0] || DB[0];
+    q.value = "";
+    openDong(start, false);
+  }).catch(function () {
+    $("placeSub").textContent = "데이터를 불러오지 못했습니다. 새로고침해 주세요.";
+  });
+})();
+</script>
+<script src="leaflet/leaflet.js"></script>
+<script src="config.js"></script>
+<script src="satmap.js"></script>
+</body>
+</html>

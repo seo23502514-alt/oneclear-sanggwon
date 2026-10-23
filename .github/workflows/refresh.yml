@@ -1,0 +1,63 @@
+name: 상권 데이터 주간 갱신
+
+on:
+  schedule:
+    - cron: "3 12 * * 1"   # 매주 월요일 21:03 (한국 시간)
+  workflow_dispatch:
+    inputs:
+      force:
+        description: "새 버전이 없어도 다시 만들기"
+        type: boolean
+        default: false
+  push:
+    branches: [main]
+    paths: ["scripts/**", "src/**", ".github/workflows/refresh.yml"]
+
+permissions:
+  contents: write
+
+concurrency:
+  group: refresh
+  cancel-in-progress: false
+
+jobs:
+  refresh:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install requests openpyxl
+      - name: 새 데이터 확인·다운로드
+        env:
+          FORCE: ${{ github.event_name == 'push' || inputs.force }}
+        run: python scripts/fetch_data.py work
+      - name: 빌드
+        run: |
+          if python -c "import json,sys;sys.exit(0 if json.load(open('work/version.json'))['changed'] else 1)"; then
+            python scripts/build.py work/extract.txt work/pop.txt docs/stations.json src/cafe-market.html work/out
+            python - <<'PY'
+          import json
+          new = json.load(open('work/out/dongs.json'))['meta']; old = json.load(open('docs/dongs.json'))['meta']
+          r = new['cafes'] / old['cafes']
+          print('카페 수', old['cafes'], '->', new['cafes'])
+          assert 0.8 <= r <= 1.2, '카페 수가 20% 넘게 바뀌어 게시를 멈춥니다'
+          PY
+            rm -rf docs/t && cp -r work/out/t docs/t
+            cp work/out/dongs.json work/out/names.json work/out/buildings.json docs/
+            mkdir -p build && cp work/out/cafe-market.html build/cafe-market.html
+            python scripts/make_host.py build/cafe-market.html docs/index.html
+            cp src/host/satmap.js docs/satmap.js
+            [ -f docs/config.js ] || cp src/host/config.js docs/config.js
+            echo "CHANGED=1" >> $GITHUB_ENV
+          fi
+      - name: 저장
+        if: env.CHANGED == '1'
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add docs build
+          V=$(python -c "import json;m=json.load(open('docs/dongs.json'))['meta'];print(m['v'],m['pop'])")
+          git diff --staged --quiet || (git commit -m "data: 상가 ${V} 반영" && git push)
