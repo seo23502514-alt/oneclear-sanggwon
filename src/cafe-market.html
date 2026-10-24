@@ -491,7 +491,7 @@ footer { font-size: 12px; color: var(--muted); display: grid; gap: 4px; }
     <div class="cols">
       <div class="source">
         <h3>행정동 기준입니다</h3>
-        <p>'철산동'은 철산1·2·3·4동처럼 행정동으로 나뉩니다. 검색하면 해당하는 행정동이 모두 나옵니다. 지도를 누르면 동 경계와 상관없이 그 자리 반경으로 다시 셉니다.</p>
+        <p>'철산동'은 철산1·2·3·4동처럼 행정동으로 나뉩니다. 검색하면 동을 합친 '철산동 전체'와 행정동 하나하나가 함께 나옵니다. 지도를 누르면 동 경계와 상관없이 그 자리 반경으로 다시 셉니다.</p>
       </div>
       <div class="source">
         <h3>주민 수만 보면 틀립니다</h3>
@@ -597,8 +597,9 @@ footer { font-size: 12px; color: var(--muted); display: grid; gap: 4px; }
     var wantStation = /역$/.test(raw[raw.length - 1]) || raw.some(function (w) { return /호선|선$/.test(w); });
     var res = [];
     // 동
-    for (var i = 0; i < DB.length; i++) {
-      var d = DB[i];
+    var dl = DB.concat(GROUPS);
+    for (var i = 0; i < dl.length; i++) {
+      var d = dl[i];
       var dn = norm(d[3]), hay = norm(META.sidos[d[1]] + shortSido(META.sidos[d[1]]) + d[2]) + dn;
       var ok = raw.every(function (w) { return hay.indexOf(w) >= 0 || dn.indexOf(w.replace(/동$/, "")) >= 0 && w.length > 1; });
       if (!ok) continue;
@@ -678,8 +679,8 @@ footer { font-size: 12px; color: var(--muted); display: grid; gap: 4px; }
       var c = document.createElement("span");
       if (it.t === "d") {
         var d = it.d;
-        a.textContent = shortSido(META.sidos[d[1]]) + " " + d[2] + " " + d[3];
-        c.textContent = "카페 " + fmt(d[8]) + " · 주민 " + fmt(d[13]);
+        a.textContent = shortSido(META.sidos[d[1]]) + " " + d[2] + " " + d[3] + (d.members ? " 전체" : "");
+        c.textContent = "카페 " + fmt(d[8]) + " · 주민 " + fmt(d[13]) + (d.members ? " · " + d.label + " 합계" : "");
       } else if (it.t === "bd" || it.t === "nm") {
         var pp = it.p, dd = DB[it.t === "bd" ? pp[5] : pp[4]];
         a.textContent = pp[0];
@@ -723,8 +724,8 @@ footer { font-size: 12px; color: var(--muted); display: grid; gap: 4px; }
   var seq = 0, lastData = null;
   function openDong(d, scroll) {
     state.dong = d; state.lat = d[4]; state.lon = d[5]; state.custom = false; state.station = null; state.place = null; state.nearShown = 300;
-    try { history.replaceState(null, "", "#d" + d[0]); } catch (e) {}
-    $("placeSub").textContent = META.sidos[d[1]] + " " + d[2] + " · 행정동";
+    try { history.replaceState(null, "", (d.members ? "#" : "#d") + d[0]); } catch (e) {}
+    $("placeSub").textContent = META.sidos[d[1]] + " " + d[2] + (d.members ? " · " + d.label + " 합계" : " · 행정동");
     $("placeName").textContent = d[3];
     analyze();
     if (scroll) $("report").scrollIntoView({ behavior: "smooth", block: "start" });
@@ -945,7 +946,7 @@ footer { font-size: 12px; color: var(--muted); display: grid; gap: 4px; }
       .sort(function (a, b) { return a.m - b.m; }).slice(0, 14);
     var body = $("nbBody"); body.innerHTML = "";
     nb.forEach(function (o) {
-      var x = o.d, tr = document.createElement("tr"); tr.className = "clickable" + (x === d ? " me" : "");
+      var x = o.d, tr = document.createElement("tr"); tr.className = "clickable" + (x === d || d.members && d.members.indexOf(x) >= 0 ? " me" : "");
       tr.addEventListener("click", function () { q.value = shortSido(META.sidos[x[1]]) + " " + x[2] + " " + x[3]; openDong(x, true); });
       var td = document.createElement("td"); td.textContent = x[3];
       if (x[2] !== d[2]) { var sm = document.createElement("span"); sm.className = "small-muted"; sm.textContent = x[2]; td.appendChild(sm); }
@@ -1359,6 +1360,41 @@ footer { font-size: 12px; color: var(--muted); display: grid; gap: 4px; }
     if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(text).then(function () { say("복사했어요."); }, fallback); else fallback();
   });
 
+  /* ---------------- 나뉜 행정동 묶기 (철산1~4동 → 철산동 합계) ---------------- */
+  var GROUPS = [], GROUP_OF = {};
+  function memberLabel(ms) {
+    var base = ms[0][3].match(/^(.+?)제?\d/)[1];
+    var nums = ms.map(function (m) { return m[3].slice(base.length).replace(/^제/, "").replace(/동$/, "").replace(/\./g, "·"); });
+    return base + nums.join(", ") + "동";
+  }
+  function buildGroups() {
+    var rx = /^(.+?)제?\d+(?:[.·]\d+)*가?동$/, by = {}, exist = {};
+    DB.forEach(function (d) { exist[d[1] + "|" + d[2] + "|" + d[3]] = 1; });
+    DB.forEach(function (d) {
+      var m = d[3].match(rx); if (!m || /\d/.test(m[1])) return;
+      var k = d[1] + "|" + d[2] + "|" + m[1] + "동";
+      (by[k] || (by[k] = [])).push(d);
+    });
+    Object.keys(by).forEach(function (k) {
+      var ms = by[k]; if (ms.length < 2 || exist[k]) return;
+      ms.sort(function (a, b) { return a[0] < b[0] ? -1 : 1; });
+      var n = 0, la = 0, lo = 0, w = 0, mj = [], sub = [], br = {}, rd = {}, cafe = 0, f1 = 0, pop = 0, hh = 0;
+      ms.forEach(function (d) {
+        n += d[6]; cafe += d[8]; f1 += d[9]; pop += d[13]; hh += d[14];
+        if (d[4] != null) { la += d[4] * d[6]; lo += d[5] * d[6]; w += d[6]; }
+        d[7].forEach(function (v, i) { mj[i] = (mj[i] || 0) + v; });
+        d[10].forEach(function (v, i) { sub[i] = (sub[i] || 0) + v; });
+        Object.keys(d[11]).forEach(function (b) { br[b] = (br[b] || 0) + d[11][b]; });
+        (d[12] || []).forEach(function (r) { rd[r[0]] = (rd[r[0]] || 0) + r[1]; });
+      });
+      var roads = Object.keys(rd).map(function (r) { return [r, rd[r]]; }).sort(function (a, b) { return b[1] - a[1]; }).slice(0, 3);
+      var g = ["g" + ms[0][0], ms[0][1], ms[0][2], k.split("|")[2], w ? la / w : null, w ? lo / w : null, n, mj, cafe, f1, sub, br, roads, pop, hh];
+      g.members = ms; g.label = memberLabel(ms);
+      GROUPS.push(g);
+      ms.forEach(function (d) { GROUP_OF[d[0]] = g; });
+    });
+  }
+
   /* ---------------- 시작 ---------------- */
   var CODE = {};
   Promise.all([
@@ -1368,6 +1404,7 @@ footer { font-size: 12px; color: var(--muted); display: grid; gap: 4px; }
     var data = all[0]; ST = all[1] || [];
     META = data.meta; DB = data.d;
     DB.forEach(function (d) { CODE[d[0]] = d; });
+    buildGroups();
     var tot = META.mj.reduce(function (a, b) { return a + b; }, 0);
     NAT.share = META.mj.map(function (v) { return v / META.total; });
     NAT.per = META.cafes / META.popTotal * 1000;
@@ -1400,6 +1437,7 @@ footer { font-size: 12px; color: var(--muted); display: grid; gap: 4px; }
     var pm = hs.match(/^#p(\d+\.\d+)_(\d+\.\d+)$/);
     if (pm) { openPoint(+pm[1], +pm[2], "선택한 자리", "링크로 연 자리", false); return; }
     if (/^\d{8}$/.test(h)) start = DB.filter(function (d) { return d[0] === h; })[0];
+    if (/^#g\d{8}$/.test(hs)) start = GROUP_OF[hs.slice(2)] || null;
     if (!start) start = DB.filter(function (d) { return d[2] === "마포구" && d[3] === "서교동"; })[0] || DB[0];
     q.value = "";
     openDong(start, false);

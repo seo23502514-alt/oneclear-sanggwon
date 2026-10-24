@@ -37,8 +37,20 @@ SUB = {'빵/도넛': 0, '아이스크림/빙수': 1, '토스트/샌드위치/샐
 SW = {'빵/도넛', '아이스크림/빙수', '떡/한과'}
 LM = re.compile(r'백화점|대형 마트|대형마트|쇼핑|아울렛|면세|종합 병원|종합병원|영화관')
 
+# 원본에서 '카페'로 분류됐지만 상호명으로 보아 다른 업종이 확실한 곳 (부동산·임대·호프·식당·유통 등)
+CAFE_WORD = re.compile(r'커피|카페|까페|캬페|cafe|caffe|coffee|다방|찻집|티하우스|티룸|tea|로스터|로스팅|roast|에스프레소|espresso|브루|brew|라운지|디저트|베이커리|bakery|케이크|cake|쥬스|주스|juice|스무디|와플|빙수|젤라또|마카롱|브런치|빵|도넛|말차|버블|요거|토스트|팥|북|보드게임|라떼|latte|쥬씨|설빙|벌툰|스타벅스|투썸|이디야|메가|컴포즈|빽다방|할리스|파스쿠찌|엔제리너스|엔젤리너스|폴바셋|매머드|텐퍼센트|하삼동|더벤티|공차|커피빈|드롭탑|바나프레소|더리터|요아정|탐앤탐스|커피베이|빈스빈스|댄싱컵', re.I)
+CAFE_KEEP = re.compile(r'시니어클럽|협동조합|자활|복지|사업단|쉼터|휴게소|키움')  # 사회적경제·기관 운영 카페는 그대로 둔다
+NOT_CAFE = re.compile(r'(매니지먼트|엔터테인먼트|가스(?!펠)|(?<!일)상사$|상사주$|(?<!공정)무역(?!투자)|(?<!원)유통|물산|부동산|공인중개|중개사|중개법인|임대|종친회|화수회|건설|건축|인테리어|설비|공업|물류|운수|세무|회계|컨설팅|솔루션|시스템|네트웍|노래연습장|노래궁|노래주점|단란주점|(?<!과)당구|볼링|호프|포차|치킨|김밥|분식|냉면|국밥|돈가스|식당|슈퍼$|슈퍼쉼터|청과|수산|정육|축산|여관|모텔|약국|치과|미용|네일|세탁|사진관|인쇄|광고)', re.I)
+
+def not_cafe(name, brand):
+    if brand >= 0 or CAFE_WORD.search(name) or CAFE_KEEP.search(name): return False
+    for m in NOT_CAFE.finditer(name):
+        if re.match(r'[^ ]{0,8}점$', name[m.end():]): continue  # '○○유통센터점'처럼 입점 위치를 뜻하는 경우
+        return True
+    return False
+
 def aggregate(zf):
-    agg, grid, bld, cafes, sweets, lms, foods, rows = {}, {}, {}, [], [], [], [], 0
+    agg, grid, bld, cafes, sweets, lms, foods, rows, nc = {}, {}, {}, [], [], [], [], 0, 0
     for info in zf.infolist():
         if not info.filename.lower().endswith('.csv'): continue
         with zf.open(info) as fh:
@@ -62,9 +74,11 @@ def aggregate(zf):
                 nm2 = (f[I['상호명']] + (' ' + f[I['지점명']] if f[I['지점명']] else '')).replace('\t', ' ').replace('\n', ' ').replace('|', ' ')
                 addr = ' '.join((f[I['도로명주소']] or '').split(' ')[2:])
                 fl = f[I['층정보']] or ''
+                b = next((q for q, rx in enumerate(BR) if rx.search(f[I['상호명']])), -1) if sub == '카페' else -1
+                if sub == '카페' and not_cafe(nm2, b):
+                    sub = '카페 아님'; nc += 1
                 if sub == '카페':
                     r['cafe'] += 1
-                    b = next((q for q, rx in enumerate(BR) if rx.search(f[I['상호명']])), -1)
                     if b >= 0: r['br'][b] += 1
                     if fl == '1': r['f1'] += 1
                     road = (f[I['도로명']] or '').split(' ')[-1]
@@ -77,7 +91,7 @@ def aggregate(zf):
                 gi = {0: 1, 1: 2, 4: 3, 9: 4, 3: 5, 8: 6, 2: 7}.get(mi)
                 if gi: g[gi] += 1
                 if sub in SW: sweets.append([code, f'{la:.5f}', f'{lo:.5f}', nm2, sub, fl, addr])
-                elif cat == '음식' and sub != '카페': foods.append([f'{la:.5f}', f'{lo:.5f}', nm2, f[I['상권업종중분류명']].strip(), sub])
+                elif cat == '음식' and sub not in ('카페', '카페 아님'): foods.append([f'{la:.5f}', f'{lo:.5f}', nm2, f[I['상권업종중분류명']].strip(), sub])
                 if LM.search(sub): lms.append([code, f'{la:.5f}', f'{lo:.5f}', nm2, sub, addr])
                 bn = (f[I['건물명']] or '').strip()
                 if bn:
@@ -85,6 +99,7 @@ def aggregate(zf):
                     if b2 is None: b2 = bld[k2] = [0, 0.0, 0.0, addr, 0, code]
                     b2[0] += 1; b2[1] += la; b2[2] += lo
                     if sub == '카페': b2[4] += 1
+    print('카페 아님으로 제외', nc, flush=True)
     return agg, grid, bld, cafes, sweets, lms, foods, rows
 
 def latest_population():
