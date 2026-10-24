@@ -135,7 +135,7 @@ select { font: 500 14px var(--font-body); color: var(--ink); background: var(--p
 .map-box { position: relative; width: 100%; aspect-ratio: 4 / 5; max-height: 760px; max-width: 100%; border-radius: var(--r); overflow: hidden; background: var(--sea); border: 1px solid var(--line); }
 #drawMap { width: 100%; height: 100%; display: block; touch-action: none; cursor: grab; }
 #drawMap:active { cursor: grabbing; }
-.naver-map { position: absolute; inset: 0; }
+.naver-map { position: absolute !important; inset: 0; width: 100%; height: 100% !important; }
 .prov { stroke: var(--muted); stroke-opacity: .5; cursor: pointer; }
 .muni { fill: none; stroke: var(--line); pointer-events: none; }
 .pt { stroke: var(--sheet); cursor: pointer; }
