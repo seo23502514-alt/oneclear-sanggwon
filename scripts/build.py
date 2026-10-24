@@ -29,8 +29,31 @@ for d in dong:
     p = pop.get(code, [0, 0])
     D.append([code, sidos.index(s), g, nm, la, lo, n, mj, cafe, f1, sub, {str(i): v for i, v in enumerate(br) if v}, [[r, c] for r, c in roads if c >= 2], p[0], p[1]])
 D.sort(key=lambda x: x[0])
+# 동 종사자 수 (통계청 SGIS 사업체통계). 이번에 못 받았으면 지금 사이트 값을 그대로 쓴다.
+def _n(x): return re.sub(r'\s+|(?<=[가-힣])제(?=\d)', '', x).replace('·', '.').replace(',', '.')
+wy, wmatch = None, 0
+wf = os.path.join(os.path.dirname(ext), 'workers.txt')
+if os.path.exists(wf):
+    L = open(wf, encoding='utf-8').read().split('\n'); wy = int(L[0])
+    by = collections.defaultdict(list)
+    for l in L[1:]:
+        if not l: continue
+        sd, sg, dn, w, c = l.split('\t'); by[(_n(sg), _n(dn))].append((sd, int(w)))
+    for d in D:
+        c = by.get((_n(d[2]), _n(d[3])), [])
+        if len(c) > 1:
+            sd = sidos[d[1]]; c = [x for x in c if x[0][:2] == sd[:2] or x[0][:2] in sd] or c
+        d.append(c[0][1] if len(c) == 1 else None)
+        if len(c) == 1: wmatch += 1
+else:
+    try:
+        old = json.load(open(os.path.join(os.path.dirname(stf), 'dongs.json'), encoding='utf-8'))
+        ow = {x[0]: (x[15] if len(x) > 15 else None) for x in old['d']}; wy = old['meta'].get('wy')
+    except Exception: ow = {}
+    for d in D:
+        d.append(ow.get(d[0])); wmatch += d[-1] is not None
 idx = {d[0]: i for i, d in enumerate(D)}
-meta = {'v': ver, 'pop': popym, 'sidos': sidos, 'total': sum(d[6] for d in D), 'cafes': sum(d[8] for d in D),
+meta = {'v': ver, 'pop': popym, 'wy': wy, 'wMatch': wmatch, 'sidos': sidos, 'total': sum(d[6] for d in D), 'cafes': sum(d[8] for d in D),
         'mj': [sum(d[7][i] for d in D) for i in range(10)], 'popTotal': sum(d[13] for d in D)}
 assert meta['total'] == rows, (meta['total'], rows)
 json.dump({'meta': meta, 'd': D}, open(out + '/dongs.json', 'w'), ensure_ascii=False, separators=(',', ':'))

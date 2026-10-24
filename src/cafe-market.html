@@ -402,9 +402,10 @@ footer { font-size: 12px; color: var(--muted); display: grid; gap: 4px; }
           <div class="field">
             <label for="worker">동네 직장인 수</label>
             <div class="input-wrap"><input id="worker" inputmode="numeric" value="0"><span class="unit">명</span></div>
+            <span class="hint" id="workerNote"></span>
           </div>
         </div>
-        <p class="hint">위에서 분석한 곳의 카페 수와 주민 수가 자동으로 채워집니다. 다른 곳을 분석하면 함께 바뀌어요. 유동인구와 직장인 수는 소상공인 상권정보시스템에서 확인해 넣어 주세요.</p>
+        <p class="hint">위에서 분석한 곳의 카페 수, 주민 수, 직장인 수가 자동으로 채워집니다. 다른 곳을 분석하면 함께 바뀌어요. 유동인구는 공공자료가 없어서 직접 세거나 소상공인 상권정보시스템에서 확인해 넣어 주세요.</p>
       </fieldset>
       <fieldset>
         <legend>비용과 가격</legend>
@@ -513,6 +514,7 @@ footer { font-size: 12px; color: var(--muted); display: grid; gap: 4px; }
 
   <footer>
     <span>가게·카페: 소상공인시장진흥공단 상가(상권)정보 2026년 6월 30일 기준 (공공데이터포털). 주민·세대: 행정안전부 주민등록 인구통계 2026년 9월 말 기준.</span>
+    <span id="wySrc" hidden></span>
     <span>입력한 숫자는 저장되지 않습니다.</span>
   </footer>
 </div>
@@ -580,7 +582,7 @@ footer { font-size: 12px; color: var(--muted); display: grid; gap: 4px; }
   }
 
   /* ---------------- 동 목록 · 검색 ---------------- */
-  // 동 레코드: [code, sidoIdx, 시군구, 동, lat, lon, 가게수, 대분류10, 카페, 1층카페, 소분류4, 브랜드{}, 카페많은길, 주민, 세대]
+  // 동 레코드: [code, sidoIdx, 시군구, 동, lat, lon, 가게수, 대분류10, 카페, 1층카페, 소분류4, 브랜드{}, 카페많은길, 주민, 세대, 종사자(없으면 null)]
   function full(d) { return META.sidos[d[1]] + " " + d[2] + " " + d[3]; }
   function shortSido(s) {
     return s.replace("특별자치도", "").replace("특별자치시", "").replace("통합특별시", "").replace("특별시", "").replace("광역시", "")
@@ -870,6 +872,7 @@ footer { font-size: 12px; color: var(--muted); display: grid; gap: 4px; }
       title = density > 80 ? "오가는 사람이 많고 카페도 빽빽합니다" : "주민보다 오가는 사람을 봐야 하는 동네입니다";
     }
     if (per != null) pts.push(d[3] + " 주민 " + fmt(d[13]) + "명에 카페 " + fmt(d[8]) + "곳, 1곳당 " + fmt(d[13] / Math.max(1, d[8])) + "명입니다. 전국 평균은 " + fmt(1000 / NAT.per) + "명입니다.");
+    if (d[15] != null && d[13] && d[15] >= d[13] * 0.7) pts.push(d[3] + " 사업체 종사자가 " + fmt(d[15]) + "명으로 주민(" + fmt(d[13]) + "명)" + (d[15] >= d[13] ? "보다 많습니다" : " 못지않게 많습니다") + ". 평일 출근·점심 시간 테이크아웃 수요를 보세요.");
     if (low >= 3) pts.push("반경 안에 저가 프랜차이즈가 " + low + "곳 있습니다. 아메리카노 가격으로 붙으면 힘들어요. 디저트나 시그니처 음료로 차별화가 필요합니다.");
     else if (low === 0 && inC.length >= 5) pts.push("반경 안에 저가 프랜차이즈가 없습니다. 테이크아웃 가성비 수요가 비어 있을 수 있어요.");
     if (high >= 2) pts.push("스타벅스·투썸 같은 프리미엄 매장이 " + high + "곳 있어 객단가 높은 손님이 다니는 길입니다.");
@@ -1208,7 +1211,9 @@ footer { font-size: 12px; color: var(--muted); display: grid; gap: 4px; }
     $("place").value = state.place ? state.place + " 주변 (" + d[2] + " " + d[3] + ")" : state.station ? stationLabel(state.station) + " 주변 (" + d[2] + " " + d[3] + ")" : META.sidos[d[1]].slice(0, 2) + " " + d[2] + " " + d[3] + (state.custom ? " 부근" : "");
     $("cafes").value = d[8];
     $("resident").value = d[13];
-    if (!flowTouched) { $("flow").value = ""; $("worker").value = ""; }  // 예시 유동인구가 이 동네 숫자로 보이지 않게
+    if (!flowTouched) $("flow").value = "";  // 예시 유동인구가 이 동네 숫자로 보이지 않게
+    if (!workerTouched) $("worker").value = d[15] != null ? d[15] : "";
+    $("workerNote").textContent = d[15] != null ? d[3] + " 사업체 종사자 " + fmt(d[15]) + "명 (통계청 사업체조사 " + (META.wy || "") + "년)을 넣었어요. 고쳐 써도 됩니다." : "이 동은 종사자 통계가 없어요. 아는 숫자가 있으면 넣어 주세요.";
     $("sampleTag").textContent = "분석한 곳 반영";
     calcRender();
   }
@@ -1357,8 +1362,9 @@ footer { font-size: 12px; color: var(--muted); display: grid; gap: 4px; }
     }
   }
   function calcInput() { $("sampleTag").textContent = "직접 입력"; calcRender(); }
-  var flowTouched = false;
-  ["flow", "worker"].forEach(function (id) { el[id].addEventListener("input", function () { flowTouched = true; }); });
+  var flowTouched = false, workerTouched = false;
+  el.flow.addEventListener("input", function () { flowTouched = true; });
+  el.worker.addEventListener("input", function () { workerTouched = true; });
   calcIds.forEach(function (id) { el[id].addEventListener("input", calcInput); });
   $("form").addEventListener("submit", function (e) { e.preventDefault(); calcRender(); });
   $("clearBtn").addEventListener("click", function () { ["place","cafes","flow","resident","worker","rent","labor","etc","price","cost"].forEach(function (id) { el[id].value = ""; }); $("sampleTag").textContent = "직접 입력"; el.place.focus(); calcRender(); });
@@ -1404,9 +1410,10 @@ footer { font-size: 12px; color: var(--muted); display: grid; gap: 4px; }
     Object.keys(by).forEach(function (k) {
       var ms = by[k]; if (ms.length < 2 || exist[k]) return;
       ms.sort(function (a, b) { return a[0] < b[0] ? -1 : 1; });
-      var n = 0, la = 0, lo = 0, w = 0, mj = [], sub = [], br = {}, rd = {}, cafe = 0, f1 = 0, pop = 0, hh = 0;
+      var n = 0, la = 0, lo = 0, w = 0, mj = [], sub = [], br = {}, rd = {}, cafe = 0, f1 = 0, pop = 0, hh = 0, wk = null;
       ms.forEach(function (d) {
         n += d[6]; cafe += d[8]; f1 += d[9]; pop += d[13]; hh += d[14];
+        if (d[15] != null) wk = (wk || 0) + d[15];
         if (d[4] != null) { la += d[4] * d[6]; lo += d[5] * d[6]; w += d[6]; }
         d[7].forEach(function (v, i) { mj[i] = (mj[i] || 0) + v; });
         d[10].forEach(function (v, i) { sub[i] = (sub[i] || 0) + v; });
@@ -1414,7 +1421,7 @@ footer { font-size: 12px; color: var(--muted); display: grid; gap: 4px; }
         (d[12] || []).forEach(function (r) { rd[r[0]] = (rd[r[0]] || 0) + r[1]; });
       });
       var roads = Object.keys(rd).map(function (r) { return [r, rd[r]]; }).sort(function (a, b) { return b[1] - a[1]; }).slice(0, 3);
-      var g = ["g" + ms[0][0], ms[0][1], ms[0][2], k.split("|")[2], w ? la / w : null, w ? lo / w : null, n, mj, cafe, f1, sub, br, roads, pop, hh];
+      var g = ["g" + ms[0][0], ms[0][1], ms[0][2], k.split("|")[2], w ? la / w : null, w ? lo / w : null, n, mj, cafe, f1, sub, br, roads, pop, hh, wk];
       g.members = ms; g.label = memberLabel(ms);
       GROUPS.push(g);
       ms.forEach(function (d) { GROUP_OF[d[0]] = g; });
@@ -1436,6 +1443,7 @@ footer { font-size: 12px; color: var(--muted); display: grid; gap: 4px; }
     NAT.per = META.cafes / META.popTotal * 1000;
     NAT.perCafe = META.popTotal / META.cafes;
     NAT.storesPerRes = META.total / META.popTotal * 1000;
+    if (META.wy) { $("wySrc").textContent = "직장인(사업체 종사자): 통계청 전국사업체조사 " + META.wy + "년 기준 (SGIS 통계지리정보서비스)."; $("wySrc").hidden = false; }
     calcRender();
     fillSido();
     try { var sv = (localStorage.getItem("oc-region") || "").split("|"); if (sv[0] !== undefined && sv[0] !== "" && META.sidos[+sv[0]]) { sidoSel.value = sv[0]; fillSgg(); if (sv[1]) sggSel.value = sv[1]; } else fillSgg(); } catch (e) { fillSgg(); }

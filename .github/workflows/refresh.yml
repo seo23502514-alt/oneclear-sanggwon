@@ -33,6 +33,8 @@ jobs:
       - name: 새 데이터 확인·다운로드
         env:
           FORCE: ${{ github.event_name == 'push' || inputs.force }}
+          SGIS_KEY: ${{ secrets.SGIS_KEY }}
+          SGIS_SECRET: ${{ secrets.SGIS_SECRET }}
         run: |
           mkdir -p work
           python scripts/fetch_data.py work 2>&1 | tee work/log.txt; exit ${PIPESTATUS[0]}

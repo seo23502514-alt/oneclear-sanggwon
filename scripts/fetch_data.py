@@ -126,6 +126,38 @@ def latest_population():
         if out: return f'{yy}-{mm:02d}', out
     raise RuntimeError('주민등록 인구 통계를 받지 못했습니다')
 
+def fetch_workers(out):
+    """통계청 SGIS 사업체통계: 전국 읍면동별 종사자 수(최신 연도). 키가 없거나 실패하면 None (이전 값 유지)."""
+    key, sec = os.environ.get('SGIS_KEY', ''), os.environ.get('SGIS_SECRET', '')
+    if not key or not sec:
+        print('SGIS 키 없음: 종사자 수는 이전 값 유지', flush=True); return None
+    B = 'https://sgisapi.kostat.go.kr/OpenAPI3'
+    try:
+        tok = requests.get(f'{B}/auth/authentication.json', params={'consumer_key': key, 'consumer_secret': sec}, timeout=30).json()['result']['accessToken']
+        def get(**p):
+            p['accessToken'] = tok
+            for _ in range(3):
+                try:
+                    r = requests.get(f'{B}/stats/company.json', params=p, timeout=60).json()
+                    if r.get('errCd') == 0: return r.get('result') or []
+                except Exception: pass
+                time.sleep(2)
+            raise RuntimeError(f'SGIS 실패 {p.get("adm_cd")}')
+        year, sidos = None, []
+        for y in range(time.localtime().tm_year, 2015, -1):
+            sidos = get(year=str(y))
+            if sidos: year = y; break
+        lines = []
+        for sd in sidos:
+            sggs = {x['adm_cd']: x['adm_nm'] for x in get(year=str(year), adm_cd=sd['adm_cd'], low_search='1')}
+            for x in get(year=str(year), adm_cd=sd['adm_cd'], low_search='2'):
+                lines.append('\t'.join([sd['adm_nm'], sggs.get(x['adm_cd'][:5], ''), x['adm_nm'], str(int(x['tot_worker'] or 0)), str(int(x['corp_cnt'] or 0))]))
+        open(f'{out}/workers.txt', 'w', encoding='utf-8').write(f'{year}\n' + '\n'.join(lines))
+        print('종사자 수', year, len(lines), '곳', flush=True)
+        return year
+    except Exception as e:
+        print('종사자 수 받기 실패, 이전 값 유지:', e, flush=True); return None
+
 if __name__ == '__main__':
     ver, atch, sn, nm = latest_store_version()
     popym, pop = latest_population()
@@ -133,7 +165,8 @@ if __name__ == '__main__':
     try: prev = json.load(open('docs/dongs.json'))['meta']
     except Exception: pass
     force = os.environ.get('FORCE') == 'true'
-    if not force and prev.get('v') == ver and prev.get('pop') == popym:
+    wy = fetch_workers(OUT)
+    if not force and prev.get('v') == ver and prev.get('pop') == popym and (wy is None or prev.get('wy') == wy):
         print(f'변경 없음: 상가 {ver}, 주민 {popym}')
         json.dump({'changed': False, 'ver': ver, 'pop': popym}, open(f'{OUT}/version.json', 'w')); sys.exit(0)
     open(f'{OUT}/pop.txt', 'w', encoding='utf-8').write(f'POP|{popym}|' + ';'.join(pop) + '|END')
