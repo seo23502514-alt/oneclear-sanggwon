@@ -331,7 +331,7 @@ footer { font-size: 12px; color: var(--muted); display: grid; gap: 4px; }
           <div class="bars" id="bars"></div>
         </div>
         <div class="actions">
-          <button type="button" class="primary" id="toCalc">이 동네 숫자로 손익 계산</button>
+          <button type="button" class="primary" id="toCalc">이 곳 손익 계산 보기</button>
         </div>
       </div>
     </div>
@@ -404,7 +404,7 @@ footer { font-size: 12px; color: var(--muted); display: grid; gap: 4px; }
             <div class="input-wrap"><input id="worker" inputmode="numeric" value="0"><span class="unit">명</span></div>
           </div>
         </div>
-        <p class="hint">위에서 동네를 고르고 '이 동네 숫자로 손익 계산'을 누르면 카페 수와 주민 수가 채워집니다. 유동인구와 직장인 수는 소상공인 상권정보시스템에서 확인해 넣어 주세요.</p>
+        <p class="hint">위에서 분석한 곳의 카페 수와 주민 수가 자동으로 채워집니다. 다른 곳을 분석하면 함께 바뀌어요. 유동인구와 직장인 수는 소상공인 상권정보시스템에서 확인해 넣어 주세요.</p>
       </fieldset>
       <fieldset>
         <legend>비용과 가격</legend>
@@ -947,6 +947,7 @@ footer { font-size: 12px; color: var(--muted); display: grid; gap: 4px; }
     var roads = d[12] || [];
     $("roadsNote").textContent = roads.length ? d[3] + "에서 카페가 많은 길: " + roads.map(function (r) { return r[0] + " " + r[1] + "곳"; }).join(", ") : "";
 
+    syncCalc(false);
     lastReport = { name: state.station ? stationLabel(state.station) : state.place || d[3], d: d, R: R, inC: inC.length, fr: fr.length, low: low, stores: stores, per: per };
   }
   var lastReport = null;
@@ -1197,15 +1198,25 @@ footer { font-size: 12px; color: var(--muted); display: grid; gap: 4px; }
   [].forEach.call(document.querySelectorAll("#radiusSeg button"), function (b) { b.addEventListener("click", function () { setRadius(+b.dataset.r); }); });
   setRadius(state.r);
 
-  $("toCalc").addEventListener("click", function () {
-    var d = state.dong; if (!d) return;
+  // 분석한 곳을 손익 계산에 자동으로 넣는다. 같은 곳을 다시 그릴 때(반경 변경 등)는 직접 고친 값을 건드리지 않는다.
+  var calcSyncedKey = null;
+  function syncCalc(force) {
+    var d = state.dong; if (!d || !el || !el.place) return;
+    var key = state.lat.toFixed(5) + "," + state.lon.toFixed(5) + "," + d[0];
+    if (!force && key === calcSyncedKey) return;
+    calcSyncedKey = key;
     $("place").value = state.place ? state.place + " 주변 (" + d[2] + " " + d[3] + ")" : state.station ? stationLabel(state.station) + " 주변 (" + d[2] + " " + d[3] + ")" : META.sidos[d[1]].slice(0, 2) + " " + d[2] + " " + d[3] + (state.custom ? " 부근" : "");
     $("cafes").value = d[8];
     $("resident").value = d[13];
     if (!flowTouched) { $("flow").value = ""; $("worker").value = ""; }  // 예시 유동인구가 이 동네 숫자로 보이지 않게
-    calcInput();
+    $("sampleTag").textContent = "분석한 곳 반영";
+    calcRender();
+  }
+  $("toCalc").addEventListener("click", function () {
+    syncCalc(true);
     $("calc").scrollIntoView({ behavior: "smooth", block: "start" });
   });
+
 
   /* ---------------- 지역 비교 표 ---------------- */
   var sidoSel = $("sidoSel"), sggSel = $("sggSel"), sortSel = $("sortSel");
