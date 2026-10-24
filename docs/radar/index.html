@@ -1,0 +1,267 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>원클리어 카페 개폐업 레이더</title>
+<meta name="description" content="지자체 인허가 데이터로 본 전국 카페 개업·폐업. 주별·월별·분기별·연별 추이, 시·군·구 순위, 프랜차이즈 브랜드별 매장 수, 시니어클럽 카페까지.">
+<meta property="og:title" content="원클리어 카페 개폐업 레이더">
+<meta property="og:description" content="요즘 어디서 카페가 문을 열고 닫을까요? 전국 카페 개업·폐업을 주·월·분기·연 단위로.">
+<meta property="og:type" content="website">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Nanum+Myeongjo:wght@700;800&family=IBM+Plex+Sans+KR:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
+<link rel="stylesheet" href="radar.css">
+</head>
+<body>
+<div class="wrap">
+  <header class="masthead">
+    <div class="topline">
+      <div class="brand"><span class="brand-mark" aria-hidden="true"></span>ONE CLEAR 원클리어</div>
+      <a class="crosslink" href="../">동네 상권진단 →</a>
+    </div>
+    <h1>요즘 어디서 카페가 문을 열고 닫을까요?</h1>
+    <p class="lede">지자체에 낸 영업 신고와 폐업 신고를 그대로 셌습니다. 전국 카페 <b class="num" id="ledeStock">9만여</b> 곳의 개업·폐업을 주·월·분기·연 단위로, 시·도와 시·군·구, 프랜차이즈와 개인 카페로 나눠 보여 드립니다.</p>
+    <div class="pickers">
+      <label class="sr" for="sidoSel">시·도</label><select id="sidoSel"></select>
+      <label class="sr" for="sggSel">시·군·구</label><select id="sggSel"></select>
+    </div>
+    <div class="quick" id="quick"><span>바로 보기</span></div>
+  </header>
+
+  <section class="report" id="report" aria-live="polite">
+    <div class="report-head">
+      <div class="place">
+        <span class="place-sub" id="placeSub">불러오는 중입니다</span>
+        <span class="place-name" id="placeName">&nbsp;</span>
+      </div>
+      <div class="period">
+        <div class="seg" role="group" aria-label="기간 단위" id="unitSeg">
+          <button type="button" data-u="w" aria-pressed="true">주별</button>
+          <button type="button" data-u="m" aria-pressed="false">월별</button>
+          <button type="button" data-u="q" aria-pressed="false">분기별</button>
+          <button type="button" data-u="y" aria-pressed="false">연별</button>
+        </div>
+        <div class="stepper">
+          <button type="button" id="prevBtn" aria-label="이전 기간">‹</button>
+          <label class="sr" for="perSel">기간</label><select id="perSel"></select>
+          <button type="button" id="nextBtn" aria-label="다음 기간">›</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="typebar">
+      <span class="hint">업소 유형</span>
+      <div class="seg wrapseg" role="group" aria-label="업소 유형" id="typeSeg">
+        <button type="button" data-t="all" aria-pressed="true">전체</button>
+        <button type="button" data-t="1" aria-pressed="false">프랜차이즈</button>
+        <button type="button" data-t="2" aria-pressed="false">체인 추정</button>
+        <button type="button" data-t="0" aria-pressed="false">개인 카페</button>
+        <button type="button" data-t="3" aria-pressed="false">시니어·복지</button>
+      </div>
+    </div>
+
+    <div class="kpis">
+      <div class="kpi"><span class="k">새로 연 카페</span><span class="v num good" id="kOpen">-</span><span class="c hint" id="kOpenC"></span></div>
+      <div class="kpi"><span class="k">문 닫은 카페</span><span class="v num bad" id="kClose">-</span><span class="c hint" id="kCloseC"></span></div>
+      <div class="kpi"><span class="k">늘어난 카페</span><span class="v num" id="kNet">-</span><span class="c hint" id="kNetC"></span></div>
+      <div class="kpi"><span class="k">지금 영업 중</span><span class="v num" id="kStock">-</span><span class="c hint" id="kStockC"></span></div>
+    </div>
+
+    <div class="split">
+      <div class="sheet">
+        <div class="sheet-head">
+          <h3 class="card-title">지도</h3>
+          <span class="hint" id="mapHint">시·도를 누르면 그 지역으로, 점을 누르면 가게 정보</span>
+        </div>
+        <div class="map-box">
+          <svg id="drawMap" role="img" aria-label="카페 개업·폐업 지도"></svg>
+          <div id="naverMap" class="naver-map" hidden></div>
+          <div class="zoombar" id="zoombar"><button type="button" id="zIn" aria-label="확대">+</button><button type="button" id="zOut" aria-label="축소">−</button><button type="button" id="zReset" aria-label="전국 보기">⟲</button></div>
+          <div class="map-note" id="mapNote" hidden></div>
+          <div class="pop" id="pop" hidden></div>
+          <div class="tip" id="tip"></div>
+        </div>
+        <div class="legend">
+          <span><i style="background:var(--good)"></i>새로 연 곳</span>
+          <span><i style="background:var(--bad)"></i>문 닫은 곳</span>
+          <span><i class="ring-fr"></i>프랜차이즈</span>
+          <span><i class="ring-sn"></i>시니어·복지</span>
+          <span><i class="sq" id="rampSw"></i>시·도 색: 이 기간 순증</span>
+        </div>
+        <div class="maplinks">
+          <label class="foodtoggle"><input type="checkbox" id="showOpen" checked> 새로 연 곳</label>
+          <label class="foodtoggle"><input type="checkbox" id="showClose" checked> 문 닫은 곳</label>
+        </div>
+      </div>
+
+      <div class="sheet">
+        <div class="summary">
+          <span class="eyebrow" id="sumEyebrow">요약</span>
+          <p class="summary-title" id="sumTitle">&nbsp;</p>
+          <div class="tags" id="sumTags"></div>
+          <ul class="points" id="sumPoints"></ul>
+        </div>
+        <div class="sheet-sub">
+          <h3 class="card-title">유형별</h3>
+          <div class="table-scroll">
+            <table class="rtable">
+              <thead><tr><th scope="col">유형</th><th scope="col" class="r">새로 연</th><th scope="col" class="r">문 닫은</th><th scope="col" class="r">순증</th><th scope="col" class="r">영업 중</th></tr></thead>
+              <tbody id="mixBody"></tbody>
+            </table>
+          </div>
+          <p class="hint" id="mixNote"></p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section" id="trendSec" aria-labelledby="trendTitle">
+    <div class="sheet-head">
+      <h2 id="trendTitle">추이</h2>
+      <span class="hint">막대를 누르면 그 기간으로 바뀝니다</span>
+    </div>
+    <div class="sheet">
+      <p class="hint" id="trendSub"></p>
+      <div class="trend-box"><svg id="trend" role="img" aria-label="기간별 개업과 폐업 막대 그래프"></svg><div class="tip" id="trendTip"></div></div>
+      <div class="legend"><span><i class="sq" style="background:var(--good)"></i>새로 연 곳(위)</span><span><i class="sq" style="background:var(--bad)"></i>문 닫은 곳(아래)</span><span><i style="background:var(--ink)"></i>순증</span><span><i class="sq" style="background:var(--line)"></i>흐린 막대는 진행 중인 기간</span></div>
+    </div>
+  </section>
+
+  <section class="section" id="listSec" aria-labelledby="listTitle">
+    <div class="sheet-head">
+      <h2 id="listTitle">이 기간 문을 연 곳·닫은 곳</h2>
+      <span class="hint" id="listCount"></span>
+    </div>
+    <div class="sheet">
+      <div class="controls">
+        <div class="seg" role="group" aria-label="구분" id="kindSeg">
+          <button type="button" data-k="all" aria-pressed="true">전체</button>
+          <button type="button" data-k="1" aria-pressed="false">새로 연 곳</button>
+          <button type="button" data-k="0" aria-pressed="false">문 닫은 곳</button>
+        </div>
+        <label class="sr" for="listQ">상호 검색</label><input id="listQ" class="textin" type="search" placeholder="상호 검색">
+      </div>
+      <div class="table-scroll near-scroll">
+        <table class="rtable">
+          <thead><tr><th scope="col">가게</th><th scope="col">구분</th><th scope="col">유형</th><th scope="col">지역</th><th scope="col" class="r">날짜</th></tr></thead>
+          <tbody id="listBody"></tbody>
+        </table>
+      </div>
+      <p class="hint" id="listNote"></p>
+    </div>
+  </section>
+
+  <section class="section" id="areaSec" aria-labelledby="areaTitle">
+    <div class="sheet-head">
+      <h2 id="areaTitle">시·군·구 순위</h2>
+      <div class="controls">
+        <label class="sr" for="areaSort">정렬</label>
+        <select id="areaSort">
+          <option value="netAsc">많이 줄어든 순</option>
+          <option value="netDesc">많이 늘어난 순</option>
+          <option value="open">많이 연 순</option>
+          <option value="close">많이 닫은 순</option>
+          <option value="stock">영업 중 많은 순</option>
+        </select>
+        <label class="sr" for="areaQ">지역 검색</label><input id="areaQ" class="textin" type="search" placeholder="지역 검색 (예: 광명)">
+      </div>
+    </div>
+    <div class="sheet">
+      <div class="table-scroll" style="max-height:480px">
+        <table class="rtable">
+          <thead><tr><th scope="col">지역</th><th scope="col" class="r">새로 연</th><th scope="col" class="r">문 닫은</th><th scope="col" class="r">순증</th><th scope="col" class="r">영업 중</th></tr></thead>
+          <tbody id="areaBody"></tbody>
+        </table>
+      </div>
+      <p class="hint">선택한 기간, 모든 유형을 합친 숫자입니다. 행을 누르면 그 지역으로 바뀝니다.</p>
+    </div>
+  </section>
+
+  <section class="section" id="brandSec" aria-labelledby="brandTitle">
+    <div class="sheet-head">
+      <h2 id="brandTitle">프랜차이즈 브랜드</h2>
+      <div class="controls">
+        <label class="sr" for="brandSort">정렬</label>
+        <select id="brandSort">
+          <option value="stock">매장 많은 순</option>
+          <option value="open">많이 연 순</option>
+          <option value="close">많이 닫은 순</option>
+          <option value="net">많이 늘어난 순</option>
+        </select>
+      </div>
+    </div>
+    <div class="sheet">
+      <div class="table-scroll" style="max-height:520px">
+        <table class="rtable">
+          <thead><tr><th scope="col">브랜드</th><th scope="col" class="r" id="brandStockTh">총매장수</th><th scope="col" class="r">새로 연</th><th scope="col" class="r">문 닫은</th><th scope="col" class="r">순증</th></tr></thead>
+          <tbody id="brandBody"></tbody>
+        </table>
+      </div>
+      <p class="hint" id="brandNote"></p>
+    </div>
+  </section>
+
+  <section class="section" id="seniorSec" aria-labelledby="seniorTitle">
+    <div class="sheet-head">
+      <h2 id="seniorTitle">시니어클럽·노인복지 카페</h2>
+      <div class="seg" role="group" aria-label="운영 상태" id="senSeg">
+        <button type="button" data-s="1" aria-pressed="true">운영 중</button>
+        <button type="button" data-s="0" aria-pressed="false">폐업</button>
+        <button type="button" data-s="t" aria-pressed="false">단기 운영</button>
+        <button type="button" data-s="all" aria-pressed="false">전체</button>
+      </div>
+    </div>
+    <div class="sheet">
+      <div class="kpis kpis-s" id="senKpis"></div>
+      <div class="table-scroll" style="max-height:480px">
+        <table class="rtable">
+          <thead><tr><th scope="col">매장</th><th scope="col">상태</th><th scope="col">지역</th><th scope="col" class="r">개업</th><th scope="col" class="r">폐업</th></tr></thead>
+          <tbody id="senBody"></tbody>
+        </table>
+      </div>
+      <p class="hint">상호에 시니어클럽, 노인복지관, 노인인력개발센터, 실버카페, 청춘카페가 들어간 카페입니다. 위에서 고른 지역 기준이고, 기간과는 상관없이 전체를 보여 줍니다.</p>
+    </div>
+  </section>
+
+  <section class="section" aria-labelledby="howTitle">
+    <h2 id="howTitle">이렇게 읽으세요</h2>
+    <div class="cols">
+      <div class="source">
+        <h3>신고한 날짜 기준입니다</h3>
+        <p>새로 연 곳은 영업 신고(인허가)일, 문 닫은 곳은 폐업 신고일로 셉니다. 신고가 며칠 늦게 올라오기도 해서 최근 1–2주 숫자는 다음 갱신 때 조금 늘 수 있습니다. 구청이 이미 문 닫은 가게를 한꺼번에 정리하면 그날 폐업이 튑니다.</p>
+      </div>
+      <div class="source">
+        <h3>행사 부스는 뺐습니다</h3>
+        <p>축제 부스, '한시적' 영업, 신고하고 14일 안에 닫은 곳은 진짜 개업으로 보지 않아 숫자에서 뺐습니다. 시니어 카페 목록에는 '단기 운영'으로 따로 보입니다.</p>
+      </div>
+      <div class="source">
+        <h3>브랜드는 상호명으로 찾았습니다</h3>
+        <p>메가MGC, 컴포즈, 이디야 등 60여 개 브랜드를 가게 이름으로 골라냈습니다. 목록에 없지만 이름이 'OO점'으로 끝나면 '체인 추정'입니다. 이름에 브랜드가 빠진 매장은 개인 카페로 잡힐 수 있습니다.</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="contact" aria-labelledby="contactTitle">
+    <h2 id="contactTitle">원가, 같이 보실래요?</h2>
+    <p>원클리어는 카페에 원두와 원재료를 납품합니다. 동네에 카페가 늘고 있는지 줄고 있는지 보셨다면, 그다음은 한 잔 원가입니다. 장비 배치와 시즌 메뉴도 같이 봐 드려요.</p>
+    <div class="channels">
+      <span>스마트스토어 <a href="https://smartstore.naver.com/oneclear01" target="_blank" rel="noopener">smartstore.naver.com/oneclear01</a></span>
+      <span>블로그 <a href="https://blog.naver.com/oneclear01" target="_blank" rel="noopener">blog.naver.com/oneclear01</a></span>
+      <span>동네 상권진단 <a href="../">반경 안 카페·주민 수 보기</a></span>
+    </div>
+  </section>
+
+  <footer>
+    <span>카페 개업·폐업: 행정안전부 지방행정 인허가데이터(식품_휴게음식점·일반음식점) <span id="srcDate">2026년 10월 22일</span>까지, 2015년부터 집계 (공공누리 제1유형).</span>
+    <span>카페 범위: 커피숍·다방·전통찻집, 상호에 카페·커피가 들어간 기타 휴게음식점, 일반음식점 까페. 키즈카페·떡카페·라이브카페 제외.</span>
+    <span>주별은 최근 2년, 월·분기·연별은 2015년부터. 지도 위 가게 점과 가게 목록은 2026년 9월 이후 기간에만 있습니다.</span>
+  </footer>
+</div>
+
+<script src="../config.js"></script>
+<script src="d3.min.js"></script>
+<script src="data.js"></script>
+<script src="radar.js"></script>
+</body>
+</html>
