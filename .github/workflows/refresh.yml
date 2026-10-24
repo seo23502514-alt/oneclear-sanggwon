@@ -50,7 +50,7 @@ jobs:
           assert 0.8 <= r <= 1.2, '카페 수가 20% 넘게 바뀌어 게시를 멈춥니다'
           PY
             rm -rf docs/t && cp -r work/out/t docs/t
-            cp work/out/dongs.json work/out/names.json work/out/buildings.json docs/
+            cp work/out/dongs.json work/out/names.json work/out/buildings.json work/out/public.json docs/
             mkdir -p build && cp work/out/cafe-market.html build/cafe-market.html
             python scripts/make_host.py build/cafe-market.html docs/index.html
             cp src/host/satmap.js docs/satmap.js

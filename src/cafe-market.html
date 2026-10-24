@@ -374,6 +374,31 @@ footer { font-size: 12px; color: var(--muted); display: grid; gap: 4px; }
     </div>
   </section>
 
+  <section class="section" id="pub" aria-labelledby="pubTitle">
+    <div class="sheet-head">
+      <h2 id="pubTitle">관공서·시니어클럽 매장</h2>
+      <span class="hint" id="pubMeta">불러오는 중</span>
+    </div>
+    <div class="sheet">
+      <p class="hint">가게 이름이나 건물 이름에 시니어클럽·노인복지관·자활센터·장애인·협동조합·구청·주민센터·도서관 같은 단서가 있는 카페·빵집을 모았습니다. 운영 주체는 이름으로 추정한 것이니 연락 전 확인하세요. 관공서 안 매장에는 일반 업체가 입점한 곳도 섞여 있습니다.</p>
+      <div class="controls">
+        <label class="sr" for="pubSido">시·도</label><select id="pubSido"></select>
+        <label class="sr" for="pubSgg">시·군·구</label><select id="pubSgg"></select>
+        <label class="sr" for="pubQ">이름 검색</label>
+        <div class="input-wrap" style="min-width:180px;flex:1"><input id="pubQ" type="text" placeholder="이름·건물로 찾기 (예: 시니어클럽)"></div>
+      </div>
+      <div class="seg" role="group" aria-label="운영 종류" id="pubSeg" style="flex-wrap:wrap;border-radius:12px"></div>
+      <div class="table-scroll" style="max-height:560px">
+        <table class="rtable">
+          <thead><tr><th scope="col">매장</th><th scope="col">종류</th><th scope="col">지역</th></tr></thead>
+          <tbody id="pubBody"></tbody>
+        </table>
+      </div>
+      <button type="button" class="more" id="pubMore" hidden>더 보기</button>
+      <p class="hint">매장을 누르면 위에서 그 자리 상권을 분석합니다.</p>
+    </div>
+  </section>
+
   <section class="tool section" id="calc" aria-label="손익 계산기">
     <form class="sheet" id="form" autocomplete="off">
       <div class="sheet-head">
@@ -1430,6 +1455,75 @@ footer { font-size: 12px; color: var(--muted); display: grid; gap: 4px; }
 
   /* ---------------- 시작 ---------------- */
   var CODE = {};
+  /* ---------------- 관공서·시니어 매장 ---------------- */
+  var PUB = null, pubTag = -1, pubShown = 200;
+  function loadPublic() {
+    fetch("public.json").then(function (r) { return r.ok ? r.json() : null; }).catch(function () { return null; }).then(function (d) {
+      if (!d || !d.p) { $("pubMeta").textContent = "자료를 준비 중입니다"; return; }
+      PUB = d;
+      $("pubMeta").textContent = "전국 " + fmt(d.p.length) + "곳 · " + META.v.slice(0, 4) + "년 " + Number(META.v.slice(4, 6)) + "월 기준";
+      var ss = $("pubSido"); ss.innerHTML = "";
+      var o = document.createElement("option"); o.value = ""; o.textContent = "전국"; ss.appendChild(o);
+      META.sidos.forEach(function (sd, i) { var e = document.createElement("option"); e.value = String(i); e.textContent = sd; ss.appendChild(e); });
+      try { var sv = localStorage.getItem("oc-pub-sido"); if (sv && META.sidos[+sv]) ss.value = sv; } catch (e) {}
+      fillPubSgg(); renderPub();
+    });
+  }
+  function fillPubSgg() {
+    var g = $("pubSgg"); g.innerHTML = "";
+    var o = document.createElement("option"); o.value = ""; o.textContent = "시·군·구 전체"; g.appendChild(o);
+    var sv = $("pubSido").value; g.disabled = sv === "";
+    if (sv === "") return;
+    var set = {};
+    PUB.p.forEach(function (x) { var d = DB[x[7]]; if (d && String(d[1]) === sv) set[d[2]] = 1; });
+    Object.keys(set).sort().forEach(function (k) { var e = document.createElement("option"); e.value = k; e.textContent = k; g.appendChild(e); });
+  }
+  function pubRows(ignoreTag) {
+    var sv = $("pubSido").value, gv = $("pubSgg").value, qv = norm($("pubQ").value || "").toLowerCase();
+    return PUB.p.filter(function (x) {
+      var d = DB[x[7]];
+      if (sv !== "" && (!d || String(d[1]) !== sv)) return false;
+      if (gv && (!d || d[2] !== gv)) return false;
+      if (!ignoreTag && pubTag >= 0 && x[3] !== pubTag) return false;
+      if (qv && norm(x[0] + x[5] + (d ? d[2] + d[3] : "")).toLowerCase().indexOf(qv) < 0) return false;
+      return true;
+    });
+  }
+  function renderPub() {
+    if (!PUB) return;
+    var base = pubRows(true), seg = $("pubSeg"); seg.innerHTML = "";
+    var cnt = {}; base.forEach(function (x) { cnt[x[3]] = (cnt[x[3]] || 0) + 1; });
+    [[-1, "전체 " + fmt(base.length)]].concat(PUB.tags.map(function (t, i) { return [i, t + " " + fmt(cnt[i] || 0)]; })).forEach(function (t) {
+      var b = document.createElement("button"); b.type = "button"; b.textContent = t[1]; b.setAttribute("aria-pressed", String(pubTag === t[0]));
+      b.addEventListener("click", function () { pubTag = t[0]; pubShown = 200; renderPub(); });
+      seg.appendChild(b);
+    });
+    var rows = pubRows(false), body = $("pubBody"); body.innerHTML = "";
+    rows.slice(0, pubShown).forEach(function (x) {
+      var d = DB[x[7]], la = x[1] / 1e5, lo = x[2] / 1e5;
+      var tr = document.createElement("tr"); tr.className = "clickable";
+      tr.addEventListener("click", function () { q.value = x[0]; openPoint(la, lo, x[0], PUB.tags[x[3]], true); });
+      var td = document.createElement("td"); td.appendChild(document.createTextNode(x[0]));
+      var ml = document.createElement("span"); ml.className = "minilinks";
+      linksFor(x[0], la, lo, x[0] + " " + (d ? d[2] : "") + " " + x[6]).forEach(function (l) {
+        var a = document.createElement("a"); a.href = l[3]; a.target = "_blank"; a.rel = "noopener"; a.textContent = l[1]; a.title = l[0] + "에서 보기";
+        a.addEventListener("click", function (ev) { ev.stopPropagation(); }); ml.appendChild(a);
+      });
+      td.appendChild(ml);
+      var sm = document.createElement("span"); sm.className = "small-muted"; sm.textContent = (x[5] ? x[5] + " · " : "") + x[6]; td.appendChild(sm);
+      tr.appendChild(td);
+      var tk = document.createElement("td"); tk.textContent = PUB.tags[x[3]] + (x[4] !== "카페" ? " · " + x[4] : ""); tk.style.fontSize = "13px"; tr.appendChild(tk);
+      var tg = document.createElement("td"); tg.textContent = d ? shortSido(META.sidos[d[1]]) + " " + d[2] : "-"; tg.style.fontSize = "13px"; tr.appendChild(tg);
+      body.appendChild(tr);
+    });
+    if (!rows.length) { var tr0 = document.createElement("tr"); var td0 = document.createElement("td"); td0.colSpan = 3; td0.className = "hint"; td0.textContent = "조건에 맞는 매장이 없습니다."; tr0.appendChild(td0); body.appendChild(tr0); }
+    var more = $("pubMore"); more.hidden = rows.length <= pubShown; more.textContent = "더 보기 (" + fmt(rows.length - pubShown) + "곳 남음)";
+  }
+  $("pubSido").addEventListener("change", function () { try { localStorage.setItem("oc-pub-sido", this.value); } catch (e) {} fillPubSgg(); pubShown = 200; renderPub(); });
+  $("pubSgg").addEventListener("change", function () { pubShown = 200; renderPub(); });
+  var pubT; $("pubQ").addEventListener("input", function () { clearTimeout(pubT); pubT = setTimeout(function () { pubShown = 200; renderPub(); }, 150); });
+  $("pubMore").addEventListener("click", function () { pubShown += 200; renderPub(); });
+
   Promise.all([
     fetch("dongs.json").then(function (r) { return r.json(); }),
     fetch("stations.json").then(function (r) { return r.ok ? r.json() : []; }).catch(function () { return []; })
@@ -1438,6 +1532,7 @@ footer { font-size: 12px; color: var(--muted); display: grid; gap: 4px; }
     META = data.meta; DB = data.d;
     DB.forEach(function (d) { CODE[d[0]] = d; });
     buildGroups();
+    loadPublic();
     var tot = META.mj.reduce(function (a, b) { return a + b; }, 0);
     NAT.share = META.mj.map(function (v) { return v / META.total; });
     NAT.per = META.cafes / META.popTotal * 1000;

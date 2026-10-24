@@ -44,6 +44,25 @@ MAJ = ['음식','소매','수리·개인','과학·기술','교육','시설관�
 BR = [re.compile(x, re.I) for x in [r'메가커피|메가엠지씨|메가MGC','컴포즈','이디야','스타벅스','빽다방','투썸','더벤티','공차','할리스','파스쿠찌','커피빈','엔제리너스','폴바셋','매머드','텐퍼센트','하삼동']]
 SUB = {'빵/도넛': 0, '아이스크림/빙수': 1, '토스트/샌드위치/샐러드': 2, '편의점': 3}
 SW = {'빵/도넛', '아이스크림/빙수', '떡/한과'}
+# 관공서·시니어·공공 운영 매장 추정 규칙 (상호명·건물명)
+#  - 시니어·장애인·사회적경제: 이름이나 건물명에 단서가 있으면 포함 (프랜차이즈여도 포함)
+#  - 복지관·관공서·공공시설: 일반 프랜차이즈 입점 매장과 대학·시청각 등 오탐은 뺀다
+PUB_RULES = [
+    ('시니어·노인일자리', re.compile(r'시니어|실버|(?<!작)은빛|어르신|노인|경로당|청춘카페|카페청춘|청춘드림|인생플러스|노인인력'), False),
+    ('장애인·사회적경제', re.compile(r'장애인|보호작업장|아이갓에브리씽|I ?GOT ?EVERYTHING|굿윌|자활|사회적협동조합|사회적기업|협동조합|꿈앤카페', re.I), False),
+    ('복지관·복지시설', re.compile(r'복지관|복지센터|가족센터|여성회관|여성센터|건강가정'), True),
+    ('관공서 안 매장', re.compile(r'구청|시청(?!각)|군청|도청|청사|행정복지센터|주민센터|동사무소|보건소|교육청|교육지원청|경찰서|소방서|세무서|법원|고용센터|국민연금|건강보험공단|(?<!협)의회'), True),
+    ('공공 문화·체육시설', re.compile(r'(시립|구립|군립|도립|국립|공립).{0,8}(도서관|미술관|박물관|과학관|수목원)|도서관|문화센터|문화회관|예술회관|시민회관|구민회관|군민회관|체육센터|국민체육|청소년수련관|청소년센터|평생학습|휴양림'), True),
+]
+FRANCHISE = re.compile(r'메가커피|메가엠지씨|메가MGC|컴포즈|이디야|스타벅스|빽다방|투썸|더벤티|공차|할리스|파스쿠찌|커피빈|엔제리너스|엔젤리너스|폴바셋|매머드|텐퍼센트|하삼동|시나본|백억커피|포트캔|읍천리|맥켄지|커피니|트리플에이|일마지오|온어스|카페베네|커피에반하다|감성커피|요거프레소|바나프레소|커피나무|탐앤탐스|셀렉토|커피베이|토프레소|그라찌에|카페봄봄|쥬씨|블루샥|하이오|더리터|빈스빈스|드롭탑|커피스미스|달콤커피|파리바게|뚜레쥬르|던킨|배스킨|베스킨|설빙|크리스피|무인|커피명가|카페051|마노핀|커피스토리|전광수|테라로사|블루보틀', re.I)
+NOT_PUBLIC = re.compile(r'대학|캠퍼스|후생복지|학생복지|시청각|[가-힣]대\s?(제\d)?복지관|[가-힣]대점|가톨릭대|협의회')
+def pub_tag(name, bldg):
+    for tag, rx, strict in PUB_RULES:
+        if rx.search(name) or (bldg and rx.search(bldg)):
+            if strict and (FRANCHISE.search(name) or NOT_PUBLIC.search(name) or (bldg and NOT_PUBLIC.search(bldg))): return None
+            return tag
+    return None
+
 LM = re.compile(r'백화점|대형 마트|대형마트|쇼핑|아울렛|면세|종합 병원|종합병원|영화관')
 
 # 원본에서 '카페'로 분류됐지만 상호명으로 보아 다른 업종이 확실한 곳 (부동산·임대·호프·식당·유통 등)
@@ -59,7 +78,7 @@ def not_cafe(name, brand):
     return False
 
 def aggregate(zf):
-    agg, grid, bld, cafes, sweets, lms, foods, rows, nc = {}, {}, {}, [], [], [], [], 0, 0
+    agg, grid, bld, cafes, sweets, lms, foods, pubs, rows, nc = {}, {}, {}, [], [], [], [], [], 0, 0
     for info in zf.infolist():
         if not info.filename.lower().endswith('.csv'): continue
         with zf.open(info) as fh:
@@ -99,6 +118,9 @@ def aggregate(zf):
                 g[0] += 1
                 gi = {0: 1, 1: 2, 4: 3, 9: 4, 3: 5, 8: 6, 2: 7}.get(mi)
                 if gi: g[gi] += 1
+                if sub == '카페' or sub in SW:
+                    bn0 = (f[I['건물명']] or '').strip(); tg = pub_tag(nm2, bn0)
+                    if tg: pubs.append([code, f'{la:.5f}', f'{lo:.5f}', nm2, sub, tg, bn0, addr])
                 if sub in SW: sweets.append([code, f'{la:.5f}', f'{lo:.5f}', nm2, sub, fl, addr])
                 elif cat == '음식' and sub not in ('카페', '카페 아님'): foods.append([f'{la:.5f}', f'{lo:.5f}', nm2, f[I['상권업종중분류명']].strip(), sub])
                 if LM.search(sub): lms.append([code, f'{la:.5f}', f'{lo:.5f}', nm2, sub, addr])
@@ -109,7 +131,7 @@ def aggregate(zf):
                     b2[0] += 1; b2[1] += la; b2[2] += lo
                     if sub == '카페': b2[4] += 1
     print('카페 아님으로 제외', nc, flush=True)
-    return agg, grid, bld, cafes, sweets, lms, foods, rows
+    return agg, grid, bld, cafes, sweets, lms, foods, pubs, rows
 
 def latest_population():
     S.get("https://jumin.mois.go.kr/statMonth.do", timeout=60)
@@ -180,7 +202,7 @@ if __name__ == '__main__':
         json.dump({'changed': False, 'ver': ver, 'pop': popym}, open(f'{OUT}/version.json', 'w')); sys.exit(0)
     open(f'{OUT}/pop.txt', 'w', encoding='utf-8').write(f'POP|{popym}|' + ';'.join(pop) + '|END')
     print('상가 다운로드', nm, flush=True)
-    agg, grid, bld, cafes, sweets, lms, foods, rows = aggregate(download_store(atch, sn, nm))
+    agg, grid, bld, cafes, sweets, lms, foods, pubs, rows = aggregate(download_store(atch, sn, nm))
     dong = [[code, r['s'], r['g'], r['d'], r['n'], round(r['la']/r['ll'], 5) if r['ll'] else None, round(r['lo']/r['ll'], 5) if r['ll'] else None,
              r['mj'], r['cafe'], r['f1'], r['sub'], r['br'], sorted(r['rd'].items(), key=lambda x: -x[1])[:3]] for code, r in agg.items()]
     with open(f'{OUT}/extract.txt', 'w', encoding='utf-8') as w:
@@ -188,7 +210,8 @@ if __name__ == '__main__':
         w.write('\n'.join('\t'.join(x) for x in cafes) + '\n#GRID\n')
         w.write('\n'.join(f'{k[0]},{k[1]},' + ','.join(map(str, g)) for k, g in grid.items()) + '\n#SWEET\n')
         w.write('\n'.join('\t'.join(x) for x in sweets) + '\n#LM\n' + '\n'.join('\t'.join(x) for x in lms) + '\n#FOOD\n')
-        w.write('\n'.join('\t'.join(x) for x in foods) + '\n#BLD\n')
+        w.write('\n'.join('\t'.join(x) for x in foods) + '\n#PUB\n')
+        w.write('\n'.join('\t'.join(x) for x in pubs) + '\n#BLD\n')
         w.write('\n'.join('\t'.join([k.split('|')[0], k.split('|', 1)[1], str(b[0]), f'{b[1]/b[0]:.5f}', f'{b[2]/b[0]:.5f}', b[3], str(b[4]), b[5]]) for k, b in bld.items() if b[0] >= 2))
     json.dump({'changed': True, 'ver': ver, 'pop': popym, 'rows': rows, 'cafes': len(cafes)}, open(f'{OUT}/version.json', 'w'))
     print('완료', ver, popym, rows, len(cafes))

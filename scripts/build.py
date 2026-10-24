@@ -12,7 +12,7 @@ ext, popf, stf, page, out = sys.argv[1:6]
 raw = open(ext, encoding='utf-8').read()
 sec, cur = {}, None
 for line in raw.split('\n'):
-    if line.startswith('#') and line[1:] in ('VER','ROWS','DONG','CAFES','GRID','SWEET','LM','FOOD','BLD'):
+    if line.startswith('#') and line[1:] in ('VER','ROWS','DONG','CAFES','GRID','SWEET','LM','FOOD','PUB','BLD'):
         cur = line[1:]; sec[cur] = []; continue
     if line: sec[cur].append(line)
 ver = sec['VER'][0]; rows = int(sec['ROWS'][0])
@@ -116,6 +116,14 @@ for l in sec.get('FOOD', []):
 for k, v in ft.items(): json.dump(v, open(f'{out}/t/r{k}.json', 'w'), ensure_ascii=False, separators=(',', ':'))
 meta['foodMids'] = mids; meta['foodSubs'] = subs
 json.dump({'meta': meta, 'd': D}, open(out + '/dongs.json', 'w'), ensure_ascii=False, separators=(',', ':'))
+# 관공서·시니어 운영 추정 매장
+tags = []
+P = []
+for l in sec.get('PUB', []):
+    code, la, lo, nm, sub, tg, bn, addr = l.split('\t')
+    if tg not in tags: tags.append(tg)
+    P.append([nm, round(float(la)*1e5), round(float(lo)*1e5), tags.index(tg), sub, bn, addr, idx.get(code, -1)])
+json.dump({'tags': tags, 'p': P}, open(out + '/public.json', 'w'), ensure_ascii=False, separators=(',', ':'))
 shutil.copy(stf, out + '/stations.json')
 
 # 페이지 문구 날짜·숫자 갱신
@@ -126,6 +134,6 @@ h = re.sub(r'상가\(상권\)정보 \d{4}년 \d{1,2}월 \d{1,2}일 기준', f'�
 h = re.sub(r'주민등록 인구통계 \d{4}년 \d{1,2}월 말 기준', f'주민등록 인구통계 {py}년 {int(pm)}월 말 기준', h)
 h = re.sub(r'전국 상가 \d+만 곳', f'전국 상가 {round(rows/10000)}만 곳', h)
 open(out + '/cafe-market.html', 'w', encoding='utf-8').write(h)
-files = sorted(['dongs.json', 'names.json', 'buildings.json', 'stations.json'] + ['t/' + f for f in os.listdir(out + '/t')])
+files = sorted(['dongs.json', 'names.json', 'buildings.json', 'stations.json', 'public.json'] + ['t/' + f for f in os.listdir(out + '/t')])
 json.dump(files, open(out + '/_files.json', 'w'))
 print(json.dumps({'ver': ver, 'pop': popym, 'stores': rows, 'cafes': meta['cafes'], 'dongs': len(D), 'files': len(files)}, ensure_ascii=False))
