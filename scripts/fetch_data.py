@@ -12,8 +12,17 @@ UA = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like 
 S = requests.Session(); S.headers.update({"User-Agent": UA, "Accept-Language": "ko-KR,ko;q=0.9"})
 BASE = "https://www.data.go.kr"; PK = "15083033"; DETAIL = f"{BASE}/data/{PK}/fileData.do"
 
+def get_retry(url, tries=4, **kw):
+    # 공공데이터 서버가 잠깐 안 받는 경우가 있어 몇 번 다시 시도한다
+    for i in range(tries):
+        try:
+            r = S.get(url, **kw); r.raise_for_status(); return r
+        except Exception as e:
+            if i == tries - 1: raise
+            print('다시 시도', i + 1, url, e, flush=True); time.sleep(30 * (i + 1))
+
 def latest_store_version():
-    html = S.get(DETAIL, timeout=60).text
+    html = get_retry(DETAIL, timeout=60).text
     print("data.go.kr 페이지", len(html), flush=True)
     detail_pk = next(p for p in re.findall(r"fn_fileDataDown\(\s*'%s'\s*,\s*'([^']*)'" % PK, html) if p.strip())
     r = S.post(f"{BASE}/tcs/dss/selectFileDataDownload.do?recommendDataYn=Y", data={"publicDataPk": PK, "publicDataDetailPk": detail_pk},
