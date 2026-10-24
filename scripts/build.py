@@ -35,14 +35,23 @@ wy, wmatch = None, 0
 wf = os.path.join(os.path.dirname(ext), 'workers.txt')
 if os.path.exists(wf):
     L = open(wf, encoding='utf-8').read().split('\n'); wy = int(L[0])
-    by = collections.defaultdict(list)
+    SK = [('전라남', '전남'), ('전남', '전남'), ('전라북', '전북'), ('전북', '전북'), ('경상남', '경남'), ('경상북', '경북'), ('충청남', '충남'), ('충청북', '충북')]
+    def skeys(n):  # 시·도 이름 → 짧은 이름들 (통합·개칭된 시·도도 맞추기 위해)
+        ks = {v for k, v in SK if k in n}
+        if '광주' in n: ks.add('광주')
+        return ks or {n[:2]}
+    by = collections.defaultdict(list); bys = collections.defaultdict(list)
     for l in L[1:]:
         if not l: continue
-        sd, sg, dn, w, c = l.split('\t'); by[(_n(sg), _n(dn))].append((sd, int(w)))
+        sd, sg, dn, w, c = l.split('\t')
+        by[(_n(sg), _n(dn))].append((sd, int(w)))
+        for k in skeys(sd): bys[(k, _n(dn))].append((sd, int(w)))
     for d in D:
+        sd = sidos[d[1]]
         c = by.get((_n(d[2]), _n(d[3])), [])
-        if len(c) > 1:
-            sd = sidos[d[1]]; c = [x for x in c if x[0][:2] == sd[:2] or x[0][:2] in sd] or c
+        if len(c) > 1: c = [x for x in c if skeys(x[0]) & skeys(sd)] or c
+        if not c:  # 구가 새로 생기거나 이름이 바뀐 곳: 같은 시·도 안에서 동 이름이 하나뿐이면 맞춘다
+            c = list({x for k in skeys(sd) for x in bys.get((k, _n(d[3])), [])})
         d.append(c[0][1] if len(c) == 1 else None)
         if len(c) == 1: wmatch += 1
 else:
