@@ -349,6 +349,7 @@ footer { font-size: 12px; color: var(--muted); display: grid; gap: 4px; }
           <button type="button" data-f="dc" aria-pressed="false">디저트 카페</button>
           <button type="button" data-f="bk" aria-pressed="false">빵집</button>
           <button type="button" data-f="sw" aria-pressed="false">디저트·떡집</button>
+          <button type="button" data-f="pub" aria-pressed="false">관공서·시니어</button>
         </div>
         <div class="table-scroll near-scroll">
           <table class="rtable" id="nearTable">
@@ -376,26 +377,27 @@ footer { font-size: 12px; color: var(--muted); display: grid; gap: 4px; }
 
   <section class="section" id="pub" aria-labelledby="pubTitle">
     <div class="sheet-head">
-      <h2 id="pubTitle">관공서·시니어클럽 매장</h2>
+      <h2 id="pubTitle">관공서·시니어클럽 운영 매장</h2>
       <span class="hint" id="pubMeta">불러오는 중</span>
     </div>
     <div class="sheet">
-      <p class="hint">가게 이름이나 건물 이름에 시니어클럽·노인복지관·자활센터·장애인·협동조합·구청·주민센터·도서관 같은 단서가 있는 카페·빵집을 모았습니다. 운영 주체는 이름으로 추정한 것이니 연락 전 확인하세요. 관공서 안 매장에는 일반 업체가 입점한 곳도 섞여 있습니다.</p>
+      <p class="hint">상호명에 시니어클럽·노인복지관·자활센터·장애인보호작업장·사회적협동조합 같은 운영 단서가 있는 카페·식당·반찬가게와, 구청·주민센터·도서관 같은 공공 건물 안 카페·구내식당을 모았습니다. 이름으로 추정한 것이라 빠지거나 섞인 곳이 있을 수 있어요. 연락 전에 확인하세요.</p>
       <div class="controls">
         <label class="sr" for="pubSido">시·도</label><select id="pubSido"></select>
         <label class="sr" for="pubSgg">시·군·구</label><select id="pubSgg"></select>
         <label class="sr" for="pubQ">이름 검색</label>
+        <label class="sr" for="pubGrp">업종</label><select id="pubGrp"><option value="">모든 업종</option></select>
         <div class="input-wrap" style="min-width:180px;flex:1"><input id="pubQ" type="text" placeholder="이름·건물로 찾기 (예: 시니어클럽)"></div>
       </div>
       <div class="seg" role="group" aria-label="운영 종류" id="pubSeg" style="flex-wrap:wrap;border-radius:12px"></div>
       <div class="table-scroll" style="max-height:560px">
         <table class="rtable">
-          <thead><tr><th scope="col">매장</th><th scope="col">종류</th><th scope="col">지역</th></tr></thead>
+          <thead><tr><th scope="col">매장</th><th scope="col">운영·업종</th><th scope="col">지역</th><th scope="col" class="r" id="pubDistH">거리</th></tr></thead>
           <tbody id="pubBody"></tbody>
         </table>
       </div>
       <button type="button" class="more" id="pubMore" hidden>더 보기</button>
-      <p class="hint">매장을 누르면 위에서 그 자리 상권을 분석합니다.</p>
+      <p class="hint" id="pubFoot">위에서 분석한 곳에서 가까운 순입니다. 매장을 누르면 그 자리 상권을 분석합니다.</p>
     </div>
   </section>
 
@@ -667,7 +669,7 @@ footer { font-size: 12px; color: var(--muted); display: grid; gap: 4px; }
     });
     return plLoading;
   }
-  function placeLabel(t) { return t === "c" ? "카페" : t === "b0" ? "빵집" : t === "b1" ? "디저트" : t === "b2" ? "떡집" : t.indexOf("L:") === 0 ? t.slice(2) : "가게"; }
+  function placeLabel(t) { if (t && t.indexOf("P:") === 0) return t.slice(2); return t === "c" ? "카페" : t === "b0" ? "빵집" : t === "b1" ? "디저트" : t === "b2" ? "떡집" : t.indexOf("L:") === 0 ? t.slice(2) : "가게"; }
   function searchPlaces(raw, limit) {
     if (!PL) return [];
     var toks = raw.map(function (w) { return w.toLowerCase(); }), out = [];
@@ -679,8 +681,15 @@ footer { font-size: 12px; color: var(--muted); display: grid; gap: 4px; }
     }
     for (var j = 0; j < PL.nm.length && out.length < 900; j++) {
       var h2 = PL.nmHay[j]; if (h2.indexOf(first) < 0) continue;
+      if (PUB && PUB.key && PUB.key[PL.nm[j][1] + "," + PL.nm[j][2]] === PL.nm[j][0]) continue;
       if (!toks.every(function (w) { return h2.indexOf(w) >= 0; })) continue;
       out.push([(PL.nmName[j] === toks.join("") ? 0.5 : PL.nmName[j].indexOf(first) === 0 ? 1.5 : 2.5) * 1e6, { t: "nm", p: PL.nm[j] }]);
+    }
+    if (PUB && PUB.hay) for (var k = 0; k < PUB.p.length && out.length < 1000; k++) {
+      var h3 = PUB.hay[k]; if (h3.indexOf(first) < 0) continue;
+      if (!toks.every(function (w) { return h3.indexOf(w) >= 0; })) continue;
+      var pp = PUB.p[k];
+      out.push([(PUB.name[k] === toks.join("") ? 0.4 : PUB.name[k].indexOf(first) === 0 ? 1.4 : 2.4) * 1e6, { t: "nm", p: [pp[0], pp[1], pp[2], "P:" + PUB.tags[pp[3]] + " · " + PUB.groups[pp[8] || 0], pp[7]] }]);
     }
     out.sort(function (a, b) { return a[0] - b[0]; });
     return out.slice(0, limit).map(function (x) { return x[1]; });
@@ -930,6 +939,8 @@ footer { font-size: 12px; color: var(--muted); display: grid; gap: 4px; }
     var s3 = document.createElement("span"); s3.className = "hint"; s3.style.width = "100%";
     s3.textContent = "빵집 " + nBk + "곳" + (nBk ? " (개인 " + (nBk - nBkFr) + ")" : "") + " · 디저트 " + nDs + " · 떡집 " + nTk + (stop.length ? " · " + stop.join(", ") : "");
     ml.appendChild(s3);
+    var np = pubNear(R);
+    if (np.length) { var s5 = document.createElement("span"); s5.className = "hint"; s5.style.width = "100%"; s5.textContent = "관공서·시니어 운영 매장 " + np.length + "곳: " + np.slice(0, 3).map(function (c) { return c.name; }).join(", ") + (np.length > 3 ? " 등" : ""); ml.appendChild(s5); }
 
     // 업종 막대
     $("barsLabel").textContent = "반경 " + rl + " 가게 구성 (검은 선은 전국 평균)";
@@ -954,8 +965,9 @@ footer { font-size: 12px; color: var(--muted); display: grid; gap: 4px; }
     $("nearTitle").textContent = "반경 " + rl + " 카페·빵집·디저트 " + fmt(state.near.length) + "곳";
     var nIndie = inC.filter(function (c) { return c.b < 0; }).length;
     state.nearFood = inF;
-    var counts = { all: state.near.length, indie: nIndie, fr: inC.length - nIndie, dc: nDc, bk: nBk, sw: nDs + nTk, food: state.foodOn ? inF.length : foodN };
-    var names = { all: "카페·빵집·디저트", indie: "개인 카페", fr: "프랜차이즈 카페", dc: "디저트 카페", bk: "빵집", sw: "디저트·떡집", food: "음식점" };
+    state.nearPub = pubNear(R);
+    var counts = { all: state.near.length, indie: nIndie, fr: inC.length - nIndie, dc: nDc, bk: nBk, sw: nDs + nTk, food: state.foodOn ? inF.length : foodN, pub: state.nearPub.length };
+    var names = { all: "카페·빵집·디저트", indie: "개인 카페", fr: "프랜차이즈 카페", dc: "디저트 카페", bk: "빵집", sw: "디저트·떡집", food: "음식점" , pub: "관공서·시니어"};
     [].forEach.call(document.querySelectorAll("#nearSeg button"), function (b) { b.textContent = names[b.dataset.f] + " " + fmt(counts[b.dataset.f]); });
 
     // 옆 동네
@@ -976,11 +988,12 @@ footer { font-size: 12px; color: var(--muted); display: grid; gap: 4px; }
     $("roadsNote").textContent = roads.length ? d[3] + "에서 카페가 많은 길: " + roads.map(function (r) { return r[0] + " " + r[1] + "곳"; }).join(", ") : "";
 
     syncCalc(false);
+    pubFollow();
     lastReport = { name: state.station ? stationLabel(state.station) : state.place || d[3], d: d, R: R, inC: inC.length, fr: fr.length, low: low, stores: stores, per: per };
   }
   var lastReport = null;
 
-  function dotColorVar(c) { if (c.t === "f") return "var(--food)"; return c.t === "c" ? (c.b >= 0 ? "var(--roast)" : "var(--signal)") : c.k === 0 ? "var(--amber)" : "var(--berry)"; }
+  function dotColorVar(c) { if (c.t === "f" || c.t === "p") return "var(--food)"; return c.t === "c" ? (c.b >= 0 ? "var(--roast)" : "var(--signal)") : c.k === 0 ? "var(--amber)" : "var(--berry)"; }
   var NAVER = "#03C75A", KAKAO = "#F2C200", GOOGLE = "#4285F4";
   function enc(x) { return encodeURIComponent(x); }
   function linksFor(name, lat, lon, query) {
@@ -1017,7 +1030,7 @@ footer { font-size: 12px; color: var(--muted); display: grid; gap: 4px; }
   function renderNear() {
     var body = $("nearBody"); body.innerHTML = "";
     var f = state.nearFilter;
-    var all = f === "food" ? (state.nearFood || []) : state.near.filter(function (c) {
+    var all = f === "food" ? (state.nearFood || []) : f === "pub" ? (state.nearPub || []) : state.near.filter(function (c) {
       if (f === "all") return true;
       if (f === "indie") return c.t === "c" && c.b < 0;
       if (f === "fr") return c.t === "c" && c.b >= 0;
@@ -1042,7 +1055,7 @@ footer { font-size: 12px; color: var(--muted); display: grid; gap: 4px; }
         ml.appendChild(a);
       });
       td.appendChild(ml);
-      var kind = c.t === "f" ? (META.foodMids[c.mid] || "").trim() + " · " + (META.foodSubs[c.sub] || "") : c.t === "c" ? (c.b >= 0 ? BRANDS[c.b] : c.ds ? "디저트 카페" : "개인 카페") : SKIND[c.k] + (c.b >= 0 ? " · " + SBRANDS[c.b] : "");
+      var kind = c.t === "p" ? c.kindLabel : c.t === "f" ? (META.foodMids[c.mid] || "").trim() + " · " + (META.foodSubs[c.sub] || "") : c.t === "c" ? (c.b >= 0 ? BRANDS[c.b] : c.ds ? "디저트 카페" : "개인 카페") : SKIND[c.k] + (c.b >= 0 ? " · " + SBRANDS[c.b] : "");
       var sm = document.createElement("span"); sm.className = "small-muted"; sm.textContent = kind + (c.addr ? " · " + c.addr : ""); td.appendChild(sm);
       tr.appendChild(td);
       var a = document.createElement("td"); a.className = "r"; a.textContent = fmt(c.m) + "m"; tr.appendChild(a);
@@ -1456,38 +1469,76 @@ footer { font-size: 12px; color: var(--muted); display: grid; gap: 4px; }
   /* ---------------- 시작 ---------------- */
   var CODE = {};
   /* ---------------- 관공서·시니어 매장 ---------------- */
-  var PUB = null, pubTag = -1, pubShown = 200;
+  // 행: [상호, 위도*1e5, 경도*1e5, 분류, 소분류, 건물명, 주소, 동 번호, 업종묶음]
+  var PUB = null, pubTag = -1, pubShown = 200, pubRegionTouched = false;
   function loadPublic() {
     fetch("public.json").then(function (r) { return r.ok ? r.json() : null; }).catch(function () { return null; }).then(function (d) {
       if (!d || !d.p) { $("pubMeta").textContent = "자료를 준비 중입니다"; return; }
-      PUB = d;
-      $("pubMeta").textContent = "전국 " + fmt(d.p.length) + "곳 · " + META.v.slice(0, 4) + "년 " + Number(META.v.slice(4, 6)) + "월 기준";
+      PUB = d; PUB.groups = d.groups || ["카페", "빵·디저트", "음식점", "반찬·식품·소매", "세탁·수리·기타"];
+      var lc = function (x) { return norm(x).toLowerCase(); };
+      PUB.hay = d.p.map(function (x) { var dd = DB[x[7]]; return lc(x[0] + x[5] + (dd ? dd[2] + dd[3] : "")); });
+      PUB.name = d.p.map(function (x) { return lc(x[0]); });
+      PUB.key = {}; d.p.forEach(function (x) { PUB.key[x[1] + "," + x[2]] = x[0]; });
+      $("pubMeta").textContent = "전국 " + fmt(d.p.length) + "곳 · 상가정보 " + META.v.slice(0, 4) + "년 " + Number(META.v.slice(4, 6)) + "월 기준";
       var ss = $("pubSido"); ss.innerHTML = "";
       var o = document.createElement("option"); o.value = ""; o.textContent = "전국"; ss.appendChild(o);
       META.sidos.forEach(function (sd, i) { var e = document.createElement("option"); e.value = String(i); e.textContent = sd; ss.appendChild(e); });
-      try { var sv = localStorage.getItem("oc-pub-sido"); if (sv && META.sidos[+sv]) ss.value = sv; } catch (e) {}
+      var gs = $("pubGrp"); PUB.groups.forEach(function (g, i) { var e = document.createElement("option"); e.value = String(i); e.textContent = g; gs.appendChild(e); });
+      try { var sv = localStorage.getItem("oc-pub-sido"); if (sv && META.sidos[+sv]) { ss.value = sv; pubRegionTouched = true; } } catch (e) {}
       fillPubSgg(); renderPub();
+      if (state.dong) analyze(true);  // 주변 목록에도 반영
     });
   }
   function fillPubSgg() {
-    var g = $("pubSgg"); g.innerHTML = "";
+    var g = $("pubSgg"), keep = g.value; g.innerHTML = "";
     var o = document.createElement("option"); o.value = ""; o.textContent = "시·군·구 전체"; g.appendChild(o);
     var sv = $("pubSido").value; g.disabled = sv === "";
     if (sv === "") return;
     var set = {};
     PUB.p.forEach(function (x) { var d = DB[x[7]]; if (d && String(d[1]) === sv) set[d[2]] = 1; });
     Object.keys(set).sort().forEach(function (k) { var e = document.createElement("option"); e.value = k; e.textContent = k; g.appendChild(e); });
+    if (set[keep]) g.value = keep;
+  }
+  function pubLabel(x) { return PUB.tags[x[3]] + " · " + (x[8] === 2 || x[8] === 3 ? x[4] : PUB.groups[x[8] || 0]); }
+  function pubObj(x, m) {
+    var dd = DB[x[7]];
+    return { t: "p", la: x[1] / 1e5, lo: x[2] / 1e5, name: x[0], m: m, addr: x[6], code: dd ? dd[0] : null, fl: "", kindLabel: pubLabel(x) };
+  }
+  // 분석한 자리 반경 안의 공공·시니어 매장
+  function pubNear(R) {
+    if (!PUB || !state.dong) return [];
+    var dLat = R / 110540 + 0.001, out = [];
+    for (var i = 0; i < PUB.p.length; i++) {
+      var x = PUB.p[i], la = x[1] / 1e5, lo = x[2] / 1e5;
+      if (Math.abs(la - state.lat) > dLat) continue;
+      var m = meters(state.lat, state.lon, la, lo);
+      if (m <= R) out.push(pubObj(x, m));
+    }
+    return out.sort(function (a, b) { return a.m - b.m; });
+  }
+  // 분석한 곳이 바뀌면 지역 선택도 그 시·군·구로 (직접 고른 적이 없을 때만)
+  function pubFollow() {
+    if (!PUB) return;
+    if (pubRegionTouched || !state.dong) { renderPub(); return; }
+    var d = state.dong, ss = $("pubSido");
+    if (ss.value !== String(d[1])) { ss.value = String(d[1]); fillPubSgg(); }
+    var has = [].some.call($("pubSgg").options, function (o) { return o.value === d[2]; });
+    $("pubSgg").value = has ? d[2] : "";
+    pubShown = 200; renderPub();
   }
   function pubRows(ignoreTag) {
-    var sv = $("pubSido").value, gv = $("pubSgg").value, qv = norm($("pubQ").value || "").toLowerCase();
-    return PUB.p.filter(function (x) {
-      var d = DB[x[7]];
-      if (sv !== "" && (!d || String(d[1]) !== sv)) return false;
-      if (gv && (!d || d[2] !== gv)) return false;
-      if (!ignoreTag && pubTag >= 0 && x[3] !== pubTag) return false;
-      if (qv && norm(x[0] + x[5] + (d ? d[2] + d[3] : "")).toLowerCase().indexOf(qv) < 0) return false;
-      return true;
-    });
+    var sv = $("pubSido").value, gv = $("pubSgg").value, grp = $("pubGrp").value, qv = norm($("pubQ").value || "").toLowerCase();
+    var out = [];
+    for (var i = 0; i < PUB.p.length; i++) {
+      var x = PUB.p[i], d = DB[x[7]];
+      if (sv !== "" && (!d || String(d[1]) !== sv)) continue;
+      if (gv && (!d || d[2] !== gv)) continue;
+      if (grp !== "" && String(x[8] || 0) !== grp) continue;
+      if (!ignoreTag && pubTag >= 0 && x[3] !== pubTag) continue;
+      if (qv && PUB.hay[i].indexOf(qv) < 0) continue;
+      out.push(x);
+    }
+    return out;
   }
   function renderPub() {
     if (!PUB) return;
@@ -1498,29 +1549,38 @@ footer { font-size: 12px; color: var(--muted); display: grid; gap: 4px; }
       b.addEventListener("click", function () { pubTag = t[0]; pubShown = 200; renderPub(); });
       seg.appendChild(b);
     });
-    var rows = pubRows(false), body = $("pubBody"); body.innerHTML = "";
-    rows.slice(0, pubShown).forEach(function (x) {
-      var d = DB[x[7]], la = x[1] / 1e5, lo = x[2] / 1e5;
-      var tr = document.createElement("tr"); tr.className = "clickable";
+    var hasPt = !!state.dong;
+    var rows = pubRows(false).map(function (x) { return [x, hasPt ? meters(state.lat, state.lon, x[1] / 1e5, x[2] / 1e5) : 0]; });
+    if (hasPt) rows.sort(function (a, b) { return a[1] - b[1]; });
+    var body = $("pubBody"); body.innerHTML = "";
+    rows.slice(0, pubShown).forEach(function (r) {
+      var x = r[0], d = DB[x[7]], la = x[1] / 1e5, lo = x[2] / 1e5;
+      var tr = document.createElement("tr"); tr.className = "clickable"; tr.title = "이 자리 상권 분석";
       tr.addEventListener("click", function () { q.value = x[0]; openPoint(la, lo, x[0], PUB.tags[x[3]], true); });
-      var td = document.createElement("td"); td.appendChild(document.createTextNode(x[0]));
+      var td = document.createElement("td");
+      var dot = document.createElement("span"); dot.className = "brand-dot"; dot.style.background = "var(--food)"; td.appendChild(dot);
+      td.appendChild(document.createTextNode(x[0]));
       var ml = document.createElement("span"); ml.className = "minilinks";
       linksFor(x[0], la, lo, x[0] + " " + (d ? d[2] : "") + " " + x[6]).forEach(function (l) {
-        var a = document.createElement("a"); a.href = l[3]; a.target = "_blank"; a.rel = "noopener"; a.textContent = l[1]; a.title = l[0] + "에서 보기";
+        var a = document.createElement("a"); a.href = l[3]; a.target = "_blank"; a.rel = "noopener"; a.textContent = l[1]; a.title = l[0] + "에서 보기"; a.setAttribute("aria-label", x[0] + " " + l[0] + "에서 보기");
         a.addEventListener("click", function (ev) { ev.stopPropagation(); }); ml.appendChild(a);
       });
       td.appendChild(ml);
       var sm = document.createElement("span"); sm.className = "small-muted"; sm.textContent = (x[5] ? x[5] + " · " : "") + x[6]; td.appendChild(sm);
       tr.appendChild(td);
-      var tk = document.createElement("td"); tk.textContent = PUB.tags[x[3]] + (x[4] !== "카페" ? " · " + x[4] : ""); tk.style.fontSize = "13px"; tr.appendChild(tk);
-      var tg = document.createElement("td"); tg.textContent = d ? shortSido(META.sidos[d[1]]) + " " + d[2] : "-"; tg.style.fontSize = "13px"; tr.appendChild(tg);
+      var tk = document.createElement("td"); tk.textContent = pubLabel(x); tk.style.fontSize = "13px"; tr.appendChild(tk);
+      var tg = document.createElement("td"); tg.textContent = d ? shortSido(META.sidos[d[1]]) + " " + d[2] + " " + d[3] : "-"; tg.style.fontSize = "13px"; tr.appendChild(tg);
+      var tm = document.createElement("td"); tm.className = "r"; tm.textContent = hasPt ? (r[1] >= 1000 ? (r[1] / 1000).toFixed(r[1] >= 10000 ? 0 : 1) + "km" : fmt(r[1]) + "m") : "-"; tr.appendChild(tm);
       body.appendChild(tr);
     });
-    if (!rows.length) { var tr0 = document.createElement("tr"); var td0 = document.createElement("td"); td0.colSpan = 3; td0.className = "hint"; td0.textContent = "조건에 맞는 매장이 없습니다."; tr0.appendChild(td0); body.appendChild(tr0); }
+    if (!rows.length) { var tr0 = document.createElement("tr"); var td0 = document.createElement("td"); td0.colSpan = 4; td0.className = "hint"; td0.textContent = "조건에 맞는 매장이 없습니다. 지역을 넓히거나 다른 이름으로 찾아보세요."; tr0.appendChild(td0); body.appendChild(tr0); }
+    var place = state.station ? stationLabel(state.station) : state.place ? state.place : state.dong ? state.dong[3] : "";
+    $("pubFoot").textContent = (place ? place + "에서 가까운 순입니다. " : "") + "매장을 누르면 그 자리 상권을 분석합니다.";
     var more = $("pubMore"); more.hidden = rows.length <= pubShown; more.textContent = "더 보기 (" + fmt(rows.length - pubShown) + "곳 남음)";
   }
-  $("pubSido").addEventListener("change", function () { try { localStorage.setItem("oc-pub-sido", this.value); } catch (e) {} fillPubSgg(); pubShown = 200; renderPub(); });
-  $("pubSgg").addEventListener("change", function () { pubShown = 200; renderPub(); });
+  $("pubSido").addEventListener("change", function () { pubRegionTouched = true; try { localStorage.setItem("oc-pub-sido", this.value); } catch (e) {} fillPubSgg(); pubShown = 200; renderPub(); });
+  $("pubSgg").addEventListener("change", function () { pubRegionTouched = true; pubShown = 200; renderPub(); });
+  $("pubGrp").addEventListener("change", function () { pubShown = 200; renderPub(); });
   var pubT; $("pubQ").addEventListener("input", function () { clearTimeout(pubT); pubT = setTimeout(function () { pubShown = 200; renderPub(); }, 150); });
   $("pubMore").addEventListener("click", function () { pubShown += 200; renderPub(); });
 

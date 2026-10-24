@@ -117,13 +117,22 @@ for k, v in ft.items(): json.dump(v, open(f'{out}/t/r{k}.json', 'w'), ensure_asc
 meta['foodMids'] = mids; meta['foodSubs'] = subs
 json.dump({'meta': meta, 'd': D}, open(out + '/dongs.json', 'w'), ensure_ascii=False, separators=(',', ':'))
 # 관공서·시니어 운영 추정 매장
-tags = []
+# 행: [상호, 위도*1e5, 경도*1e5, 분류, 소분류, 건물명, 주소, 동 번호, 업종묶음]
+tags = ['시니어·노인일자리', '장애인·자활·사회적경제', '복지관·복지시설', '관공서 안 매장', '공공 문화·체육시설']
+groups = ['카페', '빵·디저트', '음식점', '반찬·식품·소매', '세탁·수리·기타']
+def _grp(sub, cat):
+    if sub == '카페': return 0
+    if sub in ('빵/도넛', '아이스크림/빙수', '떡/한과'): return 1
+    if cat == '음식': return 2
+    if cat == '소매': return 3
+    return 4
 P = []
 for l in sec.get('PUB', []):
-    code, la, lo, nm, sub, tg, bn, addr = l.split('\t')
+    f = l.split('\t')
+    code, la, lo, nm, sub, tg, bn, addr = f[:8]; cat = f[8] if len(f) > 8 else '음식'
     if tg not in tags: tags.append(tg)
-    P.append([nm, round(float(la)*1e5), round(float(lo)*1e5), tags.index(tg), sub, bn, addr, idx.get(code, -1)])
-json.dump({'tags': tags, 'p': P}, open(out + '/public.json', 'w'), ensure_ascii=False, separators=(',', ':'))
+    P.append([nm, round(float(la)*1e5), round(float(lo)*1e5), tags.index(tg), sub, bn, addr, idx.get(code, -1), _grp(sub, cat)])
+json.dump({'tags': tags, 'groups': groups, 'p': P}, open(out + '/public.json', 'w'), ensure_ascii=False, separators=(',', ':'))
 shutil.copy(stf, out + '/stations.json')
 
 # 페이지 문구 날짜·숫자 갱신

@@ -10,7 +10,7 @@ rep('<div class="wrap">', '</head>\n<body>\n<div class="wrap">')
 rep('<canvas id="localMap" role="img" aria-label="선택한 동네 주변 가게와 카페 위치"></canvas>', '<canvas id="localMap" role="img" aria-label="선택한 동네 주변 가게와 카페 위치"></canvas>\n          <div id="satMap" style="position:absolute;inset:0;z-index:4"></div>')
 rep('    lastDraw = [cafes, grid, sweets, labels, foods];', '    lastDraw = [cafes, grid, sweets, labels, foods];\n    if (window.OCMAP && window.OCMAP.ready) { window.OCMAP.draw(state, cafes, sweets, ST, foods); return; }')
 rep('  function pxToLatLon(cx, cy) {', '''  window.OC_pickAt = function (lat, lon) { if (!DB) return; state.lat = lat; state.lon = lon; pickHere(); };
-  window.OC_kind = function (c) { if (c.t === "f") return (META.foodMids[c.mid] || "").trim() + " · " + (META.foodSubs[c.sub] || ""); return c.t === "c" ? (c.b >= 0 ? BRANDS[c.b] : c.ds ? "디저트 카페" : "개인 카페") : SKIND[c.k] + (c.b >= 0 ? " · " + SBRANDS[c.b] : ""); };
+  window.OC_kind = function (c) { if (c.t === "p") return c.kindLabel; if (c.t === "f") return (META.foodMids[c.mid] || "").trim() + " · " + (META.foodSubs[c.sub] || ""); return c.t === "c" ? (c.b >= 0 ? BRANDS[c.b] : c.ds ? "디저트 카페" : "개인 카페") : SKIND[c.k] + (c.b >= 0 ? " · " + SBRANDS[c.b] : ""); };
   window.OC_links = function (c) { var dd = CODE[c.code], sg = dd ? dd[2] : (state.dong ? state.dong[2] : ""); return linksFor(c.name, c.la, c.lo, c.name + " " + sg + " " + (c.addr || "")); };
   window.OC_redraw = function () { if (lastDraw) drawMap(lastDraw[0], lastDraw[1], lastDraw[2], lastDraw[3], lastDraw[4]); };
   function pxToLatLon(cx, cy) {''')
