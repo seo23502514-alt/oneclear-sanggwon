@@ -88,9 +88,14 @@ def open_csv(kind):
     ct = r.headers.get('content-type', '')
     print(kind, r.status_code, ct, r.headers.get('content-length'), flush=True)
     assert 'csv' in ct, f'{kind}: CSV가 아닌 응답 {ct}'
-    raw = io.BufferedReader(r.raw, buffer_size=1 << 20)
-    r.raw.decode_content = True
-    return io.TextIOWrapper(raw, encoding='cp949', errors='replace', newline='')
+    path = os.path.join(os.environ.get('RUNNER_TEMP', '/tmp'), kind + '.csv')
+    size = 0
+    with open(path, 'wb') as fo:
+        for ch in r.iter_content(1 << 20): fo.write(ch); size += len(ch)
+    r.close()
+    print(f'::notice::{kind} 받음 {size:,} 바이트', flush=True)
+    assert size > 50_000_000, f'{kind}: 파일이 너무 작음 {size}'
+    return open(path, encoding='cp949', errors='replace', newline='')
 
 
 def main():
