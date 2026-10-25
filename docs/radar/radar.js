@@ -574,19 +574,29 @@
   var cfg = window.OC_CONFIG || {};
   if (!cfg.NAVER_CLIENT_ID) { start(false); return; }
   var tried = false;
+  function fallbackNote(why) {
+    var n = $("mapNote"); n.hidden = false; n.innerHTML = "";
+    n.appendChild(document.createTextNode("네이버 지도를 " + why + " 대신 기본 지도로 보여 드립니다. "));
+    var a = el("a", null, "다시 불러오기"); a.href = location.href; a.onclick = function (e) { e.preventDefault(); location.reload(); }; n.appendChild(a);
+  }
+  function upgradeToNaver() {
+    // 기본 지도로 먼저 띄웠는데 네이버 지도가 늦게 도착한 경우
+    if (MAP && MAP === drawnMade) { MAP = null; $("drawMap").style.display = "none"; $("mapNote").hidden = true; }
+    start(true);
+  }
   function loadNaver(param) {
     var s = document.createElement("script"), done = false;
     window.navermap_authFailure = function () {
       if (done) return; done = true;
-      resetMap();
+      if (MAP && MAP !== drawnMade) resetMap();
       if (param === "ncpKeyId" && !tried) { tried = true; loadNaver("ncpClientId"); return; }
-      start(false);
+      start(false); fallbackNote("인증하지 못해");
     };
     s.src = "https://oapi.map.naver.com/openapi/v3/maps.js?" + param + "=" + encodeURIComponent(cfg.NAVER_CLIENT_ID);
-    s.onload = function () { if (!done && window.naver && naver.maps) start(true); };
-    s.onerror = function () { start(false); };
+    s.onload = function () { if (!done && window.naver && naver.maps) upgradeToNaver(); };
+    s.onerror = function () { if (!MAP) { start(false); fallbackNote("불러오지 못해(네트워크나 광고 차단 확인)"); } };
     document.head.appendChild(s);
   }
   loadNaver("ncpKeyId");
-  setTimeout(function () { if (!MAP) start(false); }, 8000);
+  setTimeout(function () { if (!MAP) { start(false); fallbackNote("불러오는 데 오래 걸려"); } }, 15000);
 })();
