@@ -997,11 +997,15 @@ footer { font-size: 12px; color: var(--muted); display: grid; gap: 4px; }
   function dotColorVar(c) { if (c.t === "f" || c.t === "p") return "var(--food)"; return c.t === "c" ? (c.b >= 0 ? "var(--roast)" : "var(--signal)") : c.k === 0 ? "var(--amber)" : "var(--berry)"; }
   var NAVER = "#03C75A", KAKAO = "#F2C200", GOOGLE = "#4285F4";
   function enc(x) { return encodeURIComponent(x); }
-  function linksFor(name, lat, lon, query) {
+  // 네이버 지도 좌표(웹 메르카토르 m). 검색 결과를 그 자리 중심으로 보여 주게 한다
+  function merc(lat, lon) { var x = lon * 20037508.34 / 180, y = Math.log(Math.tan((90 + lat) * Math.PI / 360)) * 20037508.34 / Math.PI; return x.toFixed(2) + "," + y.toFixed(2); }
+  // 지도 앱 검색어는 상호만. 주소·지역을 길게 붙이면 네이버에서 가게를 못 찾는다
+  function linksFor(name, lat, lon) {
+    var nm = String(name).replace(/\s+/g, " ").trim();
     return [
-      ["네이버지도", "N", NAVER, "https://map.naver.com/p/search/" + enc(query)],
-      ["카카오맵", "K", KAKAO, "https://map.kakao.com/link/map/" + enc(name.replace(/,/g, " ")) + "," + lat + "," + lon],
-      ["구글지도", "G", GOOGLE, "https://www.google.com/maps/search/?api=1&query=" + enc(query)]
+      ["네이버지도", "N", NAVER, "https://map.naver.com/p/search/" + enc(nm) + "?c=" + merc(lat, lon) + ",17,0,0,0,dh"],
+      ["카카오맵", "K", KAKAO, "https://map.kakao.com/link/map/" + enc(nm.replace(/,/g, " ")) + "," + lat + "," + lon],
+      ["구글지도", "G", GOOGLE, "https://www.google.com/maps/search/?api=1&query=" + enc(nm + " " + (+lat).toFixed(5) + "," + (+lon).toFixed(5))]
     ];
   }
   function renderMapLinks() {
@@ -1010,7 +1014,7 @@ footer { font-size: 12px; color: var(--muted); display: grid; gap: 4px; }
     var place = state.station ? stationLabel(state.station) : state.place ? state.place : d[2] + " " + d[3];
     var lab = document.createElement("span"); lab.textContent = place + " 주변 카페를"; box.appendChild(lab);
     [
-      ["네이버지도", NAVER, "https://map.naver.com/p/search/" + enc(place + " 카페")],
+      ["네이버지도", NAVER, "https://map.naver.com/p/search/" + enc("카페") + "?c=" + merc(state.lat, state.lon) + ",16,0,0,0,dh"],
       ["카카오맵", KAKAO, "https://map.kakao.com/link/search/" + enc(place + " 카페")],
       ["구글지도", GOOGLE, "https://www.google.com/maps/search/" + enc("카페") + "/@" + state.lat.toFixed(6) + "," + state.lon.toFixed(6) + ",16z"]
     ].forEach(function (l) {
