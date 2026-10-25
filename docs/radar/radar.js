@@ -158,19 +158,13 @@
     return (p.k ? state.show.open : state.show.close) && (state.kind === "all" || String(p.k) === state.kind) && (state.type === "all" || String(p.t) === state.type);
   }
   function kindLabel(p) { return p.t === 1 ? (p.brand || "프랜차이즈") : TNAME[p.t]; }
-  // 지도 앱 검색어: 상호만 깔끔하게 (괄호·법인 표기·'한시적' 등 빼기). 지역 이름을 길게 붙이면 네이버에서 검색이 안 된다
-  function cleanName(n) {
-    return n.replace(/\(.*?\)|（.*?）/g, " ").replace(/주식회사|\(주\)|㈜|농업회사법인|사회적협동조합|협동조합|한시적영업|한시적/g, " ")
-      .replace(/[\[\]"']/g, " ").replace(/\s+/g, " ").trim() || n;
-  }
   function areaShort(p) { var t = String(p.area || "").split(" "); return t[t.length - 1] || ""; }
   function merc(lat, lon) { var x = lon * 20037508.34 / 180, y = Math.log(Math.tan((90 + lat) * Math.PI / 360)) * 20037508.34 / Math.PI; return x.toFixed(2) + "," + y.toFixed(2); }
   function links(p) {
-    var e = encodeURIComponent, nm = cleanName(p.name), hasXY = p.lat != null;
-    // 좌표가 있으면 그 자리를 중심으로 상호만 검색, 없으면 '구 + 상호'로 검색
+    var e = encodeURIComponent, nm = String(p.name).replace(/\s+/g, " ").trim(), hasXY = p.lat != null;
+    // 인허가에 등록된 상호 그대로 검색. 좌표가 있으면 그 자리를 중심으로, 없으면 '구 + 상호'로
     var nq = hasXY ? nm : (areaShort(p) + " " + nm);
     var L = [["네이버지도", "N", "https://map.naver.com/p/search/" + e(nq) + (hasXY ? "?c=" + merc(p.lat, p.lon) + ",17,0,0,0,dh" : "")]];
-    if (hasXY) L.push(["네이버 위치", "N·", "https://map.naver.com/p/?c=" + merc(p.lat, p.lon) + ",18,0,0,0,dh"]);
     L.push(["카카오맵", "K", hasXY ? "https://map.kakao.com/link/map/" + e(nm.replace(/,/g, " ")) + "," + p.lat + "," + p.lon : "https://map.kakao.com/?q=" + e(areaShort(p) + " " + nm)]);
     L.push(["구글지도", "G", "https://www.google.com/maps/search/?api=1&query=" + e(hasXY ? nm + " " + p.lat + "," + p.lon : areaShort(p) + " " + nm)]);
     return L;
@@ -206,10 +200,10 @@
     pop.appendChild(el("div", "hint", (LONG[p.sido] || p.sido) + " " + p.area));
     pop.appendChild(el("div", null, st + " · " + kindLabel(p)));
     var lk = el("div", "poplinks");
-    links(p).forEach(function (l, k) { var a = el("a", k < 2 && l[1].charAt(0) === "N" ? "nv" : null, l[0] + " ↗"); a.href = l[2]; a.target = "_blank"; a.rel = "noopener"; lk.appendChild(a); });
+    links(p).forEach(function (l, k) { var a = el("a", k === 0 ? "nv" : null, l[0] + " ↗"); a.href = l[2]; a.target = "_blank"; a.rel = "noopener"; lk.appendChild(a); });
     pop.appendChild(lk);
-    pop.appendChild(el("div", "hint", p.k === 0 || (p.act === 0) ? "문 닫은 가게는 지도 앱에서 지워져 검색이 안 될 수 있어요. '네이버 위치'로 그 자리를 보세요."
-      : "막 문을 연 가게는 아직 지도 앱에 등록 전일 수 있어요. 검색이 안 되면 '네이버 위치'로 그 자리를 보세요."));
+    pop.appendChild(el("div", "hint", p.k === 0 || (p.act === 0) ? "문 닫은 가게는 지도 앱에서 지워져 검색이 안 될 수 있어요."
+      : "막 문을 연 가게는 아직 지도 앱에 등록 전일 수 있어요."));
     pop.hidden = false;
   }
   function focusPoint(p) {
@@ -450,7 +444,7 @@
   function nameCell(p) {
     var td = el("td"); td.appendChild(document.createTextNode(p.name));
     var ml = el("span", "minilinks");
-    links(p).filter(function (l) { return l[1] !== "N·"; }).forEach(function (l) { var a = el("a", null, l[1]); a.href = l[2]; a.target = "_blank"; a.rel = "noopener"; a.title = l[0]; a.onclick = function (e) { e.stopPropagation(); }; ml.appendChild(a); });
+    links(p).forEach(function (l) { var a = el("a", null, l[1]); a.href = l[2]; a.target = "_blank"; a.rel = "noopener"; a.title = l[0]; a.onclick = function (e) { e.stopPropagation(); }; ml.appendChild(a); });
     td.appendChild(ml); return td;
   }
   function renderList() {
