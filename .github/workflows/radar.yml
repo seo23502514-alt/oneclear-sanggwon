@@ -34,6 +34,7 @@ jobs:
         run: |
           if git diff --quiet docs/radar/data.js; then echo "바뀐 자료 없음"; exit 0; fi
           sed -i "s/<span id=\"srcDate\">[^<]*<\/span>/<span id=\"srcDate\">${RADAR_DATE}<\/span>/" docs/radar/index.html
+          sed -i "s/src=\"data\.js[^\"]*\"/src=\"data.js?v=${RADAR_DATE}\"/" docs/radar/index.html
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add docs/radar
