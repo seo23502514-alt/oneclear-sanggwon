@@ -79,9 +79,11 @@ def open_csv(kind):
     info = f"{FILE}/file/{kind}/info"
     # 공공데이터포털 상세 페이지를 거쳐 들어온 것처럼 Referer 를 붙인다 (바로 열면 403)
     get_retry("https://www.data.go.kr/data/15006730/fileData.do", timeout=60)
-    get_retry(info, headers={"Referer": "https://www.data.go.kr/"}, timeout=60)
+    ri = S.get(info, headers={"Referer": "https://www.data.go.kr/"}, timeout=60)
+    print(f'::notice::{kind} 안내 페이지 {ri.status_code} {ri.url}', flush=True)
     S.get(f"{FILE}/file/validate/download-count", headers={"Referer": info}, timeout=60)
     r = S.get(f"{FILE}/file/download/{kind}/info", headers={"Referer": info}, stream=True, timeout=1800)
+    print(f'::notice::{kind} 다운로드 응답 {r.status_code} {r.headers.get("content-type")} {r.headers.get("content-length")}', flush=True)
     r.raise_for_status()
     ct = r.headers.get('content-type', '')
     print(kind, r.status_code, ct, r.headers.get('content-length'), flush=True)
@@ -216,4 +218,9 @@ def main():
 
 
 if __name__ == '__main__':
-    main()
+    try:
+        main()
+    except Exception as e:
+        # GitHub 실행 화면 위쪽(Annotations)에 바로 보이도록
+        print(f'::error::{type(e).__name__}: {str(e)[:400]}', flush=True)
+        raise
