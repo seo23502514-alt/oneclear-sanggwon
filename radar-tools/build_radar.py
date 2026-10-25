@@ -211,7 +211,7 @@ def main():
         'prov': od['prov'], 'muni': od['muni'],
     }
     tot = sum(map(sum, STOCK)); old_tot = sum(map(sum, od['stock']))
-    print('기준일', maxD, '영업 중', old_tot, '->', tot, '시·군·구', len(areas), '브랜드', len(BR), '가게 점', len(PTS), '시니어', len(SENL), flush=True)
+    print(f'::notice::기준일 {maxD} · 영업 중 {old_tot:,} → {tot:,} · 시·군·구 {len(areas)} · 브랜드 {len(BR)} · 가게 점 {len(PTS)} · 시니어 {len(SENL)}', flush=True)
     assert maxD >= od.get('maxD', ''), '기준일이 예전보다 이릅니다'
     assert 0.85 <= tot / max(1, old_tot) <= 1.15, '영업 중 카페 수가 15% 넘게 바뀌어 멈춥니다'
     if DRY:
