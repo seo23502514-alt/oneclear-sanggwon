@@ -1,0 +1,42 @@
+name: 카페 개폐업 레이더 주간 갱신
+
+on:
+  schedule:
+    - cron: "13 13 * * 1"   # 매주 월요일 22:13 (한국 시간)
+  workflow_dispatch:
+    inputs:
+      dry:
+        description: "받아서 요약만 보고 저장하지 않기"
+        type: boolean
+        default: false
+
+permissions:
+  contents: write
+
+concurrency:
+  group: radar
+  cancel-in-progress: false
+
+jobs:
+  radar:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install requests pyproj
+      - name: 인허가 파일 받아 집계
+        run: python radar-tools/build_radar.py docs/radar/data.js ${{ inputs.dry && '--dry' || '' }}
+      - name: 저장
+        if: ${{ !inputs.dry }}
+        run: |
+          if git diff --quiet docs/radar/data.js; then echo "바뀐 자료 없음"; exit 0; fi
+          sed -i "s/<span id=\"srcDate\">[^<]*<\/span>/<span id=\"srcDate\">${RADAR_DATE}<\/span>/" docs/radar/index.html
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add docs/radar
+          git commit -m "radar: 인허가 자료 ${RADAR_DATE}까지 반영"
+          git pull --rebase origin main
+          git push

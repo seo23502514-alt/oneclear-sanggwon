@@ -19,8 +19,11 @@
   function dec(s) { var out = []; for (var i = 0; i < s.length; i++) { if (s[i] === "'") { var j = s.indexOf("'", i + 1); out.push(parseInt(s.slice(i + 1, j), 36)); i = j; } else out.push(AIX[s[i]]); } return out; }
 
   var MAXD = D.maxD;
-  var W0 = Date.UTC(2024, 9, 28), DAY = 864e5, NW = 104, NM = 142, PT0 = "2026-09-01";
+  var DAY = 864e5, W0 = Date.parse((D.w0 || "2024-10-28") + "T00:00:00Z"), PT0 = D.pt0 || "2026-09-01";
+  var NM = 0, NW = 0;
+  var PT0_TXT = PT0.slice(0, 4) + "년 " + (+PT0.slice(5, 7)) + "월";
   var ST = D.st.map(function (r) { return r.map(function (x) { return { m: dec(x[0]), w: dec(x[1]) }; }); });
+  NM = ST[0][0].m.length / 2; NW = ST[0][0].w.length / 2;
   var AREAS = D.areas.map(function (a) { return { name: a[0], sido: a[0].split(" ")[0], short: a[0].split(" ").slice(1).join(" "), lat: a[1], lon: a[2], s: a[3], m: dec(a[4]), w: dec(a[5]) }; })
     .filter(function (a) { return a.sido !== "기타" && (a.s > 0 || a.m.some(function (v) { return v > 0; })); });
   var AREA_BY = {}; AREAS.forEach(function (a) { AREA_BY[a.name] = a; });
@@ -29,6 +32,7 @@
   var SEN = D.sen.map(function (s, i) { return { i: i, pd: s[0], cd: s[1], act: s[2], name: s[3], sido: s[4], area: s[5], lat: s[6], lon: s[7], tmp: s[8], t: 3 }; });
   var TOTAL_STOCK = D.stock.reduce(function (s, r) { return s + r.reduce(function (x, y) { return x + y; }, 0); }, 0);
   $("ledeStock").textContent = fmt(TOTAL_STOCK);
+  $("ptSince").textContent = PT0_TXT;
   $("srcDate").textContent = MAXD.slice(0, 4) + "년 " + (+MAXD.slice(5, 7)) + "월 " + (+MAXD.slice(8)) + "일";
 
   // ---------- 기간 ----------
@@ -41,11 +45,11 @@
     m: { n: NM, base: "m", name: "달", span: function (i) { var y = 2015 + Math.floor(i / 12), m = i % 12; return [iso(Date.UTC(y, m, 1)), iso(Date.UTC(y, m + 1, 0))]; },
       label: function (i) { return (2015 + Math.floor(i / 12)) + "년 " + (i % 12 + 1) + "월"; },
       short: function (i) { return (i % 12 === 0 ? String(2015 + i / 12).slice(2) + "." : "") + (i % 12 + 1); }, cols: function (i) { return [i]; }, yoy: 12 },
-    q: { n: 48, base: "m", name: "분기", span: function (i) { var y = 2015 + Math.floor(i / 4), q = i % 4; return [iso(Date.UTC(y, q * 3, 1)), iso(Date.UTC(y, q * 3 + 3, 0))]; },
+    q: { n: Math.ceil(NM / 3), base: "m", name: "분기", span: function (i) { var y = 2015 + Math.floor(i / 4), q = i % 4; return [iso(Date.UTC(y, q * 3, 1)), iso(Date.UTC(y, q * 3 + 3, 0))]; },
       label: function (i) { return (2015 + Math.floor(i / 4)) + "년 " + (i % 4 + 1) + "분기"; },
       short: function (i) { return String(2015 + Math.floor(i / 4)).slice(2) + "Q" + (i % 4 + 1); },
       cols: function (i) { return [i * 3, i * 3 + 1, i * 3 + 2].filter(function (x) { return x < NM; }); }, yoy: 4 },
-    y: { n: 12, base: "m", name: "해", span: function (i) { return [(2015 + i) + "-01-01", (2015 + i) + "-12-31"]; },
+    y: { n: Math.ceil(NM / 12), base: "m", name: "해", span: function (i) { return [(2015 + i) + "-01-01", (2015 + i) + "-12-31"]; },
       label: function (i) { return (2015 + i) + "년"; }, short: function (i) { return String(2015 + i); },
       cols: function (i) { return d3.range(i * 12, Math.min(NM, i * 12 + 12)); }, yoy: 1 }
   };
@@ -442,7 +446,7 @@
     var sp = UNITS[state.unit].span(state.idx);
     if (sp[1] < PT0) {
       $("listCount").textContent = "";
-      $("listNote").textContent = "가게 목록은 2026년 9월 이후 기간에서 볼 수 있습니다. 기간을 최근으로 바꿔 보세요.";
+      $("listNote").textContent = "가게 목록은 " + PT0_TXT + " 이후 기간에서 볼 수 있습니다. 기간을 최근으로 바꿔 보세요.";
       return;
     }
     var rs = curPts.filter(function (p) {
@@ -530,7 +534,7 @@
     computeMap();
     var pp = ptsInPeriod(); curPts = pp || [];
     var note = $("mapNote"); note.hidden = !!pp;
-    if (!pp) note.textContent = "가게 점은 2026년 9월 이후 기간에만 있습니다. 지금은 시·도 색만 보입니다.";
+    if (!pp) note.textContent = "가게 점은 " + PT0_TXT + " 이후 기간에만 있습니다. 지금은 시·도 색만 보입니다.";
     MAP.draw();
   }
   function render() {
