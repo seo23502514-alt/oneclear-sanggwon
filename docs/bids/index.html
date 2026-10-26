@@ -64,7 +64,10 @@ h1 { font-family: var(--font-display); font-weight: 800; font-size: clamp(28px, 
 .stamp { font-size: 12px; color: var(--muted); display: flex; gap: 6px 16px; flex-wrap: wrap; }
 
 .stats { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 1px; background: var(--line); border: 1px solid var(--line); border-radius: var(--r); overflow: hidden; }
-.stat { background: var(--sheet); padding: 14px 16px; display: grid; gap: 2px; }
+.stat { background: var(--sheet); padding: 14px 16px; display: grid; gap: 2px; border: 0; font: inherit; color: var(--ink); text-align: left; cursor: pointer; position: relative; }
+.stat:hover { background: var(--signal-soft); }
+.stat[aria-pressed="true"] { background: var(--signal-soft); box-shadow: inset 0 -3px 0 var(--signal); }
+.stat span::after { content: " ›"; }
 .stat b { font-family: var(--font-data); font-size: 26px; font-weight: 600; line-height: 1.2; }
 .stat span { font-size: 12px; color: var(--muted); }
 .stat.hot b { color: var(--bad); }
@@ -82,8 +85,10 @@ h1 { font-family: var(--font-display); font-weight: 800; font-size: clamp(28px, 
 .row2 input[type=date] { font: inherit; font-size: 14px; border: 1px solid var(--line); background: var(--sheet); color: var(--ink); border-radius: var(--r); padding: 5px 8px; min-width: 0; }
 .dates .tilde { color: var(--muted); }
 .dates .chip { font-size: 12px; padding: 3px 10px; }
-.dates .dsum { font-size: 12px; color: var(--muted); }
 @media (max-width: 640px) { .dates input[type=date] { flex: 1 1 130px; } .controls { position: static; } }
+.flabel { font-size: 13px; font-weight: 700; min-width: 34px; }
+.resbar { justify-content: space-between; }
+.resbar .dsum { font-size: 13px; color: var(--ink); font-weight: 600; }
 .row2 label.tog { font-size: 13px; color: var(--muted); display: inline-flex; gap: 6px; align-items: center; cursor: pointer; }
 
 .list { display: grid; gap: 10px; }
@@ -136,21 +141,17 @@ footer { font-size: 12px; color: var(--muted); display: grid; gap: 4px; }
   </header>
 
   <section class="stats" aria-label="요약">
-    <div class="stat"><b id="sOpen">0</b><span>지금 넣을 수 있는 공고</span></div>
-    <div class="stat hot"><b id="sSoon">0</b><span>3일 안에 마감</span></div>
-    <div class="stat"><b id="sNew">0</b><span>오늘·어제 새로 잡힌 공고</span></div>
-    <div class="stat"><b id="sAll">0</b><span>모아 둔 공고 전체</span></div>
+    <button type="button" class="stat" data-v="open" aria-pressed="true"><b id="sOpen">0</b><span>지금 넣을 수 있는 공고</span></button>
+    <button type="button" class="stat hot" data-v="soon" aria-pressed="false"><b id="sSoon">0</b><span>3일 안에 마감</span></button>
+    <button type="button" class="stat" data-v="new" aria-pressed="false"><b id="sNew">0</b><span>오늘·어제 새로 잡힌 공고</span></button>
+    <button type="button" class="stat" data-v="all" aria-pressed="false"><b id="sAll">0</b><span>모아 둔 공고 전체 (마감 포함)</span></button>
   </section>
 
   <section class="controls" aria-label="고르기">
     <div class="chips" id="catChips" role="group" aria-label="분야"></div>
     <div class="row2">
       <label class="sr" for="q">검색</label>
-      <input type="search" id="q" placeholder="공고명·기관 검색 (예: 원두, 경기, 도서관)">
-      <label class="sr" for="sidoSel">시·도</label>
-      <select id="sidoSel"><option value="">전국</option></select>
-      <label class="sr" for="sggSel">시·군·구</label>
-      <select id="sggSel" hidden><option value="">시·군·구 전체</option></select>
+      <input type="search" id="q" placeholder="공고명·기관 검색 (예: 원두, 도서관, 매점)">
       <label class="sr" for="srcSel">출처</label>
       <select id="srcSel">
         <option value="">출처 전체</option>
@@ -163,9 +164,16 @@ footer { font-size: 12px; color: var(--muted); display: grid; gap: 4px; }
         <option value="posted">새 공고 순</option>
         <option value="price">금액 큰 순</option>
       </select>
-      <label class="tog"><input type="checkbox" id="showClosed"> 마감된 공고도 보기</label>
     </div>
-    <div class="row2 dates" role="group" aria-label="날짜로 찾기">
+    <div class="row2 frow" role="group" aria-labelledby="lblRegion">
+      <span class="flabel" id="lblRegion">지역</span>
+      <label class="sr" for="sidoSel">시·도</label>
+      <select id="sidoSel"><option value="">전국</option></select>
+      <label class="sr" for="sggSel">시·군·구</label>
+      <select id="sggSel" disabled><option value="">시·군·구 전체</option></select>
+    </div>
+    <div class="row2 frow dates" role="group" aria-labelledby="lblDate">
+      <span class="flabel" id="lblDate">날짜</span>
       <label class="sr" for="dField">날짜 기준</label>
       <select id="dField">
         <option value="posted">게시일</option>
@@ -177,8 +185,10 @@ footer { font-size: 12px; color: var(--muted); display: grid; gap: 4px; }
       <button type="button" class="chip" data-r="0">오늘</button>
       <button type="button" class="chip" data-r="7">7일</button>
       <button type="button" class="chip" data-r="30">30일</button>
-      <button type="button" class="chip" data-r="x">날짜 지우기</button>
-      <span class="dsum" id="dSum"></span>
+    </div>
+    <div class="row2 resbar">
+      <span id="resSum" class="dsum"></span>
+      <button type="button" class="chip" id="resetBtn">조건 모두 지우기</button>
     </div>
   </section>
 
@@ -215,8 +225,8 @@ footer { font-size: 12px; color: var(--muted); display: grid; gap: 4px; }
 (function () {
   "use strict";
   var CATS = ["원두·재료", "장비", "운영·임대", "공사·인테리어", "교육", "기타"];
-  var state = { cat: "", q: "", src: "", sort: "close", closed: false, sido: "", sgg: "", limit: 40, dField: "posted", dFrom: null, dTo: null };
-  var all = [];
+  var state = { view: "open", cat: "", q: "", src: "", sort: "close", sido: "", sgg: "", limit: 40, dField: "posted", dFrom: null, dTo: null };
+  var all = [], readDatesExt = function () {};
   var $ = function (id) { return document.getElementById(id); };
   try { var saved = JSON.parse(localStorage.getItem("bidsState") || "{}"); ["cat", "src", "sort"].forEach(function (k) { if (saved[k] != null) state[k] = saved[k]; }); } catch (e) {}
   function save() { try { localStorage.setItem("bidsState", JSON.stringify({ cat: state.cat, src: state.src, sort: state.sort })); } catch (e) {} }
@@ -294,13 +304,26 @@ footer { font-size: 12px; color: var(--muted); display: grid; gap: 4px; }
       var g = {}; all.forEach(function (i) { if (i.sido === state.sido && i.sgg) g[i.sgg] = (g[i.sgg] || 0) + 1; });
       var ks = Object.keys(g).sort();
       $("sggSel").innerHTML = '<option value="">시·군·구 전체</option>' + ks.map(function (k) { return '<option value="' + k + '">' + k + " (" + g[k] + ")</option>"; }).join("");
-      $("sggSel").hidden = !ks.length; render();
+      $("sggSel").disabled = !ks.length; render();
     });
     $("sggSel").addEventListener("change", function () { state.sgg = this.value; state.limit = 40; render(); });
     $("srcSel").value = state.src; $("sortSel").value = state.sort;
     $("srcSel").addEventListener("change", function () { state.src = this.value; save(); render(); });
     $("sortSel").addEventListener("change", function () { state.sort = this.value; save(); render(); });
-    $("showClosed").addEventListener("change", function () { state.closed = this.checked; render(); });
+    document.querySelectorAll(".stat").forEach(function (b) {
+      b.addEventListener("click", function () {
+        state.view = b.dataset.v; state.limit = 40;
+        document.querySelectorAll(".stat").forEach(function (x) { x.setAttribute("aria-pressed", x === b); });
+        render(); $("list").scrollIntoView({ behavior: "smooth", block: "start" });
+      });
+    });
+    $("resetBtn").addEventListener("click", function () {
+      state.view = "open"; state.cat = ""; state.q = ""; state.src = ""; state.sido = ""; state.sgg = "";
+      $("q").value = ""; $("srcSel").value = ""; $("sidoSel").value = ""; $("sggSel").value = ""; $("sggSel").disabled = true;
+      $("dFrom").value = ""; $("dTo").value = ""; $("dField").value = "posted";
+      document.querySelectorAll(".stat").forEach(function (x) { x.setAttribute("aria-pressed", x.dataset.v === "open"); });
+      save(); buildChips(); readDatesExt();
+    });
     $("moreBtn").addEventListener("click", function () { state.limit += 40; render(); });
     function ymd(d) { return d.getFullYear() + "-" + String(d.getMonth() + 1).padStart(2, "0") + "-" + String(d.getDate()).padStart(2, "0"); }
     function readDates() {
@@ -309,12 +332,12 @@ footer { font-size: 12px; color: var(--muted); display: grid; gap: 4px; }
       state.dTo = t ? parse(t) : null; if (state.dTo) state.dTo.setHours(23, 59, 59, 999);
       state.dField = $("dField").value; state.limit = 40; render();
     }
+    readDatesExt = readDates;
     ["dField", "dFrom", "dTo"].forEach(function (id) { $(id).addEventListener("change", readDates); });
     document.querySelectorAll(".dates .chip").forEach(function (b) {
       b.addEventListener("click", function () {
         var r = b.dataset.r, t = today0();
-        if (r === "x") { $("dFrom").value = ""; $("dTo").value = ""; }
-        else {
+        {
           var n = +r, a = new Date(t), z = new Date(t);
           // 게시일은 지난 n일, 마감일은 앞으로 n일
           if (n) { if ($("dField").value === "posted") a.setDate(a.getDate() - (n - 1)); else z.setDate(z.getDate() + (n - 1)); }
@@ -335,7 +358,9 @@ footer { font-size: 12px; color: var(--muted); display: grid; gap: 4px; }
     var q = state.q.toLowerCase();
     var rows = all.filter(function (i) {
       var dateOn = state.dFrom || state.dTo;
-      if (!state.closed && !dateOn && !isOpen(i)) return false;
+      if (state.view === "open" && !dateOn && !isOpen(i)) return false;
+      if (state.view === "soon" && !(isOpen(i) && i.close && i.close - now < 3 * 864e5)) return false;
+      if (state.view === "new") { var nd = i.seen || i.posted; if (!(nd && nd >= y0)) return false; }
       if (dateOn) {
         var dv = i[state.dField];
         if (!dv) return false;
@@ -357,7 +382,13 @@ footer { font-size: 12px; color: var(--muted); display: grid; gap: 4px; }
       return (a.close || 9e15) - (b.close || 9e15);
     });
     var dateOn2 = state.dFrom || state.dTo;
-    $("dSum").textContent = dateOn2 ? (state.dField === "posted" ? "게시일" : "마감일") + " 기준 " + rows.length + "건 (마감된 공고 포함)" : "";
+    var VN = { open: "지금 넣을 수 있는 공고", soon: "3일 안에 마감", new: "오늘·어제 새로 잡힌 공고", all: "모아 둔 공고 전체" };
+    var parts = [VN[state.view]];
+    if (state.cat) parts.push(state.cat);
+    if (state.sido) parts.push(state.sido + (state.sgg ? " " + state.sgg : ""));
+    if (dateOn2) parts.push((state.dField === "posted" ? "게시일 " : "마감일 ") + (state.dFrom ? fmt(state.dFrom) : "") + "~" + (state.dTo ? fmt(state.dTo) : ""));
+    if (state.q) parts.push("'" + state.q + "'");
+    $("resSum").textContent = parts.join(" · ") + " — " + rows.length + "건";
     var list = $("list");
     if (!rows.length) {
       var msg = all.length ? "조건에 맞는 공고가 없습니다. 분야나 검색어를 바꿔 보세요." : "아직 모인 공고가 없습니다.";
