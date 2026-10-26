@@ -75,7 +75,11 @@ h1 { font-family: var(--font-display); font-weight: 800; font-size: clamp(28px, 
 .stat.suist b { color: var(--warn); }
 
 .controls { display: grid; gap: 12px; position: sticky; top: 0; z-index: 5; background: var(--paper); padding-block: 10px; border-bottom: 1px solid var(--line); }
-.srctabs { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); border: 1px solid var(--line); border-radius: var(--r); overflow: hidden; background: var(--line); gap: 1px; }
+.grp { display: grid; gap: 10px; }
+.grp + .grp { margin-top: 22px; padding-top: 20px; border-top: 2px solid var(--line); }
+.grphead { display: grid; gap: 4px; }
+.grphead h2 .num { font-size: 16px; color: var(--muted); margin-left: 6px; }
+.srctabs { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); border: 1px solid var(--line); border-radius: var(--r); overflow: hidden; background: var(--line); gap: 1px; }
 .srctabs button { font: inherit; font-size: 14px; font-weight: 700; border: 0; background: var(--sheet); color: var(--muted); padding: 9px 4px; cursor: pointer; }
 .srctabs button .c { font-family: var(--font-data); font-size: 12px; font-weight: 500; }
 .srctabs button[aria-selected="true"] { background: var(--ink); color: var(--paper); }
@@ -326,7 +330,7 @@ footer { font-size: 12px; color: var(--muted); display: grid; gap: 4px; }
     });
     $("sggSel").addEventListener("change", function () { state.sgg = this.value; state.limit = 40; render(); });
     $("sortSel").value = state.sort;
-    if (["", "나라장터", "온비드", "관공서"].indexOf(state.src) < 0) state.src = "";
+    if (["", "g2b", "web"].indexOf(state.src) < 0) state.src = "";
     $("srcTabs").addEventListener("click", function (e) { var b = e.target.closest("button"); if (!b) return; state.src = b.dataset.s; state.limit = 40; save(); render(); });
     $("sortSel").addEventListener("change", function () { state.sort = this.value; save(); render(); });
     document.querySelectorAll(".stat").forEach(function (b) {
@@ -344,6 +348,7 @@ footer { font-size: 12px; color: var(--muted); display: grid; gap: 4px; }
       save(); buildChips(); readDatesExt();
     });
     $("list").addEventListener("click", function (e) {
+      if (e.target.closest("[data-more]")) { state.limit += 40; render(); return; }
       var a = e.target.closest(".copygo"); if (!a) return;
       try { navigator.clipboard.writeText(a.dataset.q); } catch (err) {}
     });
@@ -372,9 +377,9 @@ footer { font-size: 12px; color: var(--muted); display: grid; gap: 4px; }
   }
   function render() {
     var now = new Date(), t0 = today0(), y0 = new Date(t0 - 864e5);
-    var SRCS = [["", "전체"], ["나라장터", "나라장터"], ["온비드", "온비드"], ["관공서", "관공서"]];
+    var SRCS = [["", "전체"], ["g2b", "나라장터 공고"], ["web", "온비드·관공서 공고"]];
     $("srcTabs").innerHTML = SRCS.map(function (x) {
-      var n = all.filter(function (i) { return (!x[0] || i.src === x[0]) && isOpen(i); }).length;
+      var n = all.filter(function (i) { return (!x[0] || (x[0] === "web") === i.web) && isOpen(i); }).length;
       return '<button type="button" role="tab" data-s="' + x[0] + '" aria-selected="' + (state.src === x[0]) + '">' + x[1] + ' <span class="c">' + n + "</span></button>";
     }).join("");
     var comp = all.filter(function (i) { return !i.sui; });
@@ -398,7 +403,7 @@ footer { font-size: 12px; color: var(--muted); display: grid; gap: 4px; }
         if (state.dTo && dv > state.dTo) return false;
       }
       if (state.cat && i.cat !== state.cat) return false;
-      if (state.src && i.src !== state.src) return false;
+      if (state.src && (state.src === "web") !== i.web) return false;
       if (state.sido === "지역 미표기" ? i.sido : (state.sido && i.sido !== state.sido)) return false;
       if (state.sgg && i.sgg !== state.sgg) return false;
       if (q && (i.title + " " + i.org + " " + i.demand + " " + i.where + " " + i.no + " " + i.rgn + " " + i.sido).toLowerCase().indexOf(q) < 0) return false;
@@ -416,7 +421,7 @@ footer { font-size: 12px; color: var(--muted); display: grid; gap: 4px; }
     var dateOn2 = state.dFrom || state.dTo;
     var VN = { open: "지금 넣을 수 있는 공고", soon: "3일 안에 마감", new: "오늘·어제 새로 잡힌 공고", all: "모아 둔 공고 전체", sui: "수의계약 (마감 전)" };
     var parts = [VN[state.view]];
-    if (state.src) parts.push(state.src);
+    if (state.src) parts.push(state.src === "web" ? "온비드·관공서" : "나라장터");
     if (state.cat) parts.push(state.cat);
     if (state.sido) parts.push(state.sido + (state.sgg ? " " + state.sgg : ""));
     if (dateOn2) parts.push((state.dField === "posted" ? "게시일 " : "마감일 ") + (state.dFrom ? fmt(state.dFrom) : "") + "~" + (state.dTo ? fmt(state.dTo) : ""));
@@ -429,11 +434,18 @@ footer { font-size: 12px; color: var(--muted); display: grid; gap: 4px; }
     if (!rows.length) {
       var msg = all.length ? "조건에 맞는 공고가 없습니다. 분야나 검색어를 바꿔 보세요." : "아직 모인 공고가 없습니다.";
       if (window.__g2bPending) msg += " 나라장터 자동 수집은 인증키를 넣으면 시작됩니다.";
-      if (state.src === "관공서" || state.src === "온비드") msg = state.src + " 공고가 아직 없습니다. 매일 아침 7시 20분쯤 전국 기관 홈페이지·온비드를 검색해서 채웁니다.";
+      if (state.src === "web") msg = "조건에 맞는 온비드·관공서 공고가 없습니다. 매일 아침 7시 20분쯤 전국 기관 홈페이지·온비드를 검색해서 채웁니다.";
       list.innerHTML = '<div class="empty">' + esc(msg) + "</div>"; $("moreBtn").hidden = true; return;
     }
-    list.innerHTML = rows.slice(0, state.limit).map(card).join("");
-    $("moreBtn").hidden = rows.length <= state.limit;
+    var gRows = rows.filter(function (i) { return !i.web; }), wRows = rows.filter(function (i) { return i.web; });
+    function group(id, title, sub, arr, lim) {
+      var body = arr.length ? arr.slice(0, lim).map(card).join("") + (arr.length > lim ? '<button type="button" class="more" data-more="1">더 보기 (' + (arr.length - lim) + '건 더)</button>' : "") : '<div class="empty">' + (id === "w" ? "조건에 맞는 온비드·관공서 공고가 없습니다. 매일 아침 7시 20분쯤 검색해서 채웁니다." : "조건에 맞는 나라장터 공고가 없습니다.") + "</div>";
+      return '<section class="grp" id="grp-' + id + '"><div class="grphead"><h2>' + title + ' <span class="num">' + arr.length + '건</span></h2><p class="note">' + sub + "</p></div>" + body + "</section>";
+    }
+    var G = group("g", "나라장터 공고", "조달청 나라장터 전자입찰. 제목을 누르면 나라장터 공고 화면으로 갑니다.", gRows, state.limit);
+    var W = group("w", "온비드·관공서 공고", "온비드 임대·사용허가 공고와 기관 홈페이지에 직접 올라온 공고. 접수 방법이 공고마다 다릅니다.", wRows, 200);
+    list.innerHTML = state.src === "g2b" ? G : state.src === "web" ? W : G + W;
+    $("moreBtn").hidden = true;
   }
   function card(i) {
     var y0 = new Date(today0() - 864e5);
