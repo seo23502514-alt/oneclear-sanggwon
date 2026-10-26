@@ -147,6 +147,10 @@ footer { font-size: 12px; color: var(--muted); display: grid; gap: 4px; }
     <div class="row2">
       <label class="sr" for="q">검색</label>
       <input type="search" id="q" placeholder="공고명·기관 검색 (예: 원두, 경기, 도서관)">
+      <label class="sr" for="sidoSel">시·도</label>
+      <select id="sidoSel"><option value="">전국</option></select>
+      <label class="sr" for="sggSel">시·군·구</label>
+      <select id="sggSel" hidden><option value="">시·군·구 전체</option></select>
       <label class="sr" for="srcSel">출처</label>
       <select id="srcSel">
         <option value="">출처 전체</option>
@@ -211,7 +215,7 @@ footer { font-size: 12px; color: var(--muted); display: grid; gap: 4px; }
 (function () {
   "use strict";
   var CATS = ["원두·재료", "장비", "운영·임대", "공사·인테리어", "교육", "기타"];
-  var state = { cat: "", q: "", src: "", sort: "close", closed: false, limit: 40, dField: "posted", dFrom: null, dTo: null };
+  var state = { cat: "", q: "", src: "", sort: "close", closed: false, sido: "", sgg: "", limit: 40, dField: "posted", dFrom: null, dTo: null };
   var all = [];
   var $ = function (id) { return document.getElementById(id); };
   try { var saved = JSON.parse(localStorage.getItem("bidsState") || "{}"); ["cat", "src", "sort"].forEach(function (k) { if (saved[k] != null) state[k] = saved[k]; }); } catch (e) {}
@@ -231,13 +235,28 @@ footer { font-size: 12px; color: var(--muted); display: grid; gap: 4px; }
   }
   function fmt(d, withTime) { if (!d) return "—"; var s = d.getFullYear() + "." + (d.getMonth() + 1) + "." + d.getDate(); if (withTime) s += " " + String(d.getHours()).padStart(2, "0") + ":" + String(d.getMinutes()).padStart(2, "0"); return s; }
 
+  // 기관명에서 시·도 찾기 (앞에서부터 먼저 맞는 것)
+  var SIDO = [
+    ["서울", /서울/], ["부산", /부산/], ["대구", /대구/], ["인천", /인천/],
+    ["광주·전남", /전남광주|광주광역시|광주시교육|^광주\s|전라남도|전남/], ["대전", /대전/], ["울산", /울산/], ["세종", /세종/],
+    ["경기", /경기|수원|성남|고양|용인|부천|안산|안양|남양주|화성|평택|의정부|시흥|파주|김포|광명|광주시(?!교)|군포|하남|오산|이천|안성|의왕|양주|포천|여주|동두천|과천|구리|가평|양평|연천/],
+    ["강원", /강원|춘천|원주|강릉|속초|동해|삼척|태백|정선/], ["충북", /충청북도|충북|청주|충주|제천|영동|옥천|진천|음성|괴산|단양|보은|증평/],
+    ["충남", /충청남도|충남|천안|아산|공주|보령|서산|논산|계룡|당진|홍성|예산|태안|부여|서천|청양|금산/],
+    ["전북", /전북|전라북도|전주|군산|익산|정읍|남원|김제|완주|무주|장수|임실|순창|고창|부안|진안/],
+    ["경북", /경북|경상북도|포항|경주|김천|안동|구미|영주|영천|상주|문경|경산|칠곡|울진|선린대/],
+    ["경남", /경남|경상남도|창원|진주|통영|사천|김해|밀양|거제|양산|창신대|산청|함안|거창|합천|하동|남해|고성/],
+    ["제주", /제주|서귀포/]
+  ];
+  function sidoOf(txt) { for (var k = 0; k < SIDO.length; k++) if (SIDO[k][1].test(txt)) return SIDO[k][0]; return ""; }
+  function sggOf(txt) { var m = txt.match(/(?:특별시|광역시|특별자치시|특별자치도|통합특별시|도|서울|부산|대구|인천|광주|대전|울산|경기|강원|충북|충남|전북|전남|경북|경남|제주)\s+([가-힣]{1,5}?(?:시|군|구))(?=\s|$|\()/); return m ? m[1] : ""; }
+
   function norm(it, web) {
     return {
       id: it.id || it.url || it.title, title: it.title, org: it.org || "", demand: it.demand || "",
       kind: it.kind || "", cat: CATS.indexOf(it.cat) >= 0 ? it.cat : "기타",
       posted: parse(it.posted), close: parse(it.close), open: parse(it.open), price: +it.price || 0,
       url: it.url || "", src: web ? (it.src || "관공서") : "나라장터", web: !!web, where: it.where || "",
-      note: it.note || "", plabel: it.priceLabel || "금액", seen: parse(it.seen), no: it.no || ""
+      note: it.note || "", rgn: (it.rgn || []).join(", "), plabel: it.priceLabel || "금액", seen: parse(it.seen), no: it.no || ""
     };
   }
   function load(url) { return fetch(url + "?t=" + Date.now()).then(function (r) { return r.ok ? r.json() : null; }).catch(function () { return null; }); }
@@ -249,6 +268,10 @@ footer { font-size: 12px; color: var(--muted); display: grid; gap: 4px; }
     var seen = {};
     (g.items || []).forEach(function (it) { var n = norm(it, false); seen[n.title.replace(/\s/g, "")] = 1; all.push(n); });
     (w.items || []).forEach(function (it) { var n = norm(it, true); if (!seen[n.title.replace(/\s/g, "")]) all.push(n); });
+    all.forEach(function (i) {
+      var txt = i.org + " " + i.demand;
+      i.sido = sidoOf(txt) || sidoOf(i.rgn) || ""; i.sgg = i.sido ? sggOf(txt) : "";
+    });
     window.__g2bPending = !!g.pending;
     buildChips(); bind(); render();
   });
@@ -263,6 +286,17 @@ footer { font-size: 12px; color: var(--muted); display: grid; gap: 4px; }
   function bind() {
     $("catChips").addEventListener("click", function (e) { var b = e.target.closest(".chip"); if (!b) return; state.cat = b.dataset.c; state.limit = 40; save(); buildChips(); render(); });
     $("q").addEventListener("input", function () { state.q = this.value.trim(); state.limit = 40; render(); });
+    var sidos = {}; all.forEach(function (i) { var k = i.sido || "지역 미표기"; sidos[k] = (sidos[k] || 0) + 1; });
+    var order = SIDO.map(function (x) { return x[0]; }).concat(["지역 미표기"]);
+    $("sidoSel").innerHTML = '<option value="">전국 (' + all.length + ')</option>' + order.filter(function (k) { return sidos[k]; }).map(function (k) { return '<option value="' + k + '">' + k + " (" + sidos[k] + ")</option>"; }).join("");
+    $("sidoSel").addEventListener("change", function () {
+      state.sido = this.value; state.sgg = ""; state.limit = 40;
+      var g = {}; all.forEach(function (i) { if (i.sido === state.sido && i.sgg) g[i.sgg] = (g[i.sgg] || 0) + 1; });
+      var ks = Object.keys(g).sort();
+      $("sggSel").innerHTML = '<option value="">시·군·구 전체</option>' + ks.map(function (k) { return '<option value="' + k + '">' + k + " (" + g[k] + ")</option>"; }).join("");
+      $("sggSel").hidden = !ks.length; render();
+    });
+    $("sggSel").addEventListener("change", function () { state.sgg = this.value; state.limit = 40; render(); });
     $("srcSel").value = state.src; $("sortSel").value = state.sort;
     $("srcSel").addEventListener("change", function () { state.src = this.value; save(); render(); });
     $("sortSel").addEventListener("change", function () { state.sort = this.value; save(); render(); });
@@ -311,7 +345,9 @@ footer { font-size: 12px; color: var(--muted); display: grid; gap: 4px; }
       if (state.cat && i.cat !== state.cat) return false;
       if (state.src === "나라장터" && i.web) return false;
       if (state.src === "web" && !i.web) return false;
-      if (q && (i.title + " " + i.org + " " + i.demand + " " + i.where + " " + i.no).toLowerCase().indexOf(q) < 0) return false;
+      if (state.sido === "지역 미표기" ? i.sido : (state.sido && i.sido !== state.sido)) return false;
+      if (state.sgg && i.sgg !== state.sgg) return false;
+      if (q && (i.title + " " + i.org + " " + i.demand + " " + i.where + " " + i.no + " " + i.rgn + " " + i.sido).toLowerCase().indexOf(q) < 0) return false;
       return true;
     });
     rows.sort(function (a, b) {
@@ -330,7 +366,7 @@ footer { font-size: 12px; color: var(--muted); display: grid; gap: 4px; }
     }
     list.innerHTML = rows.slice(0, state.limit).map(function (i) {
       var d = dday(i.close), fresh = (i.seen || i.posted) && (i.seen || i.posted) >= y0;
-      var tags = '<span class="tag cat">' + esc(i.cat) + "</span>" + (i.kind ? '<span class="tag">' + esc(i.kind) + "</span>" : "") + '<span class="tag">' + esc(i.src) + "</span>" + (fresh ? '<span class="tag new">NEW</span>' : "");
+      var tags = '<span class="tag cat">' + esc(i.cat) + "</span>" + (i.kind ? '<span class="tag">' + esc(i.kind) + "</span>" : "") + (i.sido ? '<span class="tag">' + esc(i.sido + (i.sgg ? " " + i.sgg : "")) + "</span>" : "") + '<span class="tag">' + esc(i.src) + "</span>" + (fresh ? '<span class="tag new">NEW</span>' : "");
       var title = i.url ? '<a href="' + esc(i.url) + '" target="_blank" rel="noopener">' + esc(i.title) + "</a>" : esc(i.title);
       var org = i.org + (i.demand && i.demand !== i.org ? " · 수요기관 " + i.demand : "");
       var meta = '<span><b>' + esc(org || "기관 미기재") + "</b></span>" +
@@ -338,6 +374,7 @@ footer { font-size: 12px; color: var(--muted); display: grid; gap: 4px; }
         "<span>마감 " + (i.close ? fmt(i.close, true) : "원문 확인") + "</span>" +
         (i.price ? "<span>" + esc(i.plabel) + " " + won(i.price) + "</span>" : "") +
         (i.where ? "<span>접수 " + esc(i.where) + "</span>" : "") +
+        (i.rgn ? "<span>참가 지역 <b>" + esc(i.rgn) + "</b></span>" : "") +
         (i.no ? '<span class="num">' + esc(i.no) + "</span>" : "");
       return '<article class="item' + (isOpen(i) ? "" : " closed") + '"><div class="dday ' + d.cls + '">' + d.txt + (d.sub ? "<small>" + d.sub + "</small>" : "") + "</div>" +
         '<div class="body"><div class="tags">' + tags + '</div><div class="title">' + title + '</div><div class="meta">' + meta + "</div>" + (i.note ? '<div class="note">' + esc(i.note) + "</div>" : "") + "</div></article>";

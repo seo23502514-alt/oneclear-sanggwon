@@ -121,6 +121,34 @@ def fetch(key, start, end):
     return out, errors
 
 
+def regions(key, items, old_items):
+    """공고별 참가가능지역(지역제한)을 받아 붙임. 이미 확인한 공고는 다시 묻지 않음. 실패해도 그냥 넘어감."""
+    known = {it["id"]: it.get("rgn") for it in old_items if "rgn" in it}
+    asked = 0
+    for it in items.values():
+        if it["id"] in known:
+            it["rgn"] = known[it["id"]]; continue
+        if asked >= 300:
+            break
+        asked += 1
+        names = []
+        for base in BASES:
+            res, err = call(base, "getBidPblancListInfoPrtcptPsblRgn",
+                            {"serviceKey": key, "type": "json", "numOfRows": 50, "pageNo": 1,
+                             "inqryDiv": 2, "bidNtceNo": it["no"]})
+            if res is None:
+                continue
+            for r in res[0]:
+                if str(r.get("bidNtceOrd") or it["ord"]) != it["ord"]:
+                    continue
+                n = (r.get("prtcptPsblRgnNm") or "").strip()
+                if n and n not in names:
+                    names.append(n)
+            it["rgn"] = names
+            break
+        time.sleep(0.1)
+
+
 def num(v):
     try:
         return int(float(str(v).replace(",", "")))
@@ -186,6 +214,7 @@ def main():
         sys.exit(2)
 
     got, errors = fetch(key, now - timedelta(days=days), now)
+    regions(key, got, old.get("items", []))
     print(f"받은 공고 {len(got)}건, 오류 {len(errors)}건")
     for e in errors[:10]:
         print("  ", e)
