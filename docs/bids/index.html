@@ -110,6 +110,9 @@ h1 { font-family: var(--font-display); font-weight: 800; font-size: clamp(28px, 
 .meta { font-size: 13px; color: var(--muted); display: flex; flex-wrap: wrap; gap: 2px 14px; }
 .meta b { color: var(--ink); font-weight: 600; }
 .note { font-size: 13px; color: var(--muted); }
+.golinks { display: flex; gap: 6px 16px; flex-wrap: wrap; align-items: center; font-size: 13px; font-weight: 600; }
+.golinks .hint { font-weight: 400; color: var(--muted); font-size: 12px; }
+.golinks a.sub { font-weight: 400; color: var(--muted); }
 .empty { background: var(--sheet); border: 1px dashed var(--line); border-radius: var(--r); padding: 24px; color: var(--muted); text-align: center; }
 .more { justify-self: center; font: inherit; font-size: 14px; font-weight: 600; border: 1px solid var(--line); background: var(--sheet); color: var(--ink); border-radius: 999px; padding: 6px 18px; cursor: pointer; }
 
@@ -265,7 +268,7 @@ footer { font-size: 12px; color: var(--muted); display: grid; gap: 4px; }
       id: it.id || it.url || it.title, title: it.title, org: it.org || "", demand: it.demand || "",
       kind: it.kind || "", cat: CATS.indexOf(it.cat) >= 0 ? it.cat : "기타",
       posted: parse(it.posted), close: parse(it.close), open: parse(it.open), price: +it.price || 0,
-      url: it.url || "", src: web ? (it.src || "관공서") : "나라장터", web: !!web, where: it.where || "",
+      url: it.url || "", news: it.news || "", search: it.search || "", src: web ? (it.src || "관공서") : "나라장터", web: !!web, where: it.where || "",
       note: it.note || "", rgn: (it.rgn || []).join(", "), plabel: it.priceLabel || "금액", seen: parse(it.seen), no: it.no || ""
     };
   }
@@ -398,6 +401,11 @@ footer { font-size: 12px; color: var(--muted); display: grid; gap: 4px; }
     list.innerHTML = rows.slice(0, state.limit).map(function (i) {
       var d = dday(i.close), fresh = (i.seen || i.posted) && (i.seen || i.posted) >= y0;
       var tags = '<span class="tag cat">' + esc(i.cat) + "</span>" + (i.kind ? '<span class="tag">' + esc(i.kind) + "</span>" : "") + (i.sido ? '<span class="tag">' + esc(i.sido + (i.sgg ? " " + i.sgg : "")) + "</span>" : "") + '<span class="tag">' + esc(i.src) + "</span>" + (fresh ? '<span class="tag new">NEW</span>' : "");
+      var srch = i.search || i.title.replace(/\(.*?\)|\[.*?\]/g, "").trim().slice(0, 20);
+      var links = [];
+      if (!i.url && /온비드/.test(i.where + i.src)) links.push('<a href="https://www.onbid.co.kr/" target="_blank" rel="noopener">온비드에서 찾기 →</a> <span class="hint">검색어 \u201c' + esc(srch) + '\u201d</span>');
+      if (i.url && i.web) links.push('<a href="' + esc(i.url) + '" target="_blank" rel="noopener">입찰공고 원문 →</a>');
+      if (i.news) links.push('<a class="sub" href="' + esc(i.news) + '" target="_blank" rel="noopener">관련 기사</a>');
       var title = i.url ? '<a href="' + esc(i.url) + '" target="_blank" rel="noopener">' + esc(i.title) + "</a>" : esc(i.title);
       var org = i.org + (i.demand && i.demand !== i.org ? " · 수요기관 " + i.demand : "");
       var meta = '<span><b>' + esc(org || "기관 미기재") + "</b></span>" +
@@ -408,7 +416,7 @@ footer { font-size: 12px; color: var(--muted); display: grid; gap: 4px; }
         (i.rgn ? "<span>참가 지역 <b>" + esc(i.rgn) + "</b></span>" : "") +
         (i.no ? '<span class="num">' + esc(i.no) + "</span>" : "");
       return '<article class="item' + (isOpen(i) ? "" : " closed") + '"><div class="dday ' + d.cls + '">' + d.txt + (d.sub ? "<small>" + d.sub + "</small>" : "") + "</div>" +
-        '<div class="body"><div class="tags">' + tags + '</div><div class="title">' + title + '</div><div class="meta">' + meta + "</div>" + (i.note ? '<div class="note">' + esc(i.note) + "</div>" : "") + "</div></article>";
+        '<div class="body"><div class="tags">' + tags + '</div><div class="title">' + title + '</div><div class="meta">' + meta + "</div>" + (i.note ? '<div class="note">' + esc(i.note) + "</div>" : "") + (links.length ? '<div class="golinks">' + links.join("") + "</div>" : "") + "</div></article>";
     }).join("");
     $("moreBtn").hidden = rows.length <= state.limit;
   }
