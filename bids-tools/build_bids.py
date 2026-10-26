@@ -163,6 +163,9 @@ def record(it, kind, kw):
     cleaned = NOISE.sub("", title)
     if not title or not any(k in cleaned for k in KEYWORDS):  # 카페트·원두막만 걸린 공고는 버림
         return None
+    # 수의계약(소액수의·수의시담 포함)은 받지 않음
+    if "수의" in (it.get("cntrctCnclsMthdNm") or "") or re.search(r"수의", title):
+        return None
     no, ordv = it.get("bidNtceNo") or "", it.get("bidNtceOrd") or "000"
     if not no:
         return None
