@@ -23,7 +23,8 @@ OPS = {  # 업무 구분: 검색조건 조회 오퍼레이션
 # 공고명에 들어가면 가져오는 낱말
 KEYWORDS = ["커피", "원두", "카페", "에스프레소", "제빙기", "바리스타", "매점", "자판기", "베이커리", "제과"]
 # 걸러 낼 낱말(카페트, 원두막 같은 동음이의)
-NOISE = re.compile(r"카페트|카펫|원두막|원두정|제과점\s*위생점검|매점매석|카페인|카페리|키즈\s*카페|규제과학|교복|생리대")
+NOISE = re.compile(r"카페트|카펫|원두막|원두정|제과점\s*위생점검|매점매석")
+EXCLUDE = re.compile(r"카페인|카페리|키즈\s*카페|규제과학|교복|생리대")  # 걸리면 무조건 제외
 KEEP_DAYS_AFTER_CLOSE = 7     # 마감 뒤 며칠 더 보여 줄지
 MAX_AGE_DAYS = 60             # 공고일로부터 최대 보관 일수
 
@@ -129,6 +130,8 @@ def num(v):
 
 def record(it, kind, kw):
     title = (it.get("bidNtceNm") or "").strip()
+    if EXCLUDE.search(title):
+        return None
     cleaned = NOISE.sub("", title)
     if not title or not any(k in cleaned for k in KEYWORDS):  # 카페트·원두막만 걸린 공고는 버림
         return None
