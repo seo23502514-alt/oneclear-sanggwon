@@ -327,6 +327,10 @@ footer { font-size: 12px; color: var(--muted); display: grid; gap: 4px; }
       document.querySelectorAll(".stat").forEach(function (x) { x.setAttribute("aria-pressed", x.dataset.v === "open"); });
       save(); buildChips(); readDatesExt();
     });
+    $("list").addEventListener("click", function (e) {
+      var a = e.target.closest(".copygo"); if (!a) return;
+      try { navigator.clipboard.writeText(a.dataset.q); } catch (err) {}
+    });
     $("moreBtn").addEventListener("click", function () { state.limit += 40; render(); });
     function ymd(d) { return d.getFullYear() + "-" + String(d.getMonth() + 1).padStart(2, "0") + "-" + String(d.getDate()).padStart(2, "0"); }
     function readDates() {
@@ -403,7 +407,7 @@ footer { font-size: 12px; color: var(--muted); display: grid; gap: 4px; }
       var tags = '<span class="tag cat">' + esc(i.cat) + "</span>" + (i.kind ? '<span class="tag">' + esc(i.kind) + "</span>" : "") + (i.sido ? '<span class="tag">' + esc(i.sido + (i.sgg ? " " + i.sgg : "")) + "</span>" : "") + '<span class="tag">' + esc(i.src) + "</span>" + (fresh ? '<span class="tag new">NEW</span>' : "");
       var srch = i.search || i.title.replace(/\(.*?\)|\[.*?\]/g, "").trim().slice(0, 20);
       var links = [];
-      if (!i.url && /온비드/.test(i.where + i.src)) links.push('<a href="https://www.onbid.co.kr/" target="_blank" rel="noopener">온비드에서 찾기 →</a> <span class="hint">검색어 \u201c' + esc(srch) + '\u201d</span>');
+      if (!i.url && /온비드/.test(i.where + i.src)) links.push('<a class="copygo" data-q="' + esc(srch) + '" href="https://www.onbid.co.kr/" target="_blank" rel="noopener">온비드 열고 \u201c' + esc(srch) + '\u201d 검색 →</a> <span class="hint">원문 주소를 아직 못 찾은 공고예요. 누르면 검색어가 복사됩니다.</span>');
       if (i.url && i.web) links.push('<a href="' + esc(i.url) + '" target="_blank" rel="noopener">입찰공고 원문 →</a>');
       if (i.news) links.push('<a class="sub" href="' + esc(i.news) + '" target="_blank" rel="noopener">관련 기사</a>');
       var title = i.url ? '<a href="' + esc(i.url) + '" target="_blank" rel="noopener">' + esc(i.title) + "</a>" : esc(i.title);
