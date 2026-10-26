@@ -63,7 +63,7 @@ h1 { font-family: var(--font-display); font-weight: 800; font-size: clamp(28px, 
 .lede b { color: var(--ink); }
 .stamp { font-size: 12px; color: var(--muted); display: flex; gap: 6px 16px; flex-wrap: wrap; }
 
-.stats { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 1px; background: var(--line); border: 1px solid var(--line); border-radius: var(--r); overflow: hidden; }
+.stats { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 1px; background: var(--line); border: 1px solid var(--line); border-radius: var(--r); overflow: hidden; }
 .stat { background: var(--sheet); padding: 14px 16px; display: grid; gap: 2px; border: 0; font: inherit; color: var(--ink); text-align: left; cursor: pointer; position: relative; }
 .stat:hover { background: var(--signal-soft); }
 .stat[aria-pressed="true"] { background: var(--signal-soft); box-shadow: inset 0 -3px 0 var(--signal); }
@@ -71,7 +71,8 @@ h1 { font-family: var(--font-display); font-weight: 800; font-size: clamp(28px, 
 .stat b { font-family: var(--font-data); font-size: 26px; font-weight: 600; line-height: 1.2; }
 .stat span { font-size: 12px; color: var(--muted); }
 .stat.hot b { color: var(--bad); }
-@media (max-width: 640px) { .stats { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (max-width: 640px) { .stats { grid-template-columns: repeat(2, minmax(0, 1fr)); } .stats .suist { grid-column: 1 / -1; } }
+.stat.suist b { color: var(--warn); }
 
 .controls { display: grid; gap: 12px; position: sticky; top: 0; z-index: 5; background: var(--paper); padding-block: 10px; border-bottom: 1px solid var(--line); }
 .chips { display: flex; gap: 6px; flex-wrap: wrap; }
@@ -152,6 +153,7 @@ footer { font-size: 12px; color: var(--muted); display: grid; gap: 4px; }
     <button type="button" class="stat hot" data-v="soon" aria-pressed="false"><b id="sSoon">0</b><span>3일 안에 마감</span></button>
     <button type="button" class="stat" data-v="new" aria-pressed="false"><b id="sNew">0</b><span>오늘·어제 새로 잡힌 공고</span></button>
     <button type="button" class="stat" data-v="all" aria-pressed="false"><b id="sAll">0</b><span>모아 둔 공고 전체 (마감 포함)</span></button>
+    <button type="button" class="stat suist" data-v="sui" aria-pressed="false"><b id="sSui">0</b><span>수의계약 (마감 전)</span></button>
   </section>
 
   <section class="controls" aria-label="고르기">
@@ -374,11 +376,12 @@ footer { font-size: 12px; color: var(--muted); display: grid; gap: 4px; }
     $("sSoon").textContent = open.filter(function (i) { return i.close && i.close - now < 3 * 864e5; }).length;
     $("sNew").textContent = comp.filter(function (i) { var d = i.seen || i.posted; return d && d >= y0; }).length;
     $("sAll").textContent = comp.length;
+    $("sSui").textContent = all.filter(function (i) { return i.sui && isOpen(i); }).length;
 
     var q = state.q.toLowerCase();
     var rows = all.filter(function (i) {
       var dateOn = state.dFrom || state.dTo;
-      if (state.view === "open" && !dateOn && !isOpen(i)) return false;
+      if ((state.view === "open" || state.view === "sui") && !dateOn && !isOpen(i)) return false;
       if (state.view === "soon" && !(isOpen(i) && i.close && i.close - now < 3 * 864e5)) return false;
       if (state.view === "new") { var nd = i.seen || i.posted; if (!(nd && nd >= y0)) return false; }
       if (dateOn) {
@@ -403,8 +406,9 @@ footer { font-size: 12px; color: var(--muted); display: grid; gap: 4px; }
     });
     var suiRows = rows.filter(function (i) { return i.sui; });
     rows = rows.filter(function (i) { return !i.sui; });
+    if (state.view === "sui") { rows = suiRows; suiRows = []; }
     var dateOn2 = state.dFrom || state.dTo;
-    var VN = { open: "지금 넣을 수 있는 공고", soon: "3일 안에 마감", new: "오늘·어제 새로 잡힌 공고", all: "모아 둔 공고 전체" };
+    var VN = { open: "지금 넣을 수 있는 공고", soon: "3일 안에 마감", new: "오늘·어제 새로 잡힌 공고", all: "모아 둔 공고 전체", sui: "수의계약 (마감 전)" };
     var parts = [VN[state.view]];
     if (state.cat) parts.push(state.cat);
     if (state.sido) parts.push(state.sido + (state.sgg ? " " + state.sgg : ""));
