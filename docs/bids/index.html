@@ -103,6 +103,10 @@ h1 { font-family: var(--font-display); font-weight: 800; font-size: clamp(28px, 
 .tags { display: flex; gap: 6px; flex-wrap: wrap; font-size: 11px; font-weight: 600; }
 .tag { border-radius: 4px; padding: 1px 7px; background: var(--paper); color: var(--muted); border: 1px solid var(--line); }
 .tag.cat { background: var(--roast-soft); color: var(--roast); border-color: transparent; }
+.tag.sui { background: var(--warn-soft); color: var(--warn); border-color: transparent; }
+.suisec { display: grid; gap: 12px; padding-top: 20px; border-top: 2px dashed var(--line); }
+.suihead { display: grid; gap: 6px; }
+.suihead h2 .num { font-size: 16px; color: var(--muted); margin-left: 6px; }
 .tag.new { background: var(--bad); color: #fff; border-color: transparent; }
 .title { font-size: 16px; font-weight: 700; line-height: 1.45; }
 .title a { color: var(--ink); text-decoration: none; }
@@ -198,6 +202,14 @@ footer { font-size: 12px; color: var(--muted); display: grid; gap: 4px; }
   <section class="list" id="list" aria-live="polite"></section>
   <button type="button" class="more" id="moreBtn" hidden>더 보기</button>
 
+  <section class="suisec" id="suiSec" aria-labelledby="suiTitle" hidden>
+    <div class="suihead">
+      <h2 id="suiTitle">수의계약 공고 <span class="num" id="suiCount"></span></h2>
+      <p class="note">소액수의·수의시담·견적제출 안내처럼 경쟁입찰이 아닌 공고입니다. 기관이 견적을 받아 업체를 고르는 방식이라 참가 자격(지역·소상공인 등)과 견적 제출 방법을 원문에서 먼저 확인하세요. 위 조건(분야·지역·날짜·검색어)이 똑같이 적용됩니다.</p>
+    </div>
+    <div class="list" id="suiList"></div>
+  </section>
+
   <section class="howto" aria-labelledby="howtoTitle">
     <h2 id="howtoTitle">이렇게 읽으세요</h2>
     <div class="howto-grid">
@@ -206,7 +218,7 @@ footer { font-size: 12px; color: var(--muted); display: grid; gap: 4px; }
       <div><b>운영·임대</b><span>청사·공원·도서관·박물관 카페 운영자 모집, 공유재산 사용허가. 대부분 온비드 입찰이고 지역 거주·법인 소재지 제한이 붙습니다.</span></div>
       <div><b>공사·인테리어</b><span>카페 조성·리모델링 공사. 대개 실내건축 면허가 필요합니다.</span></div>
     </div>
-    <p class="note">공고명에 커피·원두·카페·에스프레소·제빙기·바리스타·매점·자판기·베이커리·제과가 들어간 나라장터 물품·용역·공사 공고를 하루 두 번(아침 7시, 오후 2시쯤) 받아 오고, 카페트·원두막처럼 이름만 비슷한 공고와 수의계약(소액수의·수의시담) 건은 뺍니다. 관공서 홈페이지·온비드 공고는 매일 아침 검색해서 덧붙입니다. 자격·금액·마감은 반드시 원문 공고에서 다시 확인하세요.</p>
+    <p class="note">공고명에 커피·원두·카페·에스프레소·제빙기·바리스타·매점·자판기·베이커리·제과가 들어간 나라장터 물품·용역·공사 공고를 하루 두 번(아침 7시, 오후 2시쯤) 받아 오고, 카페트·원두막처럼 이름만 비슷한 공고는 빼고, 수의계약(소액수의·수의시담) 건은 맨 아래에 따로 모읍니다. 관공서 홈페이지·온비드 공고는 매일 아침 검색해서 덧붙입니다. 자격·금액·마감은 반드시 원문 공고에서 다시 확인하세요.</p>
   </section>
 
   <section class="contact" aria-labelledby="contactTitle">
@@ -268,7 +280,7 @@ footer { font-size: 12px; color: var(--muted); display: grid; gap: 4px; }
       id: it.id || it.url || it.title, title: it.title, org: it.org || "", demand: it.demand || "",
       kind: it.kind || "", cat: CATS.indexOf(it.cat) >= 0 ? it.cat : "기타",
       posted: parse(it.posted), close: parse(it.close), open: parse(it.open), price: +it.price || 0,
-      url: it.url || "", news: it.news || "", search: it.search || "", src: web ? (it.src || "관공서") : "나라장터", web: !!web, where: it.where || "",
+      sui: !!it.sui, url: it.url || "", news: it.news || "", search: it.search || "", src: web ? (it.src || "관공서") : "나라장터", web: !!web, where: it.where || "",
       note: it.note || "", rgn: (it.rgn || []).join(", "), plabel: it.priceLabel || "금액", seen: parse(it.seen), no: it.no || ""
     };
   }
@@ -291,7 +303,7 @@ footer { font-size: 12px; color: var(--muted); display: grid; gap: 4px; }
 
   function isOpen(it) { return !it.close || it.close >= new Date(); }
   function buildChips() {
-    var box = $("catChips"), open = all.filter(isOpen);
+    var box = $("catChips"), open = all.filter(function (i) { return !i.sui && isOpen(i); });
     var opts = [["", "전체", open.length]].concat(CATS.map(function (c) { return [c, c, open.filter(function (i) { return i.cat === c; }).length]; }));
     box.innerHTML = opts.filter(function (o) { return o[0] === "" || o[2] > 0 || o[0] === state.cat || ["원두·재료", "장비", "운영·임대"].indexOf(o[0]) >= 0; })
       .map(function (o) { return '<button type="button" class="chip" data-c="' + esc(o[0]) + '" aria-pressed="' + (state.cat === o[0]) + '">' + esc(o[1]) + ' <span class="c">' + o[2] + "</span></button>"; }).join("");
@@ -356,11 +368,12 @@ footer { font-size: 12px; color: var(--muted); display: grid; gap: 4px; }
   }
   function render() {
     var now = new Date(), t0 = today0(), y0 = new Date(t0 - 864e5);
-    var open = all.filter(isOpen);
+    var comp = all.filter(function (i) { return !i.sui; });
+    var open = comp.filter(isOpen);
     $("sOpen").textContent = open.length;
     $("sSoon").textContent = open.filter(function (i) { return i.close && i.close - now < 3 * 864e5; }).length;
-    $("sNew").textContent = all.filter(function (i) { var d = i.seen || i.posted; return d && d >= y0; }).length;
-    $("sAll").textContent = all.length;
+    $("sNew").textContent = comp.filter(function (i) { var d = i.seen || i.posted; return d && d >= y0; }).length;
+    $("sAll").textContent = comp.length;
 
     var q = state.q.toLowerCase();
     var rows = all.filter(function (i) {
@@ -388,6 +401,8 @@ footer { font-size: 12px; color: var(--muted); display: grid; gap: 4px; }
       var ao = isOpen(a), bo = isOpen(b); if (ao !== bo) return ao ? -1 : 1;
       return (a.close || 9e15) - (b.close || 9e15);
     });
+    var suiRows = rows.filter(function (i) { return i.sui; });
+    rows = rows.filter(function (i) { return !i.sui; });
     var dateOn2 = state.dFrom || state.dTo;
     var VN = { open: "지금 넣을 수 있는 공고", soon: "3일 안에 마감", new: "오늘·어제 새로 잡힌 공고", all: "모아 둔 공고 전체" };
     var parts = [VN[state.view]];
@@ -395,16 +410,24 @@ footer { font-size: 12px; color: var(--muted); display: grid; gap: 4px; }
     if (state.sido) parts.push(state.sido + (state.sgg ? " " + state.sgg : ""));
     if (dateOn2) parts.push((state.dField === "posted" ? "게시일 " : "마감일 ") + (state.dFrom ? fmt(state.dFrom) : "") + "~" + (state.dTo ? fmt(state.dTo) : ""));
     if (state.q) parts.push("'" + state.q + "'");
-    $("resSum").textContent = parts.join(" · ") + " — " + rows.length + "건";
+    $("resSum").textContent = parts.join(" · ") + " — " + rows.length + "건" + (suiRows.length ? " (수의계약 " + suiRows.length + "건은 아래)" : "");
+    $("suiSec").hidden = !suiRows.length;
+    $("suiCount").textContent = suiRows.length + "건";
+    $("suiList").innerHTML = suiRows.slice(0, 60).map(card).join("");
     var list = $("list");
     if (!rows.length) {
       var msg = all.length ? "조건에 맞는 공고가 없습니다. 분야나 검색어를 바꿔 보세요." : "아직 모인 공고가 없습니다.";
       if (window.__g2bPending) msg += " 나라장터 자동 수집은 인증키를 넣으면 시작됩니다.";
       list.innerHTML = '<div class="empty">' + esc(msg) + "</div>"; $("moreBtn").hidden = true; return;
     }
-    list.innerHTML = rows.slice(0, state.limit).map(function (i) {
+    list.innerHTML = rows.slice(0, state.limit).map(card).join("");
+    $("moreBtn").hidden = rows.length <= state.limit;
+  }
+  function card(i) {
+    var y0 = new Date(today0() - 864e5);
+    {
       var d = dday(i.close), fresh = (i.seen || i.posted) && (i.seen || i.posted) >= y0;
-      var tags = '<span class="tag cat">' + esc(i.cat) + "</span>" + (i.kind ? '<span class="tag">' + esc(i.kind) + "</span>" : "") + (i.sido ? '<span class="tag">' + esc(i.sido + (i.sgg ? " " + i.sgg : "")) + "</span>" : "") + '<span class="tag">' + esc(i.src) + "</span>" + (fresh ? '<span class="tag new">NEW</span>' : "");
+      var tags = '<span class="tag cat">' + esc(i.cat) + "</span>" + (i.kind ? '<span class="tag">' + esc(i.kind) + "</span>" : "") + (i.sido ? '<span class="tag">' + esc(i.sido + (i.sgg ? " " + i.sgg : "")) + "</span>" : "") + '<span class="tag">' + esc(i.src) + "</span>" + (i.sui ? '<span class="tag sui">수의계약</span>' : "") + (fresh ? '<span class="tag new">NEW</span>' : "");
       var srch = i.search || i.title.replace(/\(.*?\)|\[.*?\]/g, "").trim().slice(0, 20);
       var links = [];
       if (!i.url && /온비드/.test(i.where + i.src)) links.push('<a class="copygo" data-q="' + esc(srch) + '" href="https://www.onbid.co.kr/" target="_blank" rel="noopener">온비드 열고 \u201c' + esc(srch) + '\u201d 검색 →</a> <span class="hint">원문 주소를 아직 못 찾은 공고예요. 누르면 검색어가 복사됩니다.</span>');
@@ -421,8 +444,7 @@ footer { font-size: 12px; color: var(--muted); display: grid; gap: 4px; }
         (i.no ? '<span class="num">' + esc(i.no) + "</span>" : "");
       return '<article class="item' + (isOpen(i) ? "" : " closed") + '"><div class="dday ' + d.cls + '">' + d.txt + (d.sub ? "<small>" + d.sub + "</small>" : "") + "</div>" +
         '<div class="body"><div class="tags">' + tags + '</div><div class="title">' + title + '</div><div class="meta">' + meta + "</div>" + (i.note ? '<div class="note">' + esc(i.note) + "</div>" : "") + (links.length ? '<div class="golinks">' + links.join("") + "</div>" : "") + "</div></article>";
-    }).join("");
-    $("moreBtn").hidden = rows.length <= state.limit;
+    }
   }
 })();
 </script>
