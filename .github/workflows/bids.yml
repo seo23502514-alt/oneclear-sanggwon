@@ -1,0 +1,43 @@
+name: 카페 입찰 레이더 매일 갱신
+
+on:
+  schedule:
+    - cron: "47 21 * * *"   # 매일 06:47 (한국 시간)
+    - cron: "47 4 * * *"    # 매일 13:47 (한국 시간) — 오전에 올라온 공고 반영
+  workflow_dispatch:
+    inputs:
+      days:
+        description: "며칠 치를 다시 받을지"
+        type: number
+        default: 3
+
+permissions:
+  contents: write
+
+concurrency:
+  group: bids
+  cancel-in-progress: false
+
+jobs:
+  bids:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install requests
+      - name: 나라장터 공고 받기
+        env:
+          G2B_KEY: ${{ secrets.G2B_KEY }}
+        run: python bids-tools/build_bids.py docs/bids/data.json --days ${{ inputs.days || 3 }}
+      - name: 저장
+        run: |
+          if git diff --quiet docs/bids/data.json; then echo "바뀐 자료 없음"; exit 0; fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add docs/bids/data.json
+          git commit -m "bids: 나라장터 공고 $(TZ=Asia/Seoul date +%F' '%H:%M) 반영"
+          git pull --rebase origin main
+          git push
