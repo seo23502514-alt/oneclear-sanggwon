@@ -63,7 +63,7 @@ h1 { font-family: var(--font-display); font-weight: 800; font-size: clamp(28px, 
 .lede b { color: var(--ink); }
 .stamp { font-size: 12px; color: var(--muted); display: flex; gap: 6px 16px; flex-wrap: wrap; }
 
-.stats { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 1px; background: var(--line); border: 1px solid var(--line); border-radius: var(--r); overflow: hidden; }
+.stats { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 1px; background: var(--line); border: 1px solid var(--line); border-radius: var(--r); overflow: hidden; }
 .stat { background: var(--sheet); padding: 14px 16px; display: grid; gap: 2px; border: 0; font: inherit; color: var(--ink); text-align: left; cursor: pointer; position: relative; }
 .stat:hover { background: var(--signal-soft); }
 .stat[aria-pressed="true"] { background: var(--signal-soft); box-shadow: inset 0 -3px 0 var(--signal); }
@@ -72,6 +72,8 @@ h1 { font-family: var(--font-display); font-weight: 800; font-size: clamp(28px, 
 .stat span { font-size: 12px; color: var(--muted); }
 .stat.hot b { color: var(--bad); }
 @media (max-width: 640px) { .stats { grid-template-columns: repeat(2, minmax(0, 1fr)); } .stats .suist { grid-column: 1 / -1; } }
+.stats .suist { grid-column: span 2; }
+.stat.srcst b { color: var(--signal); }
 .stat.suist b { color: var(--warn); }
 
 .controls { display: grid; gap: 12px; position: sticky; top: 0; z-index: 5; background: var(--paper); padding-block: 10px; border-bottom: 1px solid var(--line); }
@@ -163,6 +165,8 @@ footer { font-size: 12px; color: var(--muted); display: grid; gap: 4px; }
     <button type="button" class="stat hot" data-v="soon" aria-pressed="false"><b id="sSoon">0</b><span>3일 안에 마감</span></button>
     <button type="button" class="stat" data-v="new" aria-pressed="false"><b id="sNew">0</b><span>오늘·어제 새로 잡힌 공고</span></button>
     <button type="button" class="stat" data-v="all" aria-pressed="false"><b id="sAll">0</b><span>모아 둔 공고 전체 (마감 포함)</span></button>
+    <button type="button" class="stat srcst" data-v="open" data-s="g2b" aria-pressed="false"><b id="sG2b">0</b><span>나라장터 공고 (마감 전)</span></button>
+    <button type="button" class="stat srcst" data-v="open" data-s="web" aria-pressed="false"><b id="sWeb">0</b><span>온비드·관공서 공고 (마감 전)</span></button>
     <button type="button" class="stat suist" data-v="sui" aria-pressed="false"><b id="sSui">0</b><span>수의계약 (마감 전)</span></button>
   </section>
 
@@ -335,7 +339,7 @@ footer { font-size: 12px; color: var(--muted); display: grid; gap: 4px; }
     $("sortSel").addEventListener("change", function () { state.sort = this.value; save(); render(); });
     document.querySelectorAll(".stat").forEach(function (b) {
       b.addEventListener("click", function () {
-        state.view = b.dataset.v; state.limit = 40;
+        state.view = b.dataset.v; state.src = b.dataset.s || ""; state.limit = 40; save();
         document.querySelectorAll(".stat").forEach(function (x) { x.setAttribute("aria-pressed", x === b); });
         render(); $("list").scrollIntoView({ behavior: "smooth", block: "start" });
       });
@@ -388,6 +392,8 @@ footer { font-size: 12px; color: var(--muted); display: grid; gap: 4px; }
     $("sSoon").textContent = open.filter(function (i) { return i.close && i.close - now < 3 * 864e5; }).length;
     $("sNew").textContent = comp.filter(function (i) { var d = i.seen || i.posted; return d && d >= y0; }).length;
     $("sAll").textContent = comp.length;
+    $("sG2b").textContent = comp.filter(function (i) { return !i.web && isOpen(i); }).length;
+    $("sWeb").textContent = comp.filter(function (i) { return i.web && isOpen(i); }).length;
     $("sSui").textContent = all.filter(function (i) { return i.sui && isOpen(i); }).length;
 
     var q = state.q.toLowerCase();
