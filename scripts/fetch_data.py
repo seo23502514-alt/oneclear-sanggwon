@@ -170,7 +170,7 @@ def aggregate(zf):
     return agg, grid, bld, cafes, sweets, lms, foods, pubs, rows
 
 def latest_population():
-    S.get("https://jumin.mois.go.kr/statMonth.do", timeout=60)
+    get_retry("https://jumin.mois.go.kr/statMonth.do", timeout=60)
     t = time.localtime(); y, m = t.tm_year, t.tm_mon
     for back in range(0, 4):
         mm, yy = m - back, y
@@ -178,7 +178,12 @@ def latest_population():
         d = {"sltOrgType": "1", "sltOrgLvl1": "A", "sltOrgLvl2": "", "gender": "gender", "genderPer": "genderPer", "generation": "generation",
              "sltUndefType": "", "sltOrderType": "1", "sltOrderValue": "ASC", "category": "month", "state": "3",
              "searchYearStart": str(yy), "searchMonthStart": f"{mm:02d}", "searchYearEnd": str(yy), "searchMonthEnd": f"{mm:02d}"}
-        r = S.post("https://jumin.mois.go.kr/downloadExcel2.do?searchYearMonth=month&xlsStats=3", data=d, timeout=300)
+        r = None
+        for i in range(4):
+            try: r = S.post("https://jumin.mois.go.kr/downloadExcel2.do?searchYearMonth=month&xlsStats=3", data=d, timeout=300); break
+            except Exception as e:
+                if i == 3: raise
+                print('주민 통계 다시 시도', i + 1, e, flush=True); time.sleep(30 * (i + 1))
         if r.status_code != 200 or len(r.content) < 8000: continue
         import openpyxl
         wb = openpyxl.load_workbook(io.BytesIO(r.content))

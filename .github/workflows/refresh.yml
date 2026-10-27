@@ -58,15 +58,17 @@ jobs:
             echo "CHANGED=1" >> $GITHUB_ENV
           fi
       - name: 서울 상권 (매출·유동인구·직장인구)
+        if: ${{ !cancelled() }}
         continue-on-error: true
         env:
           FORCE: ${{ github.event_name == 'push' || inputs.force }}
           SEOUL_KEY: ${{ secrets.SEOUL_KEY }}
         run: |
+          mkdir -p work
           python scripts/fetch_seoul.py docs/seoul.json 2>&1 | tee work/seoul_log.txt
           if grep -q "SEOUL_CHANGED=1" work/seoul_log.txt; then echo "CHANGED=1" >> $GITHUB_ENV; fi
       - name: 저장
-        if: env.CHANGED == '1'
+        if: ${{ !cancelled() && env.CHANGED == '1' }}
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
