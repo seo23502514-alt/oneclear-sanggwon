@@ -187,6 +187,29 @@ button:hover { border-color: var(--signal); }
 #nearSeg { justify-self: start; flex-wrap: wrap; border-radius: 12px; }
 .more { justify-self: start; }
 
+/* 서울 상권 · 커피 매출과 사람 */
+.sl { display: grid; gap: 18px; }
+.sl-kpis { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; }
+@media (max-width: 860px) { .sl-kpis { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+.sl-k { border: 1px solid var(--line); border-radius: var(--r); padding: 12px 14px; display: grid; gap: 2px; align-content: start; min-width: 0; }
+.sl-k .k { font-size: 12px; color: var(--muted); }
+.sl-k .v { white-space: nowrap; font-family: var(--font-data); font-size: clamp(17px, 2.6vw, 26px); font-weight: 600; letter-spacing: -0.02em; font-variant-numeric: tabular-nums; }
+.sl-k .c { font-size: 12px; color: var(--muted); }
+.sl-charts { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 24px; }
+@media (max-width: 860px) { .sl-charts { grid-template-columns: minmax(0, 1fr); } }
+.sl-chart { display: grid; gap: 6px; min-width: 0; }
+.sl-chart h4 { margin: 0; font-size: 14px; font-weight: 600; }
+.sl-chart h4 span { font-weight: 400; color: var(--muted); }
+.sl-chart svg { width: 100%; height: auto; display: block; }
+.sl-chart .ax { fill: var(--muted); font: 13px var(--font-data); }
+.sl .rtable { min-width: 680px; }
+.sl .rtable td:first-child { white-space: nowrap; }
+.sl-chart .gl { stroke: var(--line); stroke-width: 1; }
+.sl-chart .bl { stroke: var(--ink); stroke-width: 1; }
+.sl-leg { display: flex; flex-wrap: wrap; gap: 4px 14px; font-size: 12px; color: var(--muted); justify-content: center; }
+.sl-leg i { display: inline-block; width: 10px; height: 10px; border-radius: 2px; margin-right: 5px; vertical-align: -1px; }
+.sl .up2 { color: var(--good); } .sl .dn2 { color: var(--bad); }
+
 /* 계산기 */
 .tool { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.05fr); gap: 24px; align-items: start; }
 @media (max-width: 900px) { .tool { grid-template-columns: minmax(0, 1fr); } }
@@ -335,6 +358,40 @@ footer { font-size: 12px; color: var(--muted); display: grid; gap: 4px; }
           <button type="button" class="primary" id="toCalc">이 곳 손익 계산 보기</button>
         </div>
       </div>
+    </div>
+
+    <div class="sheet sl" id="seoul" hidden>
+      <div class="sheet-head">
+        <h3 class="card-title" id="slTitle">서울 상권 · 커피 매출과 사람</h3>
+        <span class="hint" id="slSub"></span>
+      </div>
+      <div class="sl-kpis">
+        <div class="sl-k"><span class="k">커피-음료 추정매출 (분기)</span><span class="v" id="slAmt">-</span><span class="c" id="slAmtC"></span></div>
+        <div class="sl-k"><span class="k">결제 1건당</span><span class="v" id="slPer">-</span><span class="c" id="slPerC"></span></div>
+        <div class="sl-k"><span class="k">유동인구 (분기)</span><span class="v" id="slFlow">-</span><span class="c" id="slFlowC"></span></div>
+        <div class="sl-k"><span class="k">직장인구</span><span class="v" id="slWrc">-</span><span class="c" id="slWrcC">상권 안에서 일하는 사람</span></div>
+      </div>
+      <div class="sl-charts">
+        <div class="sl-chart">
+          <h4>시간대별 <span>· 커피가 팔리는 때와 사람이 다니는 때</span></h4>
+          <div id="slTm"></div>
+          <div class="sl-leg"><span><i style="background: var(--signal)"></i>유동인구</span><span><i style="background: var(--ink)"></i>커피 매출</span></div>
+        </div>
+        <div class="sl-chart">
+          <h4>연령대별 <span>· 누가 사고, 누가 다니고, 누가 일하나</span></h4>
+          <div id="slAg"></div>
+          <div class="sl-leg"><span><i style="background: var(--signal)"></i>유동인구</span><span><i style="background: var(--amber)"></i>직장인구</span><span><i style="background: var(--ink)"></i>커피 매출</span></div>
+        </div>
+      </div>
+      <p class="hint" id="slInsight"></p>
+      <div class="table-scroll">
+        <table class="rtable">
+          <thead><tr><th scope="col">상권</th><th scope="col" class="r">거리</th><th scope="col" class="r">커피 매출(분기)</th><th scope="col" class="r">전분기</th><th scope="col" class="r">전년</th><th scope="col" class="r">1건당</th><th scope="col" class="r">유동인구</th><th scope="col" class="r">직장인구</th></tr></thead>
+          <tbody id="slBody"></tbody>
+        </table>
+      </div>
+      <div class="actions"><button type="button" id="slToCalc">이 상권 하루 유동인구를 손익 계산에 넣기</button></div>
+      <p class="hint" id="slNote"></p>
     </div>
 
     <div class="split">
@@ -990,6 +1047,8 @@ footer { font-size: 12px; color: var(--muted); display: grid; gap: 4px; }
 
     syncCalc(false);
     pubFollow();
+    if (state.dong !== renderSeoul.lastDong || state.lat !== renderSeoul.lastLat) { slPick = null; renderSeoul.lastDong = state.dong; renderSeoul.lastLat = state.lat; }
+    renderSeoul();
     lastReport = { name: state.station ? stationLabel(state.station) : state.place || d[3], d: d, R: R, inC: inC.length, fr: fr.length, low: low, stores: stores, per: per };
   }
   var lastReport = null;
@@ -1471,6 +1530,112 @@ footer { font-size: 12px; color: var(--muted); display: grid; gap: 4px; }
     });
   }
 
+  /* ---------------- 서울 상권 · 커피 매출과 사람 (서울시 상권분석서비스) ---------------- */
+  // 상권 행: [코드, 이름, 구분, 위도*1e5, 경도*1e5, 자치구, 행정동, 면적, 커피, 유동, 직장]
+  //  커피 = [분기매출, 결제건수, 전분기매출, 전년매출, 주말매출, [시간대6], [연령대6]] 또는 0
+  //  유동 = [분기, 전분기, [시간대6], [연령대6]] 또는 0,  직장 = [총, [연령대6], 분기] 또는 0
+  var SL = null, slPick = null;
+  var SL_TM = ["0~6시", "6~11시", "11~14시", "14~17시", "17~21시", "21~24시"], SL_AG = ["10대", "20대", "30대", "40대", "50대", "60대+"];
+  function loadSeoul() {
+    fetch("seoul.json").then(function (r) { return r.ok ? r.json() : null; }).catch(function () { return null; }).then(function (d) {
+      if (!d || !d.a) return;
+      SL = d; renderSeoul();
+    });
+  }
+  function qLabel(q) { return q ? q.slice(0, 4) + "년 " + q.slice(4) + "분기" : ""; }
+  function eok(v) { return v >= 1e8 ? (v / 1e8).toFixed(1) + "<small>억원</small>" : fmt(v / 1e4) + "<small>만원</small>"; }
+  function eokT(v) { return v >= 1e8 ? (v / 1e8).toFixed(1) + "억원" : fmt(v / 1e4) + "만원"; }
+  function pct(a, b) { return a != null && b ? (a / b - 1) * 100 : null; }
+  function pctT(v) { return v == null ? "-" : (v > 0 ? "+" : "") + v.toFixed(1) + "%"; }
+  function shares(a) { var t = (a || []).reduce(function (x, y) { return x + y; }, 0); return (a || []).map(function (v) { return t ? v / t : 0; }); }
+  function slNear() {
+    if (!SL || !state.dong || META.sidos[state.dong[1]].indexOf("서울") < 0) return [];
+    var out = [];
+    SL.a.forEach(function (x) {
+      var m = meters(state.lat, state.lon, x[3] / 1e5, x[4] / 1e5);
+      if (m <= 1500) out.push({ x: x, m: m });
+    });
+    return out.sort(function (a, b) { return a.m - b.m; });
+  }
+  // 묶음 막대 그래프 (각 계열은 비율 0~1)
+  function barSvg(cats, series) {
+    var W = 560, H = 220, L = 40, B = 28, T = 8, R = 6;
+    var mx = 0; series.forEach(function (s) { s.v.forEach(function (v) { mx = Math.max(mx, v); }); });
+    var step = [0.05, 0.1, 0.15, 0.2, 0.25].filter(function (st) { return mx / st <= 5; })[0] || 0.25, top = Math.max(step, Math.ceil(mx / step) * step);
+    var y = function (v) { return T + (H - T - B) * (1 - v / top); };
+    var gw = (W - L - R) / cats.length, bw = Math.min(26, (gw * 0.78) / series.length);
+    var h = '<svg viewBox="0 0 ' + W + ' ' + H + '" role="img">';
+    for (var t = 0; t <= top + 1e-9; t += step) {
+      h += '<line class="gl" x1="' + L + '" x2="' + (W - R) + '" y1="' + y(t).toFixed(1) + '" y2="' + y(t).toFixed(1) + '"/>';
+      h += '<text class="ax" x="' + (L - 4) + '" y="' + (y(t) + 4).toFixed(1) + '" text-anchor="end">' + Math.round(t * 100) + '%</text>';
+    }
+    cats.forEach(function (c, i) {
+      var x0 = L + gw * i + (gw - bw * series.length) / 2;
+      series.forEach(function (s, k) {
+        var v = s.v[i] || 0, yy = y(v);
+        h += '<rect x="' + (x0 + k * bw + 1).toFixed(1) + '" y="' + yy.toFixed(1) + '" width="' + (bw - 2).toFixed(1) + '" height="' + Math.max(0, H - B - yy).toFixed(1) + '" style="fill:' + s.c + '"><title>' + c + " " + s.n + " " + (v * 100).toFixed(1) + '%</title></rect>';
+      });
+      h += '<text class="ax" x="' + (L + gw * i + gw / 2).toFixed(1) + '" y="' + (H - 8) + '" text-anchor="middle">' + c + '</text>';
+    });
+    h += '<line class="bl" x1="' + L + '" x2="' + (W - R) + '" y1="' + (H - B) + '" y2="' + (H - B) + '"/></svg>';
+    return h;
+  }
+  function renderSeoul() {
+    var box = $("seoul"); if (!box) return;
+    var near = slNear();
+    if (!near.length) { box.hidden = true; return; }
+    var pick = near.filter(function (o) { return slPick && o.x[0] === slPick; })[0];
+    if (!pick) { slPick = null; pick = near.filter(function (o) { return o.x[8]; })[0] || near[0]; }
+    var x = pick.x, cf = x[8], fp = x[9], wk = x[10];
+    box.hidden = false;
+    $("slTitle").textContent = "서울 상권 · " + x[1] + " " + x[2];
+    $("slSub").textContent = x[5] + " " + x[6] + " · 중심까지 " + fmt(pick.m) + "m · 매출 " + qLabel(SL.q) + " 기준";
+    if (cf) {
+      $("slAmt").innerHTML = eok(cf[0]);
+      $("slAmtC").textContent = "전분기 " + pctT(pct(cf[0], cf[2])) + " · 전년 같은 분기 " + pctT(pct(cf[0], cf[3]));
+      $("slPer").innerHTML = cf[1] ? fmt(cf[0] / cf[1]) + "<small>원</small>" : "-";
+      $("slPerC").textContent = "결제 " + fmt(cf[1]) + "건 · 주말 매출 " + (cf[0] ? Math.round(cf[4] / cf[0] * 100) : 0) + "%";
+    } else { $("slAmt").textContent = "-"; $("slAmtC").textContent = "이 상권은 커피 매출 자료가 없어요"; $("slPer").textContent = "-"; $("slPerC").textContent = ""; }
+    if (fp) { $("slFlow").innerHTML = fmt(fp[0]) + "<small>명</small>"; $("slFlowC").textContent = "전분기 " + pctT(pct(fp[0], fp[1])) + " · 하루 평균 약 " + fmt(fp[0] / 91) + "명"; }
+    else { $("slFlow").textContent = "-"; $("slFlowC").textContent = "자료 없음"; }
+    $("slWrc").innerHTML = wk ? fmt(wk[0]) + "<small>명</small>" : "-";
+    $("slWrcC").textContent = wk ? "상권 안에서 일하는 사람 · " + qLabel(wk[2]) : "자료 없음";
+    var C1 = "var(--signal)", C2 = "var(--ink)", C3 = "var(--amber)";
+    $("slTm").innerHTML = barSvg(SL_TM, [{ n: "유동인구", c: C1, v: shares(fp ? fp[2] : []) }, { n: "커피 매출", c: C2, v: shares(cf ? cf[5] : []) }]);
+    $("slAg").innerHTML = barSvg(SL_AG, [{ n: "유동인구", c: C1, v: shares(fp ? fp[3] : []) }, { n: "직장인구", c: C3, v: shares(wk ? wk[1] : []) }, { n: "커피 매출", c: C2, v: shares(cf ? cf[6] : []) }]);
+    // 한 줄 해석: 매출이 가장 몰리는 시간·연령, 사람 대비 매출이 큰 시간
+    var ins = [];
+    if (cf) {
+      var ts = shares(cf[5]), as = shares(cf[6]), ti = ts.indexOf(Math.max.apply(null, ts)), ai = as.indexOf(Math.max.apply(null, as));
+      ins.push("커피 매출은 " + SL_TM[ti] + "(" + Math.round(ts[ti] * 100) + "%)와 " + SL_AG[ai] + "(" + Math.round(as[ai] * 100) + "%)에 가장 몰립니다.");
+      if (fp) {
+        var fs = shares(fp[2]), gap = ts.map(function (v, i) { return v - fs[i]; }), gi = gap.indexOf(Math.max.apply(null, gap));
+        if (gap[gi] > 0.05) ins.push(SL_TM[gi] + "는 다니는 사람에 비해 매출 비중이 " + Math.round(gap[gi] * 100) + "%p 높아요.");
+      }
+    }
+    $("slInsight").textContent = ins.join(" ");
+    var body = $("slBody"); body.innerHTML = "";
+    near.slice(0, 8).forEach(function (o) {
+      var y = o.x, c = y[8], f = y[9], w = y[10];
+      var tr = document.createElement("tr"); tr.className = "clickable" + (o === pick ? " me" : ""); tr.title = "이 상권 자세히 보기";
+      tr.addEventListener("click", function () { slPick = y[0]; renderSeoul(); });
+      var td = document.createElement("td"); td.textContent = y[1];
+      var sm = document.createElement("span"); sm.className = "small-muted"; sm.textContent = y[2] + " · " + y[6]; td.appendChild(sm); tr.appendChild(td);
+      [fmt(o.m) + "m", c ? eokT(c[0]) : "-", c ? pctT(pct(c[0], c[2])) : "-", c ? pctT(pct(c[0], c[3])) : "-", c && c[1] ? fmt(c[0] / c[1]) + "원" : "-", f ? fmt(f[0]) : "-", w ? fmt(w[0]) : "-"].forEach(function (v) {
+        var t = document.createElement("td"); t.className = "r"; t.textContent = v; tr.appendChild(t);
+      });
+      body.appendChild(tr);
+    });
+    $("slToCalc").hidden = !fp;
+    $("slNote").textContent = "서울시 상권분석서비스(서울 열린데이터광장) · 커피-음료 추정매출 " + qLabel(SL.q) + ", 유동인구 " + qLabel(SL.fq) + ", 직장인구 " + qLabel(SL.wq) + " 기준. 카드 결제 기반 추정치이고, 상권은 서울시가 정한 영역(발달상권·골목상권·전통시장·관광특구)이라 위 반경과 다릅니다.";
+  }
+  $("slToCalc").addEventListener("click", function () {
+    var x = (slNear().filter(function (o) { return o.x[0] === slPick; })[0] || slNear().filter(function (o) { return o.x[8]; })[0] || slNear()[0] || {}).x;
+    if (!x || !x[9]) return;
+    $("flow").value = Math.round(x[9][0] / 91); flowTouched = true;
+    calcInput(); $("calc").scrollIntoView({ behavior: "smooth", block: "start" });
+  });
+
   /* ---------------- 시작 ---------------- */
   var CODE = {};
   /* ---------------- 관공서·시니어 매장 ---------------- */
@@ -1598,6 +1763,7 @@ footer { font-size: 12px; color: var(--muted); display: grid; gap: 4px; }
     DB.forEach(function (d) { CODE[d[0]] = d; });
     buildGroups();
     loadPublic();
+    loadSeoul();
     var tot = META.mj.reduce(function (a, b) { return a + b; }, 0);
     NAT.share = META.mj.map(function (v) { return v / META.total; });
     NAT.per = META.cafes / META.popTotal * 1000;

@@ -29,7 +29,7 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
-      - run: pip install requests openpyxl
+      - run: pip install requests openpyxl pyproj
       - name: 새 데이터 확인·다운로드
         env:
           FORCE: ${{ github.event_name == 'push' || inputs.force }}
@@ -57,6 +57,14 @@ jobs:
             [ -f docs/config.js ] || cp src/host/config.js docs/config.js
             echo "CHANGED=1" >> $GITHUB_ENV
           fi
+      - name: 서울 상권 (매출·유동인구·직장인구)
+        continue-on-error: true
+        env:
+          FORCE: ${{ github.event_name == 'push' || inputs.force }}
+          SEOUL_KEY: ${{ secrets.SEOUL_KEY }}
+        run: |
+          python scripts/fetch_seoul.py docs/seoul.json 2>&1 | tee work/seoul_log.txt
+          if grep -q "SEOUL_CHANGED=1" work/seoul_log.txt; then echo "CHANGED=1" >> $GITHUB_ENV; fi
       - name: 저장
         if: env.CHANGED == '1'
         run: |
