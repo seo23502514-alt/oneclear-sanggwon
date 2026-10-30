@@ -1,5 +1,5 @@
 {
-  "updated": "2026-10-30 07:26",
+  "updated": "2026-10-31 07:50",
   "items": [
     {
       "id": "web-yeongdong-nogeunri-cafe",
@@ -20,6 +20,26 @@
       "news": "https://www.inews365.com/news/article.html?no=940195",
       "search": "노근리 카페",
       "sui": false
+    },
+    {
+      "id": "web-ex-rest-area-direct-cafe",
+      "title": "시범운영 직계약 휴게소 8곳 입점매장(일반카페·실속카페·푸드코트·편의점) 운영자 선정 입찰",
+      "org": "한국도로공사",
+      "cat": "운영·임대",
+      "kind": "임대",
+      "src": "관공서",
+      "where": "한국도로공사 전자조달시스템",
+      "posted": "2026-10-30",
+      "close": "",
+      "open": "",
+      "price": 0,
+      "priceLabel": "",
+      "note": "여주·대천·장유·군위 등 기존 6곳+신설 월출산·합천호. 카페는 일반카페/2,000원 이하 실속카페로 구분(실속카페·편의점은 4개 휴게소 묶음). 매장 직접운영 필수, 도공 퇴직자 관련 법인 제한",
+      "url": "",
+      "news": "https://www.newspim.com/news/view/20261030000317",
+      "search": "직계약 휴게소 입찰",
+      "sui": false,
+      "seen": "2026-10-31"
     }
   ]
 }
