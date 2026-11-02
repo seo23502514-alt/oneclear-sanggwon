@@ -1,8 +1,8 @@
-name: 카페 개폐업 레이더 주간 갱신
+name: 카페 개폐업 레이더 매일 갱신
 
 on:
   schedule:
-    - cron: "13 13 * * 1"   # 매주 월요일 22:13 (한국 시간)
+    - cron: "13 13 * * *"   # 매일 22:13 (한국 시간)
   workflow_dispatch:
     inputs:
       dry:
