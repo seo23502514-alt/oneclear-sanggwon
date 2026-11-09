@@ -1,0 +1,32 @@
+name: probe-region
+on: { push: { paths: ['.github/workflows/probe-region.yml'] }, workflow_dispatch: {} }
+permissions: { contents: write }
+jobs:
+  p:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: probe
+        run: |
+          mkdir -p build; O=build/probe_region.txt; : > $O
+          UA='Mozilla/5.0'
+          for id in B7BIA8NM4VIXSPPQQV0132089283 7Y02TF04H1WUB55Q4IZL35052374 VC8S8H646TPGS80AKMU630453421; do
+            echo "== gg $id" >> $O
+            curl -sL -A "$UA" -m 40 "https://data.gg.go.kr/portal/data/service/selectServicePage.do?infId=$id&infSeq=1" | grep -oE 'openapi\.gg\.go\.kr/[A-Za-z0-9_]+' | sort -u >> $O
+            curl -sL -A "$UA" -m 40 "https://data.gg.go.kr/portal/data/service/selectServicePage.do?infId=$id&infSeq=3" | grep -oE 'openapi\.gg\.go\.kr/[A-Za-z0-9_]+' | sort -u >> $O
+          done
+          echo "== sbiz index" >> $O
+          curl -sL -A "$UA" -m 40 https://bigdata.sbiz.or.kr/ -o idx.html; head -c 1500 idx.html >> $O; echo >> $O
+          for js in $(grep -oE '(src|href)="[^"]+\.js"' idx.html | sed -E 's/.*="([^"]+)"/\1/' | head -20); do
+            case $js in http*) u=$js;; /*) u=https://bigdata.sbiz.or.kr$js;; *) u=https://bigdata.sbiz.or.kr/$js;; esac
+            echo "-- $u" >> $O
+            curl -sL -A "$UA" -m 60 "$u" -o b.js
+            grep -oE '"/[a-zA-Z0-9_/.-]*(openApi|openapi|api)[a-zA-Z0-9_/.-]*"' b.js | sort -u | head -150 >> $O
+            grep -oE 'openapi[^"]{0,120}' b.js | sort -u | head -40 >> $O
+          done
+          echo "== sbiz openapi guesses" >> $O
+          for p in /openApi /api/openApi /openapi /sbiz/api/bizonSttus/MenuInfo; do
+            echo "-- $p $(curl -s -o /dev/null -w '%{http_code}' -A "$UA" -m 20 https://bigdata.sbiz.or.kr$p)" >> $O; done
+      - run: |
+          git config user.name probe; git config user.email probe@users.noreply.github.com
+          git add build/probe_region.txt; git commit -m "probe region" && git pull --rebase && git push || true
