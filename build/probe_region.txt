@@ -1,0 +1,10 @@
+== gg B7BIA8NM4VIXSPPQQV0132089283
+== gg 7Y02TF04H1WUB55Q4IZL35052374
+== gg VC8S8H646TPGS80AKMU630453421
+== sbiz index
+
+== sbiz openapi guesses
+-- /openApi 000
+-- /api/openApi 000
+-- /openapi 000
+-- /sbiz/api/bizonSttus/MenuInfo 000
