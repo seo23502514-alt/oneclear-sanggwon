@@ -101,6 +101,13 @@ h1 { font-family: var(--font-display); font-weight: 800; font-size: clamp(28px, 
 .suggest button { display: flex; width: 100%; justify-content: space-between; gap: 12px; border: 0; background: transparent; text-align: left; padding: 9px 10px; border-radius: 6px; font: 500 15px var(--font-body); color: var(--ink); cursor: pointer; }
 .suggest button span { color: var(--muted); font-size: 12px; white-space: nowrap; }
 .suggest button.on, .suggest button:hover { background: var(--signal-soft); }
+.search-box select { flex: none; border: 1px solid var(--line); border-radius: 8px; background: var(--sheet); color: var(--ink); font: 500 14px var(--font-body); padding: 7px 6px; max-width: 92px; }
+.suggest button strong { display: flex; align-items: center; gap: 6px; min-width: 0; }
+.suggest .sd { flex: none; font-style: normal; font-size: 11px; font-weight: 600; color: var(--signal); background: var(--signal-soft); border-radius: 4px; padding: 1px 5px; }
+.suggest .sdbar { display: flex; flex-wrap: wrap; gap: 4px; padding: 6px 6px 8px; border-bottom: 1px solid var(--line); margin-bottom: 4px; }
+.suggest .sdbar button { display: inline-flex; width: auto; padding: 3px 8px; font-size: 12px; border: 1px solid var(--line); border-radius: 999px; gap: 4px; }
+.suggest .sdbar button.on { background: var(--signal); border-color: var(--signal); color: var(--sheet); }
+.suggest .sdbar button span { color: inherit; opacity: .75; }
 .suggest .empty { padding: 10px; color: var(--muted); font-size: 14px; }
 .quick { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; font-size: 13px; color: var(--muted); }
 .chip-btn { font: 500 13px var(--font-body); border: 1px solid var(--line); background: var(--sheet); color: var(--ink); border-radius: 999px; padding: 4px 12px; cursor: pointer; }
@@ -294,6 +301,8 @@ footer { font-size: 12px; color: var(--muted); display: grid; gap: 4px; }
         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>
         <label class="sr" for="q">동네 이름이나 지하철역</label>
         <input id="q" type="search" autocomplete="off" placeholder="동네, 지하철역, 매장·건물 이름 (예: 철산동, 강남역, 테크노마트)" role="combobox" aria-expanded="false" aria-controls="suggest" aria-autocomplete="list">
+        <label class="sr" for="qSido">시·도</label>
+        <select id="qSido" title="시·도로 좁히기"><option value="-1">전국</option></select>
         <button type="button" class="primary" id="goBtn">분석</button>
       </div>
       <div class="suggest" id="suggest" role="listbox" hidden></div>
@@ -702,7 +711,33 @@ footer { font-size: 12px; color: var(--muted); display: grid; gap: 4px; }
   function norm(s) { return s.replace(/\s+/g, "").replace(/제(\d)/g, "$1"); }
   // 역 레코드: [역이름, [노선], lat, lon, 다른이름, 시도 시군구]
   function stationLabel(s) { return s[0] + "역"; }
-  function search(q) {
+  // 검색 결과마다 시·도 번호 (역은 가장 가까운 동의 시·도)
+  var stSido = null;
+  function stationSido(j) {
+    if (!stSido) {
+      stSido = ST.map(function (s) {
+        var best = -1, bm = 1e18;
+        for (var i = 0; i < DB.length; i++) { var dy = DB[i][4] - s[2], dx = (DB[i][5] - s[3]) * 0.8, m = dy * dy + dx * dx; if (m < bm) { bm = m; best = i; } }
+        return best >= 0 ? DB[best][1] : -1;
+      });
+    }
+    return stSido[j];
+  }
+  function itemSido(it) {
+    if (it.t === "d") return it.d[1];
+    if (it.t === "s") return stationSido(it.i);
+    var dd = DB[it.t === "bd" ? it.p[5] : it.p[4]];
+    return dd ? dd[1] : -1;
+  }
+  var qSidoSel = -1;
+  var wideSearch = false;
+  function search(q, all) {
+    wideSearch = !!all || qSidoSel >= 0;
+    var res0 = searchAll(q); wideSearch = false;
+    if (all || qSidoSel < 0) return res0;
+    return res0.filter(function (it) { return itemSido(it) === qSidoSel; });
+  }
+  function searchAll(q) {
     var raw = q.trim().split(/\s+/).filter(Boolean).map(norm);
     if (!raw.length) return [];
     var wantStation = /역$/.test(raw[raw.length - 1]) || raw.some(function (w) { return /호선|선$/.test(w); });
@@ -729,9 +764,9 @@ footer { font-size: 12px; color: var(--muted); display: grid; gap: 4px; }
       res.push([sc, { t: "s", s: s, i: j }]);
     }
     res.sort(function (a, b) { return a[0] - b[0]; });
-    var main = res.slice(0, 40).map(function (x) { return x[1]; });
+    var main = res.slice(0, wideSearch ? 400 : 40).map(function (x) { return x[1]; });
     var exact = res.length && res[0][0] < 100000;
-    var pl = raw.join("").length >= 2 ? searchPlaces(raw, exact ? 12 : 30) : [];
+    var pl = raw.join("").length >= 2 ? searchPlaces(raw, wideSearch ? 300 : exact ? 12 : 30) : [];
     return exact ? main.slice(0, 12).concat(pl, main.slice(12)) : pl.length ? pl.slice(0, 20).concat(main.slice(0, 20), pl.slice(20)) : main;
   }
 
@@ -782,12 +817,26 @@ footer { font-size: 12px; color: var(--muted); display: grid; gap: 4px; }
   var sug = $("suggest"), q = $("q"), sugIdx = -1, sugList = [];
   function renderSuggest() {
     var v = q.value;
-    sugList = v.trim() ? search(v) : [];
+    var allList = v.trim() ? search(v, true) : [];
+    sugList = v.trim() ? search(v).slice(0, 60) : [];
     sug.innerHTML = "";
+    // 시·도별 개수 (누르면 그 시·도만)
+    var cnt = {}; allList.forEach(function (it) { var k = itemSido(it); if (k >= 0) cnt[k] = (cnt[k] || 0) + 1; });
+    var keys = Object.keys(cnt).map(Number).sort(function (a, b) { return cnt[b] - cnt[a]; });
+    if (v.trim() && (keys.length > 1 || qSidoSel >= 0)) {
+      var bar = document.createElement("div"); bar.className = "sdbar";
+      [[-1, "전국", allList.length]].concat(keys.map(function (k) { return [k, shortSido(META.sidos[k]), cnt[k]]; })).forEach(function (o) {
+        var bb = document.createElement("button"); bb.type = "button"; if (o[0] === qSidoSel) bb.className = "on";
+        bb.textContent = o[1]; var cs = document.createElement("span"); cs.textContent = o[2]; bb.appendChild(cs);
+        bb.addEventListener("mousedown", function (ev) { ev.preventDefault(); setSido(o[0]); sugIdx = -1; renderSuggest(); });
+        bar.appendChild(bb);
+      });
+      sug.appendChild(bar);
+    }
     if (!v.trim()) { sug.hidden = true; q.setAttribute("aria-expanded", "false"); return; }
     if (!PL && v.trim().length >= 2) { loadPlaces(); var e0 = document.createElement("div"); e0.className = "empty"; e0.textContent = "매장·건물 이름을 불러오는 중입니다…"; sug.appendChild(e0); }
     if (!sugList.length && PL) {
-      var e = document.createElement("div"); e.className = "empty"; e.textContent = "찾는 곳이 없어요. 동네, 지하철역, 매장 이름, 건물 이름으로 넣어 보세요.";
+      var e = document.createElement("div"); e.className = "empty"; e.textContent = qSidoSel >= 0 ? shortSido(META.sidos[qSidoSel]) + "에서는 찾는 곳이 없어요. 시·도를 '전국'으로 바꿔 보세요." : "찾는 곳이 없어요. 동네, 지하철역, 매장 이름, 건물 이름으로 넣어 보세요.";
       sug.appendChild(e);
     }
     sugList.forEach(function (it, i) {
@@ -808,6 +857,8 @@ footer { font-size: 12px; color: var(--muted); display: grid; gap: 4px; }
         a.textContent = stationLabel(s) + (s[4] ? " (" + s[4] + ")" : "");
         c.textContent = "지하철 " + s[1].join(" · ");
       }
+      var si = itemSido(it);
+      if (si >= 0) { var chip = document.createElement("em"); chip.className = "sd"; chip.textContent = shortSido(META.sidos[si]); a.insertBefore(chip, a.firstChild); if (it.t === "d") a.lastChild.textContent = a.lastChild.textContent.replace(/^\S+ /, ""); }
       b.appendChild(a); b.appendChild(c);
       b.addEventListener("mousedown", function (ev) { ev.preventDefault(); pick(it); });
       sug.appendChild(b);
@@ -836,6 +887,13 @@ footer { font-size: 12px; color: var(--muted); display: grid; gap: 4px; }
     else if (e.key === "Enter") { e.preventDefault(); var l = search(q.value); if (l.length) pick(l[Math.max(0, sugIdx)]); }
     else if (e.key === "Escape") { sug.hidden = true; }
   });
+  var qSido = $("qSido");
+  function setSido(k) { qSidoSel = k; qSido.value = String(k); }
+  function fillQSido() {
+    if (qSido.options.length > 1 || !META) return;
+    META.sidos.forEach(function (sd, i) { var o = document.createElement("option"); o.value = String(i); o.textContent = shortSido(sd); qSido.appendChild(o); });
+  }
+  qSido.addEventListener("change", function () { setSido(parseInt(qSido.value, 10)); sugIdx = -1; if (q.value.trim()) { renderSuggest(); q.focus(); } });
   $("goBtn").addEventListener("click", function () { var l = search(q.value); if (l.length) pick(l[0]); else { renderSuggest(); q.focus(); } });
 
   /* ---------------- 리포트 ---------------- */
@@ -1827,7 +1885,7 @@ footer { font-size: 12px; color: var(--muted); display: grid; gap: 4px; }
     fetch("stations.json").then(function (r) { return r.ok ? r.json() : []; }).catch(function () { return []; })
   ]).then(function (all) {
     var data = all[0]; ST = all[1] || [];
-    META = data.meta; DB = data.d;
+    META = data.meta; DB = data.d; fillQSido();
     DB.forEach(function (d) { CODE[d[0]] = d; });
     buildGroups();
     loadPublic();
