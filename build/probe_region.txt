@@ -1,14 +1,49 @@
-VwsmAdstrdSelngW latest 20262
-16659 [{"STDR_YYQU_CD": "20262", "ADSTRD_CD": "11110515", "ADSTRD_CD_NM": "청운효자동", "SVC_INDUTY_CD": "CS100001", "SVC_INDUTY_CD_NM": "한식음식점", "THSMON_SELNG_AMT": 4501910300.0, "THSMON_SELNG_CO": 118186.0, "MDWK_SELNG_AMT": 3276168569.0, "WKEND_SELNG_AMT": 1225741731.0, "MON_SELNG_AMT": 520329152.0, "TUES_SELNG_AMT": 624026694.0, "WED_SELNG_AMT": 735338725.0, "THUR_SELNG_AMT": 660946921.0, "FRI_SELNG_AMT": 735527077.0, "SAT_SELNG_AMT": 787205970.0, "SUN_SELNG_AMT": 438535761.0, "TMZON_00_06_SELNG_AMT": 215237643.0, "TMZON_06_11_SELNG_AMT": 61621829.0, "TMZON_11_14_SELNG_AMT": 1609989520.0, "TMZON_14_17_SELNG_AMT": 464075113.0, "TMZON_17_21_SELNG_AMT": 1566807401.0, "TMZON_21_24_SELNG_AMT": 584178794.0, "ML_SELNG_AMT": 2012185750.0, "FML_SELNG_AMT": 1552687890.0, "AGRDE_10_SELNG_AMT": 6394876.0, "AGRDE_20_SELNG_AMT": 440057422.0, "AGRDE_30_SELNG_AMT": 902276738.0, "AGRDE_40_SELNG_AMT": 713358358.0, "AGRDE_50_SELNG_AMT": 868085266.0, "AGRDE_60_ABOVE_SELNG_AMT": 634700982.0, "MDWK_SELNG_CO": 85038.0, "WKEND_SELNG_CO": 33148.0, "MON_SELNG_CO": 15409.0, "TUES_SELNG_CO": 15779.0, "WED_SELNG_CO": 17796.0, "THUR_SELNG_CO": 16832.0, "FRI_SELNG_CO": 19222.0, "SAT_SELNG_CO": 20807.0, "SUN_SELNG_CO": 12341.0, "TMZON_00_06_SELNG_CO": 2289.0, "TMZON_06_11_SELNG_CO": 2337.0, "TMZON_11_14_SELNG_CO": 59333.0, "TMZON_14_17_SELNG_CO": 17204.0, "TMZON_17_21_SELNG_CO": 31967.0, "TMZON_21_24_SELNG_CO": 5056.0, "ML_SELNG_CO": 57348.0, "FML_SELNG_CO": 48859.0, "AGRDE_10_SELNG_CO": 485.0, "AGRDE_20_SELNG_CO": 14923.0, "AGRDE_30_SELNG_CO": 25991.0, "AGRDE_40_SELNG_CO": 21833.0, "AGRDE_50_SELNG_CO": 23732.0, "AGRDE_60_ABOVE_SELNG_CO": 19232.0}]
-VwsmAdstrdStorW latest 20262
-35301 [{"STDR_YYQU_CD": "20262", "ADSTRD_CD": "11620695", "ADSTRD_CD_NM": "신림동", "SVC_INDUTY_CD": "CS300011", "SVC_INDUTY_CD_NM": "일반의류", "SIMILR_INDUTY_STOR_CO": 73.0, "STOR_CO": 72.0, "FRC_STOR_CO": 1.0, "OPBIZ_RT": 0.0, "OPBIZ_STOR_CO": 0.0, "CLSBIZ_RT": 1.0, "CLSBIZ_STOR_CO": 1.0}]
-VwsmAdstrdFlpopW latest 20264
-9350 [{"STDR_YYQU_CD": "20251", "ADSTRD_CD": "11500604", "ADSTRD_CD_NM": "가양2동", "TOT_FLPOP_CO": 2113025.0, "ML_FLPOP_CO": 964253.0, "FML_FLPOP_CO": 1148772.0, "AGRDE_10_FLPOP_CO": 181836.0, "AGRDE_20_FLPOP_CO": 209924.0, "AGRDE_30_FLPOP_CO": 378585.0, "AGRDE_40_FLPOP_CO": 296039.0, "AGRDE_50_FLPOP_CO": 267557.0, "AGRDE_60_ABOVE_FLPOP_CO": 779085.0, "TMZON_00_06_FLPOP_CO": 528814.0, "TMZON_06_11_FLPOP_CO": 451788.0, "TMZON_11_14_FLPOP_CO": 251175.0, "TMZON_14_17_FLPOP_CO": 254783.0, "TMZON_17_21_FLPOP_CO": 352949.0, "TMZON_21_24_FLPOP_CO": 273516.0, "MON_FLPOP_CO": 302295.0, "TUES_FLPOP_CO": 301268.0, "WED_FLPOP_CO": 301806.0, "THUR_FLPOP_CO": 300918.0, "FRI_FLPOP_CO": 300972.0, "SAT_FLPOP_CO": 301305.0, "SUN_FLPOP_CO": 304463.0}]
-VwsmAdstrdSelngW ('20262',) 16659 줄
-VwsmAdstrdStorW ('20262',) 35301 줄
-rows 421 425
-data.gg.go.kr 200
-openapi.gg.go.kr 200
-bigdata.sbiz.or.kr 000
-sbiz.gmr.or.kr 200
-www.data.go.kr 200
+== B7BIA8NM4VIXSPPQQV0132089283 seq1 size 647166
+<title>경기도 발달골목상권 추정매출 현황 | 데이터 | 경기데이터드림
+fileDownload.js?ver=1.4
+== B7BIA8NM4VIXSPPQQV0132089283 seq2 size 647166
+<title>경기도 발달골목상권 추정매출 현황 | 데이터 | 경기데이터드림
+fileDownload.js?ver=1.4
+== B7BIA8NM4VIXSPPQQV0132089283 seq3 size 647166
+<title>경기도 발달골목상권 추정매출 현황 | 데이터 | 경기데이터드림
+fileDownload.js?ver=1.4
+== H92OOSWZXICJM0UO4IHH38259217 seq1 size 645527
+<title>카드매출_행정동_집계 | 데이터 | 경기데이터드림
+fileDownload.js?ver=1.4
+== H92OOSWZXICJM0UO4IHH38259217 seq2 size 645527
+<title>카드매출_행정동_집계 | 데이터 | 경기데이터드림
+fileDownload.js?ver=1.4
+== H92OOSWZXICJM0UO4IHH38259217 seq3 size 645527
+<title>카드매출_행정동_집계 | 데이터 | 경기데이터드림
+fileDownload.js?ver=1.4
+== VC8S8H646TPGS80AKMU630453421 seq1 size 645844
+<title>골목상권 현황 | 데이터 | 경기데이터드림
+fileDownload.js?ver=1.4
+== VC8S8H646TPGS80AKMU630453421 seq2 size 645844
+<title>골목상권 현황 | 데이터 | 경기데이터드림
+fileDownload.js?ver=1.4
+== VC8S8H646TPGS80AKMU630453421 seq3 size 645845
+<title>골목상권 현황 | 데이터 | 경기데이터드림
+fileDownload.js?ver=1.4
+== 7Y02TF04H1WUB55Q4IZL35052374 seq1 size 646997
+<title>카드 소비 데이터 | 데이터 | 경기데이터드림
+fileDownload.js?ver=1.4
+== 7Y02TF04H1WUB55Q4IZL35052374 seq2 size 646997
+<title>카드 소비 데이터 | 데이터 | 경기데이터드림
+fileDownload.js?ver=1.4
+== 7Y02TF04H1WUB55Q4IZL35052374 seq3 size 976437
+<title>데이터 | 경기데이터드림
+<title>오류 메세지 | 경기데이터드림
+fileDownload.js?ver=1.4
+<html>
+<head>
+<meta charset="euc-kr">
+</head>
+<body bgcolor=#ffffff>
+<br><br><br>
+   <CENTER><font face=���� size=4 color=#999900><b>
+   <hr color=#0000ff width=80%>
+   <FONT color=#ff0000 size=10> - ���� ��å�� ���� ���� �Ǿ����ϴ� - </font><br><br>
+   <FONT color=#000000 size=6> �ڼ��� ������ ���̹�ħ�ش������ͷ� ���� �ٶ��ϴ�. <br>�� 031-8008-4114 / 4115<br>
+   <hr color=#0000ff width=80%>
+   <
