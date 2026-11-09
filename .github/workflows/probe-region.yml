@@ -6,28 +6,19 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - run: pip install requests
       - name: probe
-        env: { SEOUL_KEY: "${{ secrets.SEOUL_KEY }}" }
         run: |
-          set +e; mkdir -p build
-          python - <<'PY' > build/probe_region.txt 2>&1
-          import sys, json; sys.path.insert(0,'scripts')
-          import fetch_seoul as F
-          for svc in ['VwsmAdstrdSelngW','VwsmAdstrdStorW','VwsmAdstrdFlpopW']:
-              try:
-                  q=F.latest_q(svc); print(svc,'latest',q)
-                  t,r=F.api(svc,1,2,q); print(t, json.dumps(r[:1],ensure_ascii=False))
-              except Exception as e: print(svc,'ERR',e)
-          q=F.latest_q('VwsmAdstrdSelngW')
-          rows=[r for r in F.fetch_all('VwsmAdstrdSelngW',q) if r['SVC_INDUTY_CD']=='CS100010']
-          st=[r for r in F.fetch_all('VwsmAdstrdStorW',q) if r['SVC_INDUTY_CD']=='CS100010']
-          json.dump({'q':q,'sales':[[r['ADSTRD_CD'],F.n(r['THSMON_SELNG_AMT']),F.n(r['THSMON_SELNG_CO'])] for r in rows],
-                     'stores':[[r['ADSTRD_CD'],F.n(r['STOR_CO']),F.n(r.get('SIMILR_INDUTY_STOR_CO'))] for r in st]},
-                    open('build/seoul_dong_sales.json','w'),ensure_ascii=False)
-          print('rows',len(rows),len(st))
-          PY
-          for h in data.gg.go.kr openapi.gg.go.kr bigdata.sbiz.or.kr sbiz.gmr.or.kr www.data.go.kr; do echo "$h $(curl -s -o /dev/null -w '%{http_code}' -m 20 https://$h/)" >> build/probe_region.txt; done
+          set +e; mkdir -p build; O=build/probe_region.txt; : > $O
+          UA='Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 Chrome/120 Safari/537.36'
+          for id in B7BIA8NM4VIXSPPQQV0132089283 H92OOSWZXICJM0UO4IHH38259217 VC8S8H646TPGS80AKMU630453421 7Y02TF04H1WUB55Q4IZL35052374; do
+            for s in 1 2 3; do
+              curl -sL -A "$UA" -m 40 "https://data.gg.go.kr/portal/data/service/selectServicePage.do?infId=$id&infSeq=$s" -o p.html
+              echo "== $id seq$s size $(wc -c < p.html)" >> $O
+              grep -oiE '(openapi\.gg\.go\.kr/[A-Za-z0-9_]+|srvNm[^,]{0,60}|apiNm[^,]{0,60}|<title>[^<]*|이용허락[^<]{0,80}|공공누리[^<]{0,60}|CC[- ]?BY[^<]{0,30})' p.html | sort -u | head -20 >> $O
+              grep -oE 'fileDownload[^"]{0,200}|atchFileId[^"&]{0,60}' p.html | sort -u | head -5 >> $O
+            done
+          done
+          curl -s -m 30 "https://openapi.gg.go.kr/Tbgg" | head -c 400 >> $O
       - run: |
           git config user.name probe; git config user.email probe@users.noreply.github.com
-          git add build/probe_region.txt build/seoul_dong_sales.json; git commit -m "probe region" && git pull --rebase && git push || true
+          git add build/probe_region.txt; git commit -m "probe region" && git pull --rebase && git push || true
