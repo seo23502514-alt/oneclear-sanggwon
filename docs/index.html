@@ -106,12 +106,13 @@ h1 { font-family: var(--font-display); font-weight: 800; font-size: clamp(28px, 
 .chip-btn { font: 500 13px var(--font-body); border: 1px solid var(--line); background: var(--sheet); color: var(--ink); border-radius: 999px; padding: 4px 12px; cursor: pointer; }
 .chip-btn:hover { border-color: var(--signal); }
 
-button {
+button, a.btn {
   font: 600 14px var(--font-body); border-radius: var(--r); padding: 9px 14px; cursor: pointer;
   border: 1px solid var(--line); background: var(--sheet); color: var(--ink);
 }
+a.btn { display: inline-flex; align-items: center; text-decoration: none; }
 button.primary { background: var(--signal); border-color: var(--signal); color: var(--sheet); }
-button:hover { border-color: var(--signal); }
+button:hover, a.btn:hover { border-color: var(--signal); }
 
 .sheet { background: var(--sheet); border: 1px solid var(--line); border-radius: var(--r); padding: 22px; display: grid; gap: 18px; min-width: 0; align-content: start; }
 .sheet-head { display: flex; justify-content: space-between; align-items: baseline; gap: 8px 12px; flex-wrap: wrap; }
@@ -401,6 +402,22 @@ footer { font-size: 12px; color: var(--muted); display: grid; gap: 4px; }
       </div>
       <div class="actions"><button type="button" id="slToCalc">이 상권 하루 유동인구를 손익 계산에 넣기</button></div>
       <p class="hint" id="slNote"></p>
+    </div>
+
+    <div class="sheet sl" id="region" hidden>
+      <div class="sheet-head">
+        <h3 class="card-title" id="rgTitle">지역 상권 · 카페 매출과 사람</h3>
+        <span class="hint" id="rgSub"></span>
+      </div>
+      <div class="sl-kpis">
+        <div class="sl-k"><span class="k">카페 1곳당 주민</span><span class="v" id="rgPop">-</span><span class="c" id="rgPopC"></span></div>
+        <div class="sl-k"><span class="k">카페 1곳당 직장인</span><span class="v" id="rgWk">-</span><span class="c" id="rgWkC"></span></div>
+        <div class="sl-k"><span class="k">카페 1곳당 주민+직장인</span><span class="v" id="rgAll">-</span><span class="c" id="rgAllC"></span></div>
+        <div class="sl-k"><span class="k">같은 시·도 안 순위</span><span class="v" id="rgRank">-</span><span class="c" id="rgRankC"></span></div>
+      </div>
+      <p class="hint" id="rgInsight"></p>
+      <p class="hint" id="rgWhy"></p>
+      <div class="actions" id="rgLinks"></div>
     </div>
 
     <div class="split">
@@ -1058,6 +1075,7 @@ footer { font-size: 12px; color: var(--muted); display: grid; gap: 4px; }
     pubFollow();
     if (state.dong !== renderSeoul.lastDong || state.lat !== renderSeoul.lastLat) { slPick = null; renderSeoul.lastDong = state.dong; renderSeoul.lastLat = state.lat; }
     renderSeoul();
+    renderRegion();
     lastReport = { name: state.station ? stationLabel(state.station) : state.place || d[3], d: d, R: R, inC: inC.length, fr: fr.length, low: low, stores: stores, per: per };
   }
   var lastReport = null;
@@ -1596,6 +1614,39 @@ footer { font-size: 12px; color: var(--muted); display: grid; gap: 4px; }
     });
     h += '<line class="bl" x1="' + L + '" x2="' + (W - R) + '" y1="' + (H - B) + '" y2="' + (H - B) + '"/></svg>';
     return h;
+  }
+  // 서울 밖: 공개 매출·유동인구가 없으니 카페 1곳당 배후 사람(주민·직장인)으로 비교하고, 공식 매출은 소상공인365로 안내
+  function renderRegion() {
+    var box = $("region"); if (!box) return;
+    var d = state.dong;
+    if (!d || !META || META.sidos[d[1]].indexOf("서울") >= 0) { box.hidden = true; return; }
+    box.hidden = false;
+    var sido = META.sidos[d[1]], cf = d[8] || 0, pop = d[13] || 0, wk = d[15] || 0;
+    $("rgTitle").textContent = "지역 상권 · " + shortSido(sido) + " " + d[2] + " " + d[3];
+    $("rgSub").textContent = "서울은 상권별 매출·유동인구가 공개되지만 다른 지역은 공개 자료가 없어, 카페 1곳당 배후 사람으로 비교해요";
+    var same = DB.filter(function (x) { return x[1] === d[1] && x[8] >= 3; });
+    function med(a) { a = a.slice().sort(function (p, q) { return p - q; }); return a.length ? a[Math.floor(a.length / 2)] : 0; }
+    var mPop = med(same.map(function (x) { return x[13] / x[8]; })), mWk = med(same.map(function (x) { return (x[15] || 0) / x[8]; }));
+    var allV = function (x) { return (x[13] + (x[15] || 0)) / x[8]; }, mAll = med(same.map(allV));
+    function cmp(v, m) { if (!m) return ""; var r = v / m; return shortSido(sido) + " 보통 동네 " + fmt(m) + "명 · " + (r >= 1.15 ? "넉넉한 편" : r <= 0.85 ? "빠듯한 편" : "비슷한 편"); }
+    if (!cf) {
+      ["rgPop", "rgWk", "rgAll", "rgRank"].forEach(function (k) { $(k).textContent = "-"; });
+      ["rgPopC", "rgWkC", "rgAllC", "rgRankC"].forEach(function (k) { $(k).textContent = ""; });
+      $("rgInsight").textContent = "이 동에는 아직 카페가 없어요. 주민 " + fmt(pop) + "명, 직장인 " + fmt(wk) + "명이 있습니다.";
+    } else {
+      $("rgPop").innerHTML = fmt(pop / cf) + "<small>명</small>"; $("rgPopC").textContent = cmp(pop / cf, mPop);
+      $("rgWk").innerHTML = wk ? fmt(wk / cf) + "<small>명</small>" : "-"; $("rgWkC").textContent = wk ? cmp(wk / cf, mWk) : "직장인 수 자료 없음";
+      var v = (pop + wk) / cf; $("rgAll").innerHTML = fmt(v) + "<small>명</small>"; $("rgAllC").textContent = cmp(v, mAll);
+      var rank = same.filter(function (x) { return allV(x) > v; }).length + 1;
+      $("rgRank").innerHTML = fmt(rank) + "<small>위 / " + fmt(same.length) + "</small>";
+      $("rgRankC").textContent = "카페당 배후 사람이 많은 순 · 상위 " + Math.max(1, Math.round(rank / same.length * 100)) + "%";
+      $("rgInsight").textContent = "카페 " + fmt(cf) + "곳에 주민 " + fmt(pop) + "명, 직장인 " + fmt(wk) + "명. " +
+        (v >= mAll * 1.15 ? "같은 " + shortSido(sido) + " 안에서 카페 수에 비해 사람이 많은 동네예요." : v <= mAll * 0.85 ? "같은 " + shortSido(sido) + " 안에서 카페가 이미 촘촘한 동네예요." : "같은 " + shortSido(sido) + " 안에서 보통 수준이에요.");
+    }
+    $("rgWhy").textContent = "주민은 행안부 주민등록, 직장인은 통계청 사업체조사(" + (META.wy || "") + "년), 카페 수는 소상공인 상가정보 기준입니다. 이 동의 실제 카페 월평균 매출과 유동인구는 소상공인365(무료)에서 동을 골라 확인할 수 있어요. 서울 기준으로 맞춰 본 결과 카페당 사람 수만으로는 매출이 잘 맞지 않아(서울 행정동 설명력 약 27%) 추정 매출은 따로 보여드리지 않습니다.";
+    var links = [["소상공인365에서 이 동 매출·유동인구 보기", "https://bigdata.sbiz.or.kr/#/hotplace/gis"]];
+    if (sido.indexOf("경기") >= 0) links.push(["경기도 상권분석 서비스", "https://sbiz.gmr.or.kr/map/trdArea.do"]);
+    $("rgLinks").innerHTML = links.map(function (l) { return '<a class="btn" href="' + l[1] + '" target="_blank" rel="noopener">' + l[0] + '</a>'; }).join("");
   }
   function renderSeoul() {
     var box = $("seoul"); if (!box) return;
