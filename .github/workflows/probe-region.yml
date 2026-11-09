@@ -8,7 +8,7 @@ jobs:
       - uses: actions/checkout@v4
       - name: probe
         run: |
-          mkdir -p build; O=build/probe_region.txt; : > $O
+          set +e; mkdir -p build; O=build/probe_region.txt; : > $O
           UA='Mozilla/5.0'
           for id in B7BIA8NM4VIXSPPQQV0132089283 7Y02TF04H1WUB55Q4IZL35052374 VC8S8H646TPGS80AKMU630453421; do
             echo "== gg $id" >> $O
