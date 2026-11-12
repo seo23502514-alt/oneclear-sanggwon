@@ -1,0 +1,545 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>카페 장비 시각가이드 · 장비찾기</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;900&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#f4f5f7;--card:#fff;--ink:#1c1f24;--muted:#6b7280;--line:#e3e6ea;--brand:#6b4226;--brand2:#8a5634;--accent:#c8742f;--ok:#2e8b57;--warn:#d9822b;--bad:#c0392b;
+--c-ext:#7a4a2a;--c-cold:#2f6f8f;--c-bev:#8a5a9a;--c-wash:#3f8a6a;--c-heat:#c0532f;--c-etc:#5f6670}
+*{box-sizing:border-box}
+body{margin:0;font-family:"Noto Sans KR",system-ui,sans-serif;background:var(--bg);color:var(--ink);line-height:1.5}
+.top{background:var(--brand);color:#fff}
+.top .in{max-width:1280px;margin:0 auto;padding:0 20px;display:flex;align-items:center;gap:24px;height:60px}
+.logo{font-weight:900;font-size:18px;letter-spacing:-.4px;white-space:nowrap}
+.logo small{font-weight:500;opacity:.7;font-size:12px;margin-left:6px}
+nav{display:flex;gap:4px;height:100%}
+nav button{font:inherit;font-size:14.5px;font-weight:700;color:rgba(255,255,255,.7);background:none;border:0;padding:0 14px;cursor:pointer;border-bottom:3px solid transparent}
+nav button.on{color:#fff;border-bottom-color:var(--accent)}
+.view{display:none}.view.on{display:block}
+.layout{max-width:1280px;margin:0 auto;padding:20px;display:grid;grid-template-columns:340px 1fr;gap:20px;align-items:start}
+@media(max-width:900px){.layout{grid-template-columns:1fr}}
+/* side form */
+.side{background:#fff;border:1px solid var(--line);border-radius:14px;position:sticky;top:12px;overflow:hidden}
+.side h2{margin:0;padding:16px 18px;font-size:16px;border-bottom:1px solid var(--line)}
+.step{border-bottom:1px solid var(--line)}
+.step summary{list-style:none;cursor:pointer;padding:13px 18px;display:flex;align-items:center;gap:10px;font-weight:700;font-size:14.5px}
+.step summary::-webkit-details-marker{display:none}
+.num{width:24px;height:24px;border-radius:50%;background:var(--brand);color:#fff;font-size:12px;display:flex;align-items:center;justify-content:center;flex:none}
+.step .sum{margin-left:auto;font-weight:500;font-size:12px;color:var(--muted);text-align:right}
+.fields{padding:0 18px 16px;display:grid;gap:12px}
+.f label{display:block;font-size:12.5px;color:var(--muted);margin-bottom:4px;font-weight:500}
+.f input[type=number],.f select{width:100%;font:inherit;font-size:14px;padding:9px 10px;border:1.5px solid var(--line);border-radius:8px;background:#fff}
+.f input:focus,.f select:focus{outline:none;border-color:var(--accent)}
+.row2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.checks{display:flex;flex-wrap:wrap;gap:6px}
+.checks label{font-size:13px;padding:6px 10px;border:1.5px solid var(--line);border-radius:8px;cursor:pointer;user-select:none;color:var(--ink);margin:0}
+.checks input{display:none}
+.checks label:has(input:checked){background:var(--brand);border-color:var(--brand);color:#fff}
+.range{display:flex;align-items:center;gap:10px}
+.range input{flex:1;accent-color:var(--accent)}
+.range b{min-width:46px;text-align:right;font-size:14px}
+.go{display:block;width:calc(100% - 36px);margin:16px 18px 18px;font:inherit;font-size:15px;font-weight:900;padding:13px;border:0;border-radius:10px;background:var(--accent);color:#fff;cursor:pointer}
+.go:hover{filter:brightness(.95)}
+/* report */
+.report{display:grid;gap:16px}
+.panel{background:#fff;border:1px solid var(--line);border-radius:14px;padding:18px 20px}
+.panel h3{margin:0 0 4px;font-size:16px}
+.panel .desc{margin:0 0 14px;font-size:12.5px;color:var(--muted)}
+.rhead{background:linear-gradient(120deg,var(--brand),var(--brand2));color:#fff;border-radius:14px;padding:20px 22px;display:flex;gap:20px;align-items:center;flex-wrap:wrap}
+.rhead h2{margin:0;font-size:20px}
+.rhead p{margin:4px 0 0;opacity:.85;font-size:13px}
+.grade{margin-left:auto;text-align:center;background:rgba(255,255,255,.14);border-radius:12px;padding:10px 18px}
+.grade b{display:block;font-size:30px;line-height:1.1}
+.grade span{font-size:12px;opacity:.85}
+.kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}
+@media(max-width:1100px){.kpis{grid-template-columns:repeat(2,1fr)}}
+.kpi{background:#fff;border:1px solid var(--line);border-radius:14px;padding:16px}
+.kpi .l{font-size:12.5px;color:var(--muted)}
+.kpi .v{font-size:26px;font-weight:900;letter-spacing:-.5px;margin-top:2px}
+.kpi .v small{font-size:14px;font-weight:700;color:var(--muted);margin-left:2px}
+.kpi .s{font-size:12px;margin-top:4px}
+.tone-ok{color:var(--ok)}.tone-warn{color:var(--warn)}.tone-bad{color:var(--bad)}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+@media(max-width:1100px){.two{grid-template-columns:1fr}}
+.gauge{height:18px;background:#eef0f3;border-radius:9px;position:relative;overflow:visible;margin:24px 0 8px}
+.gauge .fill{height:100%;border-radius:9px}
+.gauge .cap{position:absolute;top:-22px;transform:translateX(-50%);font-size:11px;color:var(--muted);white-space:nowrap}
+.gauge .cap::after{content:"";position:absolute;left:50%;top:18px;width:2px;height:26px;background:var(--ink)}
+.bars{display:grid;gap:8px}
+.bar{display:grid;grid-template-columns:120px 1fr 56px;gap:10px;align-items:center;font-size:13px}
+.bar .t{height:12px;background:#eef0f3;border-radius:6px;overflow:hidden}
+.bar .t i{display:block;height:100%;border-radius:6px}
+.bar .n{text-align:right;font-weight:700}
+table{width:100%;border-collapse:collapse;font-size:13.5px}
+th{text-align:left;font-size:12px;color:var(--muted);font-weight:500;padding:8px 10px;border-bottom:1.5px solid var(--line);white-space:nowrap}
+td{padding:10px;border-bottom:1px solid var(--line);vertical-align:top}
+td .ic{width:34px;height:34px;border-radius:8px;display:flex;align-items:center;justify-content:center}
+td .ic svg{width:24px;height:24px}
+.pill{display:inline-block;font-size:11px;font-weight:700;padding:2px 7px;border-radius:5px;color:#fff;background:var(--accent)}
+.pill.opt{background:#9aa1ab}
+.why{color:var(--muted);font-size:12.5px}
+td a{color:var(--brand);font-weight:700;font-size:12.5px;white-space:nowrap}
+.alerts{display:grid;gap:8px}
+.alert{display:flex;gap:10px;padding:11px 13px;border-radius:10px;font-size:13.5px}
+.alert.bad{background:#fbeceb}.alert.warn{background:#fdf2e6}.alert.ok{background:#e9f5ee}
+.alert b{flex:none}
+.strip{display:flex;height:46px;border-radius:8px;overflow:hidden;border:1px solid var(--line);margin:6px 0 4px}
+.strip div{display:flex;align-items:center;justify-content:center;font-size:11px;color:#fff;font-weight:700;border-right:1px solid rgba(255,255,255,.5);overflow:hidden;white-space:nowrap;padding:0 2px}
+.striplbl{display:flex;justify-content:space-between;font-size:12px;color:var(--muted);margin-bottom:12px}
+.empty-r{text-align:center;padding:80px 20px;color:var(--muted)}
+.empty-r b{display:block;font-size:18px;color:var(--ink);margin-bottom:6px}
+.foot{font-size:12px;color:var(--muted);padding:4px 2px 30px}
+/* dictionary view */
+.dict{max-width:1280px;margin:0 auto;padding:20px}
+.dtools{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px}
+.dtools input{flex:1;min-width:220px;font:inherit;font-size:15px;padding:10px 14px;border:1.5px solid var(--line);border-radius:10px}
+.chip{font:inherit;font-size:13px;padding:7px 12px;border-radius:999px;border:1.5px solid var(--line);background:#fff;cursor:pointer}
+.chip.on{background:var(--ink);color:#fff;border-color:var(--ink)}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:14px}
+.card{background:#fff;border:1px solid var(--line);border-radius:14px;overflow:hidden;cursor:pointer}
+.card:hover{box-shadow:0 6px 18px rgba(0,0,0,.08)}
+.art{height:110px;display:flex;align-items:center;justify-content:center}
+.art svg{width:76px;height:76px}
+.cbody{padding:12px 14px 14px}
+.cbody .c{font-size:12px;font-weight:700}
+.cbody h4{margin:2px 0;font-size:16px}
+.cbody p{margin:4px 0 0;font-size:13px;color:#444}
+.scrim{position:fixed;inset:0;background:rgba(15,15,20,.55);display:none;align-items:center;justify-content:center;padding:16px;z-index:20}
+.scrim.open{display:flex}
+.modal{background:#fff;border-radius:16px;max-width:600px;width:100%;max-height:92vh;overflow:auto;padding:22px}
+.modal h2{margin:0 0 4px}
+.modal ul{padding-left:18px}
+.modal .x{float:right;border:0;background:none;font-size:22px;cursor:pointer;color:var(--muted)}
+.buy a{display:inline-block;margin:6px 6px 0 0;font-size:14px;font-weight:700;text-decoration:none;padding:9px 14px;border-radius:10px;border:1.5px solid var(--ink);color:var(--ink)}
+.buy a:first-child{background:var(--ink);color:#fff}
+</style>
+</head>
+<body>
+<div class="top"><div class="in">
+  <div class="logo">장비찾기 <small>카페 장비 시각가이드</small></div>
+  <nav><button class="on" data-v="analyze">장비 구성 분석</button><button data-v="dict">장비 사전</button></nav>
+</div></div>
+
+<section class="view on" id="v-analyze">
+<div class="layout">
+  <aside class="side">
+    <h2>매장 조건 입력</h2>
+    <details class="step" open><summary><span class="num">1</span>매장 기본<span class="sum" id="sum1"></span></summary>
+      <div class="fields">
+        <div class="row2">
+          <div class="f"><label>매장 면적 (평)</label><input type="number" id="area" value="20" min="5" max="200"></div>
+          <div class="f"><label>좌석 수</label><input type="number" id="seats" value="24" min="0" max="300"></div>
+        </div>
+        <div class="f"><label>매장 형태</label>
+          <select id="type"><option value="takeout">테이크아웃 중심</option><option value="hall" selected>홀 중심 카페</option><option value="dessert">디저트 카페</option><option value="senior">시니어 운영 카페</option></select></div>
+      </div></details>
+    <details class="step" open><summary><span class="num">2</span>메뉴 구성<span class="sum" id="sum2"></span></summary>
+      <div class="fields"><div class="checks" id="menus">
+        <label><input type="checkbox" value="espresso" checked>에스프레소·라떼</label>
+        <label><input type="checkbox" value="drip">핸드드립</label>
+        <label><input type="checkbox" value="coldbrew">콜드브루</label>
+        <label><input type="checkbox" value="smoothie" checked>스무디·프라페</label>
+        <label><input type="checkbox" value="ade" checked>에이드·아이스티</label>
+        <label><input type="checkbox" value="tea">차·청 직접 제조</label>
+        <label><input type="checkbox" value="bake">디저트 굽기</label>
+        <label><input type="checkbox" value="waffle">와플·토스트</label>
+        <label><input type="checkbox" value="cake">케이크 진열</label>
+        <label><input type="checkbox" value="bottle">병음료 판매</label>
+      </div></div></details>
+    <details class="step" open><summary><span class="num">3</span>예상 판매량<span class="sum" id="sum3"></span></summary>
+      <div class="fields">
+        <div class="f"><label>하루 판매 잔 수</label><div class="range"><input type="range" id="cups" min="20" max="600" step="10" value="150"><b id="cupsv"></b></div></div>
+        <div class="f"><label>아이스 음료 비율 (여름 기준)</label><div class="range"><input type="range" id="icer" min="0" max="100" step="5" value="65"><b id="icerv"></b></div></div>
+        <div class="f"><label>가장 바쁜 1시간에 팔리는 비율</label><div class="range"><input type="range" id="peak" min="5" max="40" step="1" value="18"><b id="peakv"></b></div></div>
+      </div></details>
+    <details class="step" open><summary><span class="num">4</span>운영·설비<span class="sum" id="sum4"></span></summary>
+      <div class="fields">
+        <div class="row2">
+          <div class="f"><label>근무 인원 (피크)</label><input type="number" id="staff" value="2" min="1" max="10"></div>
+          <div class="f"><label>계약 전력 (kW)</label><input type="number" id="power" value="20" min="3" max="200"></div>
+        </div>
+        <div class="row2">
+          <div class="f"><label>프론트 카운터 길이 (mm)</label><input type="number" id="front" value="4000" step="100"></div>
+          <div class="f"><label>백 카운터 길이 (mm)</label><input type="number" id="back" value="3500" step="100"></div>
+        </div>
+      </div></details>
+    <button class="go" id="go">분석하기</button>
+  </aside>
+
+  <div class="report" id="report">
+    <div class="panel empty-r"><b>왼쪽에 매장 조건을 넣고 분석하기를 눌러 주세요</b>추천 장비 구성, 전력 부하, 얼음 필요량, 카운터 배치 길이를 리포트로 보여 드립니다.</div>
+  </div>
+</div>
+</section>
+
+<section class="view" id="v-dict"><div class="dict">
+  <div class="dtools"><input id="q" type="search" placeholder="장비 이름이나 하고 싶은 일로 검색 (예: 얼음, 스팀, 세척)"></div>
+  <div class="dtools" id="chips"></div>
+  <div class="grid" id="grid"></div>
+</div></section>
+
+<div class="scrim" id="scrim"><div class="modal" id="modal"></div></div>
+
+<script>
+const CATS = {
+  ext:{name:"추출", color:"var(--c-ext)", bg:"#f3e7dc"},
+  cold:{name:"냉장·냉동·얼음", color:"var(--c-cold)", bg:"#e1eef4"},
+  bev:{name:"음료 제조", color:"var(--c-bev)", bg:"#efe5f3"},
+  wash:{name:"세척·위생·물", color:"var(--c-wash)", bg:"#e2f1ea"},
+  heat:{name:"가열·디저트", color:"var(--c-heat)", bg:"#f8e6de"},
+  etc:{name:"운영·소도구", color:"var(--c-etc)", bg:"#e9ebee"}
+};
+
+// simple original line icons (stroke = currentColor)
+const S = (inner)=>`<svg viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round">${inner}</svg>`;
+const IC = {
+  espresso:S('<rect x="8" y="10" width="48" height="16" rx="3"/><rect x="12" y="26" width="40" height="22"/><path d="M20 26v6M44 26v6"/><path d="M16 32h8v3h-8zM40 32h8v3h-8z"/><path d="M22 42h6v6h-6zM38 42h6v6h-6z"/><path d="M6 52h52"/>'),
+  grinder:S('<path d="M22 6h20l-4 16H26z"/><rect x="20" y="22" width="24" height="22" rx="3"/><path d="M28 44v6h8v-6"/><path d="M18 56h28"/><circle cx="32" cy="33" r="4"/>'),
+  drip:S('<path d="M16 14h32l-12 18h-8z"/><path d="M28 32v4M36 32v4"/><path d="M18 40h28v14a4 4 0 0 1-4 4H22a4 4 0 0 1-4-4z"/><path d="M46 44h4a3 3 0 0 1 0 8h-4"/>'),
+  coldbrew:S('<rect x="22" y="4" width="20" height="14" rx="2"/><path d="M32 18v6"/><path d="M26 24h12l-2 10h-8z"/><path d="M32 34v6"/><path d="M20 40h24v16a3 3 0 0 1-3 3H23a3 3 0 0 1-3-3z"/><path d="M32 46v2"/>'),
+  tablefridge:S('<rect x="6" y="18" width="52" height="34" rx="3"/><path d="M32 18v34"/><path d="M26 30v10M38 30v10"/><path d="M6 14h52"/><path d="M12 52v4M52 52v4"/>'),
+  showcase:S('<rect x="10" y="6" width="44" height="52" rx="3"/><rect x="15" y="11" width="34" height="34" rx="1"/><path d="M15 23h34M15 34h34"/><path d="M20 18v5M28 18v5M24 29v5M34 29v5M42 40v5"/><path d="M10 50h44"/>'),
+  ice:S('<rect x="10" y="6" width="44" height="52" rx="4"/><path d="M10 24h44"/><rect x="18" y="32" width="10" height="10" rx="2"/><rect x="32" y="36" width="10" height="10" rx="2"/><rect x="24" y="44" width="9" height="9" rx="2"/><circle cx="46" cy="15" r="3"/>'),
+  freezer:S('<rect x="6" y="20" width="52" height="34" rx="3"/><path d="M6 28h52"/><path d="M26 24h12"/><path d="M32 34v14M26 37l12 8M38 37l-12 8"/>'),
+  blender:S('<path d="M22 6h20l-3 30H25z"/><path d="M27 16h10"/><path d="M22 36h20l2 8H20z"/><rect x="18" y="44" width="28" height="12" rx="3"/><circle cx="32" cy="50" r="2"/>'),
+  hotwater:S('<rect x="14" y="8" width="36" height="40" rx="4"/><path d="M24 48v4h16v-4"/><path d="M28 18c0 4 4 4 4 8M36 18c0 4 4 4 4 8"/><rect x="22" y="32" width="20" height="8" rx="2"/><path d="M12 56h40"/>'),
+  dispenser:S('<path d="M18 6h28v12H18z"/><path d="M14 18h36v20H14z"/><path d="M26 38v6h12v-6"/><path d="M32 44v4"/><path d="M24 52h16v6H24z"/><path d="M20 26h6M38 26h6"/>'),
+  steamer:S('<path d="M24 22h16l4 30a4 4 0 0 1-4 4H24a4 4 0 0 1-4-4z"/><path d="M44 28h4a4 4 0 0 1 0 8h-3"/><path d="M28 8c0 4 4 4 4 8M36 8c0 4 4 4 4 8"/><path d="M22 32h20"/>'),
+  dishwasher:S('<rect x="8" y="8" width="48" height="48" rx="4"/><path d="M8 18h48"/><circle cx="16" cy="13" r="1.5"/><circle cx="22" cy="13" r="1.5"/><circle cx="32" cy="38" r="12"/><path d="M26 36c2-3 6-3 8 0s6 3 8 0"/>'),
+  sterilizer:S('<rect x="10" y="6" width="44" height="52" rx="4"/><rect x="16" y="12" width="32" height="34" rx="2"/><path d="M22 20h6l-1 8h-4zM36 20h6l-1 8h-4zM22 34h6l-1 8h-4zM36 34h6l-1 8h-4z"/><circle cx="32" cy="52" r="2"/>'),
+  filter:S('<path d="M8 12h48"/><path d="M20 12v8M44 12v8"/><rect x="14" y="20" width="12" height="32" rx="6"/><rect x="38" y="20" width="12" height="32" rx="6"/><path d="M32 30c-3 4-3 7 0 7s3-3 0-7z"/>'),
+  sink:S('<path d="M6 30h52"/><path d="M10 30v10a8 8 0 0 0 8 8h28a8 8 0 0 0 8-8V30"/><path d="M38 30V14a6 6 0 0 0-12 0"/><path d="M26 14v3"/><path d="M32 48v8"/>'),
+  induction:S('<rect x="6" y="20" width="52" height="28" rx="4"/><circle cx="22" cy="34" r="8"/><circle cx="44" cy="34" r="6"/><path d="M14 52h36"/><path d="M50 26h4"/>'),
+  oven:S('<rect x="6" y="10" width="52" height="42" rx="4"/><rect x="12" y="20" width="34" height="26" rx="2"/><path d="M12 33h34"/><circle cx="52" cy="22" r="2"/><circle cx="52" cy="32" r="2"/><path d="M6 16h52"/>'),
+  waffle:S('<path d="M8 30h48v16a4 4 0 0 1-4 4H12a4 4 0 0 1-4-4z"/><path d="M8 30l6-14h36l6 14"/><path d="M20 30v20M32 30v20M44 30v20M8 40h48"/>'),
+  pos:S('<rect x="10" y="8" width="44" height="30" rx="3"/><path d="M26 38l-2 8h16l-2-8"/><rect x="14" y="46" width="36" height="10" rx="2"/><path d="M18 18h20M18 26h12"/>'),
+  scale:S('<rect x="8" y="34" width="48" height="20" rx="4"/><path d="M12 30h40"/><rect x="22" y="40" width="20" height="8" rx="2"/><path d="M26 30V20h12v10"/>'),
+  tamper:S('<circle cx="32" cy="14" r="8"/><path d="M28 22h8v16h-8z"/><path d="M18 38h28v6H18z"/><path d="M14 50h36"/><path d="M14 56h36"/>'),
+  knock:S('<path d="M12 24h40v26a4 4 0 0 1-4 4H16a4 4 0 0 1-4-4z"/><path d="M8 24h48"/><path d="M24 24v-4h16v4"/><path d="M22 36h20"/>'),
+  pitcher:S('<path d="M18 16h24l4 36a4 4 0 0 1-4 4H22a4 4 0 0 1-4-4z"/><path d="M18 16l-6-4"/><path d="M42 24h4a5 5 0 0 1 0 10h-3"/><path d="M20 30h24"/>')
+};
+
+const E = [
+ {id:"espresso",cat:"ext",name:"에스프레소 머신",alias:"커피머신 · 반자동 머신 · 그룹 머신",must:true,zone:"프론트",
+  use:"에스프레소를 추출하고 스팀으로 우유를 데우는 카페의 중심 장비.",
+  check:["그룹 수: 1그룹(소량)·2그룹(일반 매장)·3그룹(고회전)","전기: 2그룹 이상은 전용 회로·차단기 용량을 먼저 확인","급수·배수 연결 위치와 정수필터 연결 여부","보일러 방식(싱글/멀티 보일러)과 스팀 힘","A/S 거점과 부품 수급 기간"],
+  tags:["커피","샷","라떼","스팀","우유","추출"],kw:"2그룹 에스프레소 머신 업소용"},
+ {id:"grinder",cat:"ext",name:"원두 그라인더",alias:"에스프레소 그라인더 · 분쇄기",must:true,zone:"프론트",
+  use:"원두를 추출에 맞는 굵기로 갈아 주는 장비. 맛의 절반을 좌우.",
+  check:["에스프레소용인지, 드립용인지(용도별로 분리하는 경우가 많음)","버(날) 크기와 분쇄 속도","도징 방식: 정량(타이머) / 온디맨드","분쇄도 미세 조절이 쉬운지","청소·날 교체 편의성"],
+  tags:["커피","원두","분쇄","추출"],kw:"업소용 에스프레소 그라인더 온디맨드"},
+ {id:"drip",cat:"ext",name:"핸드드립·배치브루 세트",alias:"드리퍼 · 드립포트 · 커피브루어",must:false,zone:"프론트",
+  use:"필터커피 메뉴용. 손으로 내리는 핸드드립 또는 대량 자동 추출 배치브루.",
+  check:["메뉴 비중: 소량이면 핸드드립, 대량이면 배치브루","온도 조절 드립포트 여부","배치브루는 한 번에 추출되는 양과 보온 방식"],
+  tags:["커피","드립","필터","추출"],kw:"업소용 커피브루어 배치브루"},
+ {id:"coldbrew",cat:"ext",name:"콜드브루 추출기",alias:"더치 커피 기구 · 콜드브루 메이커",must:false,zone:"백",
+  use:"찬물로 장시간 커피를 우려내는 기구. 콜드브루 메뉴·병음료용.",
+  check:["점적식(더치) / 침출식 방식 선택","1회 추출량과 추출 시간","냉장 보관 공간 확보"],
+  tags:["커피","콜드브루","더치","병음료"],kw:"업소용 콜드브루 추출기"},
+ {id:"tablefridge",cat:"cold",name:"테이블 냉장고",alias:"작업대 냉장고 · 언더카운터 냉장고",must:true,zone:"프론트",
+  use:"작업대 아래 들어가는 냉장고. 우유·시럽·재료를 손 닿는 곳에 보관.",
+  check:["가로 폭(900·1200·1500·1800mm 등)과 깊이가 카운터에 맞는지","문 개수와 여는 방향","냉장 전용 / 냉장·냉동 겸용","기계실(콤프레셔) 위치와 열 배출 공간"],
+  tags:["냉장","우유","보관","작업대"],kw:"테이블 냉장고 1500"},
+ {id:"showcase",cat:"cold",name:"음료·디저트 쇼케이스",alias:"오픈 쇼케이스 · 케이크 쇼케이스 · 음료 냉장고",must:false,zone:"프론트",
+  use:"병음료나 디저트를 보이게 진열하면서 냉장 보관.",
+  check:["진열 대상: 병음료(수직형) / 케이크(곡면·사각 유리)","문 있는 형태 / 오픈형(전기료·온도 유지 차이)","조명과 성에 방지 기능","손님 동선 쪽 배치 공간"],
+  tags:["냉장","진열","디저트","케이크","병음료"],kw:"케이크 쇼케이스 업소용"},
+ {id:"ice",cat:"cold",name:"제빙기",alias:"아이스 메이커",must:true,zone:"백",
+  use:"아이스 음료용 얼음을 만드는 장비. 여름 매출과 직결.",
+  check:["하루 생산량(kg)과 저장 용량을 성수기 기준으로","공랭식 / 수랭식, 설치 장소의 열·환기","급수·배수 연결 필수","얼음 모양(큐브·반달 등)이 음료에 맞는지","세척·필터 관리 주기"],
+  tags:["얼음","아이스","여름","냉"],kw:"업소용 제빙기 50kg"},
+ {id:"freezer",cat:"cold",name:"업소용 냉동고",alias:"스탠드 냉동고 · 냉동 쇼케이스",must:false,zone:"백",
+  use:"냉동 디저트, 냉동 과일, 얼음 보관.",
+  check:["스탠드형 / 다이렉트(눕힌) 형","용량과 칸 구성","제빙기 저장량으로 부족할 때 얼음 보관용 겸용"],
+  tags:["냉동","보관","과일","디저트"],kw:"업소용 냉동고 스탠드"},
+ {id:"blender",cat:"bev",name:"블렌더",alias:"믹서 · 스무디 블렌더",must:true,zone:"프론트",
+  use:"스무디·프라페·쉐이크 등 갈아 만드는 음료용.",
+  check:["얼음을 잘 가는 모터 힘","소음(방음 커버 유무)","용기 용량과 여분 용기","프로그램 버튼(시니어·초보 직원에게 유리)"],
+  tags:["얼음","스무디","프라페","갈기","과일"],kw:"업소용 블렌더 방음"},
+ {id:"hotwater",cat:"bev",name:"온수기",alias:"전기 온수기 · 핫워터 디스펜서",must:true,zone:"프론트",
+  use:"아메리카노·차 메뉴용 뜨거운 물을 바로 공급.",
+  check:["탱크 용량과 회복(재가열) 속도","온도 설정 가능 여부","직수 연결 / 물 붓는 방식","정량 토출 버튼"],
+  tags:["뜨거운물","차","아메리카노","온수"],kw:"업소용 온수기 카페"},
+ {id:"dispenser",cat:"bev",name:"음료 디스펜서",alias:"주스 디스펜서 · 냉음료 디스펜서",must:false,zone:"프론트",
+  use:"에이드·아이스티·식혜 등을 차갑게 보관하며 따르는 장비.",
+  check:["탱크 개수와 용량","교반(섞기) 기능 여부","분해 세척 편의성"],
+  tags:["에이드","아이스티","냉","보관"],kw:"업소용 음료 디스펜서"},
+ {id:"pitcher",cat:"bev",name:"스팀 피처·바 도구",alias:"밀크 피처 · 계량컵 · 바 스푼",must:true,zone:"프론트",
+  use:"우유 스팀, 계량, 음료 제조용 소도구 묶음.",
+  check:["피처 크기 2종 이상(350·600ml 등)","눈금 있는 계량컵·지거","스테인리스 재질"],
+  tags:["우유","스팀","라떼","계량","소도구"],kw:"스팀피처 600ml"},
+ {id:"dishwasher",cat:"wash",name:"식기세척기",alias:"업소용 세척기 · 도어형 세척기",must:false,zone:"백",
+  use:"컵·식기를 빠르게 고온 세척.",
+  check:["언더카운터형 / 도어형 선택","전기 용량과 급수·배수, 온수 연결","1회 세척 시간과 랙 크기","세제·린스 자동 투입"],
+  tags:["세척","설거지","컵","위생"],kw:"업소용 식기세척기 언더카운터"},
+ {id:"sterilizer",cat:"wash",name:"컵 소독기",alias:"자외선 살균기 · 식기 건조기",must:false,zone:"백",
+  use:"세척한 컵을 건조·살균해 보관.",
+  check:["자외선 / 열풍 방식","보관 칸 수와 컵 높이","위생 점검 대비 여부"],
+  tags:["위생","소독","컵","살균"],kw:"업소용 컵소독기 자외선"},
+ {id:"filter",cat:"wash",name:"정수 필터",alias:"정수기 필터 · 연수기",must:true,zone:"백",
+  use:"머신·제빙기로 들어가는 물을 걸러 맛을 지키고 스케일(물때)을 줄임.",
+  check:["어떤 장비에 연결할지(머신·제빙기·온수기)","교체 주기와 필터 가격","스케일 방지 기능 여부"],
+  tags:["물","정수","위생","머신관리"],kw:"커피머신 정수필터"},
+ {id:"sink",cat:"wash",name:"싱크대·린서",alias:"업소용 싱크 · 피처 린서",must:true,zone:"프론트",
+  use:"설거지와 손 세척, 피처를 빠르게 헹구는 린서.",
+  check:["볼 개수(1구·2구)와 크기","손 세척용 별도 싱크 필요 여부","배수 위치"],
+  tags:["세척","물","위생","설거지"],kw:"업소용 싱크대 2구"},
+ {id:"induction",cat:"heat",name:"인덕션·전기레인지",alias:"업소용 인덕션 · 하이라이트",must:false,zone:"백",
+  use:"시럽·청·소스를 끓이거나 간단 조리.",
+  check:["구 수와 화력","전기 용량","쓸 냄비가 인덕션용인지"],
+  tags:["가열","시럽","청","조리"],kw:"업소용 인덕션 2구"},
+ {id:"oven",cat:"heat",name:"오븐",alias:"컨벡션 오븐 · 미니 오븐",must:false,zone:"백",
+  use:"빵 데우기, 쿠키·구움과자 굽기.",
+  check:["데우기용이면 소형, 굽기까지면 컨벡션","전기 용량과 환기·열 배출","단 수와 트레이 크기"],
+  tags:["디저트","빵","굽기","가열"],kw:"업소용 컨벡션 오븐"},
+ {id:"waffle",cat:"heat",name:"와플기·토스터",alias:"와플 메이커 · 그릴 · 파니니",must:false,zone:"백",
+  use:"와플·토스트·샌드위치 디저트 메뉴용.",
+  check:["판 모양과 개수","온도 조절","판 분리 세척 가능 여부"],
+  tags:["디저트","와플","토스트","가열"],kw:"업소용 와플기"},
+ {id:"pos",cat:"etc",name:"POS·키오스크",alias:"포스기 · 카드단말기 · 무인 주문기",must:true,zone:"프론트",
+  use:"주문·결제·매출 관리.",
+  check:["키오스크 병행 여부(시니어 운영 매장은 화면 단순한 것)","영수증·주문서 프린터 연결","월 사용료와 카드 수수료 조건"],
+  tags:["주문","결제","운영","매출"],kw:"카페 포스기 키오스크"},
+ {id:"scale",cat:"etc",name:"전자저울",alias:"추출 저울 · 계량 저울",must:true,zone:"프론트",
+  use:"원두 양·추출량을 재서 맛을 일정하게.",
+  check:["0.1g 단위 표시","타이머 내장 여부","방수와 크기(드립 트레이에 올라가는지)"],
+  tags:["계량","커피","추출","레시피"],kw:"커피 저울 타이머"},
+ {id:"tamper",cat:"etc",name:"탬퍼·탬핑 매트",alias:"템퍼 · 디스트리뷰터",must:true,zone:"프론트",
+  use:"포터필터에 담긴 커피 가루를 고르게 눌러 줌.",
+  check:["머신 바스켓 지름에 맞는 크기(58mm 등)","일정 압력 탬퍼(초보에게 유리)"],
+  tags:["커피","추출","소도구"],kw:"58mm 탬퍼"},
+ {id:"knock",cat:"etc",name:"넉박스",alias:"노크박스 · 찌꺼기통",must:true,zone:"프론트",
+  use:"추출 후 커피 찌꺼기를 털어 내는 통.",
+  check:["카운터 매립형 / 올려두는 형","용량과 세척 편의성"],
+  tags:["커피","찌꺼기","소도구"],kw:"업소용 넉박스 매립"}
+];
+
+
+
+// 장비별 대략 기준값: 소비전력 kW(대표값), 차지 폭 mm, 놓는 곳
+const SPEC = {
+ espresso:{kw:{1:2.8,2:4.5,3:6.5},w:{1:550,2:800,3:1050},z:"front"},
+ grinder:{kw:0.5,w:250,z:"front"},
+ drip:{kw:1.5,w:500,z:"front"},
+ coldbrew:{kw:0,w:500,z:"back"},
+ tablefridge:{kw:0.35,w:0,z:"under"},
+ showcase:{kw:0.6,w:900,z:"front"},
+ ice:{kw:0.9,w:600,z:"back"},
+ freezer:{kw:0.4,w:650,z:"back"},
+ blender:{kw:1.5,w:250,z:"front"},
+ hotwater:{kw:3,w:300,z:"front"},
+ dispenser:{kw:0.3,w:400,z:"back"},
+ pitcher:{kw:0,w:0,z:"none"},
+ dishwasher:{kw:5,w:0,z:"under"},
+ sterilizer:{kw:0.5,w:600,z:"back"},
+ filter:{kw:0,w:0,z:"none"},
+ sink:{kw:0,w:600,z:"back"},
+ induction:{kw:3,w:400,z:"back"},
+ oven:{kw:3.5,w:600,z:"back"},
+ waffle:{kw:1.8,w:350,z:"back"},
+ pos:{kw:0.2,w:450,z:"front"},
+ scale:{kw:0,w:0,z:"none"},
+ tamper:{kw:0,w:0,z:"none"},
+ knock:{kw:0,w:150,z:"front"}
+};
+const ICE_SIZES=[30,50,70,100,150,200];
+const val=id=>+document.getElementById(id).value;
+
+function analyze(){
+  const area=val("area"),seats=val("seats"),type=document.getElementById("type").value;
+  const menus=[...document.querySelectorAll("#menus input:checked")].map(i=>i.value);
+  const has=m=>menus.includes(m);
+  const cups=val("cups"),icer=val("icer")/100,peakr=val("peak")/100,staff=val("staff"),power=val("power"),front=val("front"),back=val("back");
+  const peak=Math.round(cups*peakr);
+  const senior=type==="senior";
+  const rec=[]; // {id,qty,spec,why,must,kw,w,z}
+  const add=(id,qty,spec,why,must=true,kwOverride,wOverride)=>{
+    const s=SPEC[id]; rec.push({id,qty,spec,why,must,kw:(kwOverride??s.kw)*qty,w:(wOverride??s.w)*qty,z:s.z});
+  };
+  // 에스프레소
+  let groups=0;
+  if(has("espresso")){
+    groups = peak<=25 && cups<=80 ? 1 : (peak<=70 ? 2 : 3);
+    add("espresso",1,`${groups}그룹`,`피크 1시간 약 ${peak}잔 기준. ${groups===1?"소량 매장은 1그룹으로 충분":groups===2?"일반 매장 표준 구성":"피크가 높아 3그룹 또는 2그룹 2대 검토"}`,true,SPEC.espresso.kw[groups],SPEC.espresso.w[groups]);
+    const g=cups>=250?2:1;
+    add("grinder",g,g===2?"에스프레소용 2대(블렌드·디카페인 또는 예비)":"에스프레소용 1대",g===2?"하루 250잔 이상이면 그라인더 1대가 쉬지 못함":"한 가지 원두 운영 기준");
+    add("tamper",1,"바스켓 지름에 맞춤(보통 58mm)","에스프레소 메뉴 필수 소도구");
+    add("knock",1,"카운터 매립형 권장","추출 동선 바로 옆에 배치");
+    add("pitcher",1,`스팀 피처 ${Math.max(2,groups*2)}개 이상`,"그룹당 2개 정도 돌려 쓰는 기준");
+  }
+  if(has("drip")) add("drip",1,cups>=200?"배치브루 + 핸드드립 소량":"핸드드립 세트 2~3구","필터커피 메뉴 운영",false);
+  if(has("drip") && has("espresso")) add("grinder",1,"드립용 1대 추가","에스프레소와 드립 분쇄도가 달라 분리 권장",false);
+  if(has("coldbrew")) add("coldbrew",1,"침출식 대용량 또는 점적식","콜드브루 메뉴 운영",false);
+  // 얼음
+  const iceNeed = cups*icer*0.18 + (has("smoothie")?cups*0.1*0.15:0);
+  const iceDay = Math.ceil(iceNeed*1.3);
+  const iceSize = ICE_SIZES.find(s=>s>=iceDay) || 200;
+  if(iceNeed>0){
+    add("ice",1,`일 생산 ${iceSize}kg급`,`아이스 1잔당 얼음 약 180g × ${Math.round(cups*icer)}잔 + 여유 30% ≈ 하루 ${iceDay}kg`);
+  }
+  // 냉장
+  const fridgeW = cups<=100?1200:cups<=250?1500:1800;
+  const fridgeN = (has("smoothie")||has("ade")||has("tea")) && cups>150 ? 2 : 1;
+  add("tablefridge",fridgeN,`${fridgeW}mm${fridgeN>1?" ×2 (프론트·백)":""}`,"우유·시럽·과일청을 손 닿는 곳에 보관");
+  if(has("cake")||has("bottle")) add("showcase",1,has("cake")&&has("bottle")?"케이크용 + 병음료용 각 1대 검토":has("cake")?"케이크용 사각/곡면 유리":"병음료용 수직형","진열 판매 메뉴가 있음",true,undefined,has("cake")&&has("bottle")?1600:900);
+  if(has("bake")||has("smoothie")||iceDay>iceSize*0.85) add("freezer",1,"스탠드형 냉동고","냉동 과일·생지·여분 얼음 보관",false);
+  // 음료
+  if(has("smoothie")){ const b=cups>=300||peak>=60?2:1; add("blender",b,`방음 커버형 ${b}대`,b>1?"피크에 갈아 만드는 음료가 겹침":"스무디·프라페 메뉴 운영"); }
+  add("hotwater",1,cups>=250?"20L 이상 직수형":"10L급 직수형","아메리카노·차 메뉴용 온수");
+  if(has("ade")&&cups>=150) add("dispenser",1,"2구 냉음료 디스펜서","에이드·아이스티 베이스를 미리 만들어 두면 피크가 빨라짐",false);
+  if(has("tea")) add("induction",1,"2구","청·시럽을 직접 끓여 만드는 경우",false);
+  if(has("bake")) add("oven",1,"컨벡션 오븐 4단 내외","디저트 직접 굽기");
+  if(has("waffle")) add("waffle",1,"2구","와플·토스트 메뉴");
+  // 세척
+  add("sink",1,seats>=20?"2구 + 손 세척 싱크 별도":"2구","설거지·손 세척");
+  add("filter",has("espresso")?2:1,"머신·제빙기 각각 연결","스케일 방지와 맛 유지");
+  const dish = seats>=20 || cups>=150;
+  if(dish) add("dishwasher",1,"언더카운터 도어형","좌석 20석 이상 또는 하루 150잔 이상이면 손설거지가 밀림",seats>=30);
+  if(seats>0) add("sterilizer",1,"자외선 컵 소독기","매장 컵·식기 위생 보관",false);
+  // 운영
+  add("pos",1,senior?"큰 화면·단순 메뉴의 POS(+키오스크 선택)":staff<=1?"POS + 키오스크":"POS",senior?"시니어 운영은 화면이 단순한 기종이 실수가 적음":staff<=1?"1인 운영이면 키오스크로 주문을 분산":"주문·결제");
+  add("scale",has("espresso")?2:1,"0.1g 단위, 타이머 내장","레시피를 일정하게 유지" + (senior?" — 시니어 운영 매장에 특히 중요":""));
+
+  // 합계
+  const totalKw = rec.reduce((a,r)=>a+r.kw,0);
+  const simKw = totalKw*0.7;
+  const useFront = rec.filter(r=>r.z==="front").reduce((a,r)=>a+r.w,0);
+  const useBack = rec.filter(r=>r.z==="back").reduce((a,r)=>a+r.w,0);
+  const perStaff = peak/staff;
+
+  // 경고
+  const al=[];
+  if(simKw>power) al.push(["bad","전력 초과",`동시 사용 추정 ${simKw.toFixed(1)}kW가 계약 전력 ${power}kW보다 큽니다. 냉난방·조명은 별도라 실제 여유는 더 적어요. 한전 증설이나 장비 축소를 검토하세요.`]);
+  else if(simKw>power*0.75) al.push(["warn","전력 빠듯",`장비만으로 계약 전력의 ${Math.round(simKw/power*100)}%를 씁니다. 냉난방기를 더하면 차단기가 떨어질 수 있어요.`]);
+  else al.push(["ok","전력 여유",`장비 동시 사용 추정 ${simKw.toFixed(1)}kW로 계약 전력 ${power}kW 안에 들어옵니다 (냉난방·조명 별도).`]);
+  if(useFront>front) al.push(["bad","프론트 부족",`프론트에 올릴 장비 폭이 약 ${useFront.toLocaleString()}mm로 카운터(${front.toLocaleString()}mm)보다 깁니다. 작업 공간이 없어요.`]);
+  else if(useFront>front*0.7) al.push(["warn","프론트 빠듯",`프론트 카운터의 ${Math.round(useFront/front*100)}%를 장비가 차지합니다. 음료 만들 작업 공간이 30% 이상 남는지 확인하세요.`]);
+  if(useBack>back) al.push(["bad","백 부족",`백 카운터에 놓을 장비 폭(${useBack.toLocaleString()}mm)이 카운터 길이(${back.toLocaleString()}mm)보다 깁니다. 제빙기·냉동고를 바닥 독립형으로 빼는 것을 검토하세요.`]);
+  if(perStaff>45) al.push(["warn","인력 부족",`피크 1시간에 직원 1명당 약 ${Math.round(perStaff)}잔입니다. 한 명이 시간당 40잔을 넘기면 대기가 길어져요.`]);
+  if(groups===3) al.push(["warn","3그룹 전력",`3그룹 머신은 단독으로 6kW 이상 쓰는 경우가 많습니다. 전용 회로가 필요해요.`]);
+  if(iceDay>iceSize*0.85) al.push(["warn","얼음 여유",`추정 필요량이 제빙기 생산량에 가깝습니다. 한 단계 큰 용량이나 냉동고 보관을 함께 쓰세요.`]);
+  if(senior) al.push(["ok","시니어 운영",`버튼식 블렌더, 타이머 저울, POS 단순 화면처럼 실수를 줄이는 기종을 우선 고르세요.`]);
+  if(area<12 && rec.length>16) al.push(["warn","공간 대비 장비",`${area}평에 장비 ${rec.length}종은 많은 편입니다. 선택 장비부터 줄여 보세요.`]);
+
+  // 등급
+  const pen = al.filter(a=>a[0]==="bad").length*2 + al.filter(a=>a[0]==="warn").length;
+  const grade = pen===0?"A":pen<=1?"B":pen<=3?"C":"D";
+  const gtxt = {A:"바로 진행 가능",B:"일부 확인 필요",C:"조정 필요",D:"재검토 필요"}[grade];
+
+  renderReport({area,seats,type,cups,icer,peak,staff,power,front,back,rec,totalKw,simKw,useFront,useBack,iceDay,iceSize,al,grade,gtxt,groups});
+}
+
+const TYPE_N={takeout:"테이크아웃 중심",hall:"홀 중심 카페",dessert:"디저트 카페",senior:"시니어 운영 카페"};
+function tone(r){return r>1?"bad":r>0.75?"warn":"ok"}
+
+function renderReport(d){
+  const R=document.getElementById("report");
+  const must=d.rec.filter(r=>r.must).length;
+  const pr=d.simKw/d.power, fr=d.useFront/d.front, br=d.useBack/d.back;
+  const color={ok:"var(--ok)",warn:"var(--warn)",bad:"var(--bad)"};
+  // category breakdown
+  const catCount={}; d.rec.forEach(r=>{const c=E.find(e=>e.id===r.id).cat; catCount[c]=(catCount[c]||0)+r.qty;});
+  const maxC=Math.max(...Object.values(catCount));
+  const kwList=d.rec.filter(r=>r.kw>0).sort((a,b)=>b.kw-a.kw);
+  const maxKw=kwList.length?kwList[0].kw:1;
+  const strip=(zone,len)=>{
+    const items=d.rec.filter(r=>r.z===zone&&r.w>0);
+    const used=items.reduce((a,r)=>a+r.w,0), total=Math.max(len,used);
+    return `<div class="strip">${items.map(r=>{const e=E.find(x=>x.id===r.id);return `<div style="width:${r.w/total*100}%;background:${CATS[e.cat].color}" title="${e.name} ${r.w}mm">${e.name.replace(/[·].*/,"")}</div>`}).join("")}${len>used?`<div style="width:${(len-used)/total*100}%;background:repeating-linear-gradient(45deg,#f1f2f4,#f1f2f4 6px,#e6e8eb 6px,#e6e8eb 12px);color:var(--muted)">작업 공간 ${(len-used).toLocaleString()}mm</div>`:""}</div>
+    <div class="striplbl"><span>장비 ${used.toLocaleString()}mm</span><span>카운터 ${len.toLocaleString()}mm</span></div>`;
+  };
+  R.innerHTML=`
+  <div class="rhead">
+    <div><h2>장비 구성 분석 리포트</h2>
+    <p>${TYPE_N[d.type]} · ${d.area}평 · ${d.seats}석 · 하루 ${d.cups}잔 · 피크 1시간 약 ${d.peak}잔</p></div>
+    <div class="grade"><b>${d.grade}</b><span>${d.gtxt}</span></div>
+  </div>
+  <div class="kpis">
+    <div class="kpi"><div class="l">추천 장비</div><div class="v">${d.rec.length}<small>종</small></div><div class="s">필수 ${must} · 선택 ${d.rec.length-must}</div></div>
+    <div class="kpi"><div class="l">장비 전력 (동시 사용 추정)</div><div class="v">${d.simKw.toFixed(1)}<small>kW</small></div><div class="s tone-${tone(pr)}">계약 ${d.power}kW의 ${Math.round(pr*100)}%</div></div>
+    <div class="kpi"><div class="l">하루 얼음 필요량</div><div class="v">${d.iceDay}<small>kg</small></div><div class="s">제빙기 ${d.iceSize}kg급 추천</div></div>
+    <div class="kpi"><div class="l">프론트 카운터 점유</div><div class="v">${Math.round(fr*100)}<small>%</small></div><div class="s tone-${tone(fr/0.95)}">${d.useFront.toLocaleString()} / ${d.front.toLocaleString()}mm</div></div>
+  </div>
+  <div class="panel"><h3>진단</h3><p class="desc">입력한 조건으로 본 주의할 점</p>
+    <div class="alerts">${d.al.map(a=>`<div class="alert ${a[0]}"><b>${a[1]}</b><span>${a[2]}</span></div>`).join("")}</div></div>
+  <div class="two">
+    <div class="panel"><h3>전력 부하</h3><p class="desc">장비 소비전력 합계 ${d.totalKw.toFixed(1)}kW × 동시 사용률 70% = ${d.simKw.toFixed(1)}kW</p>
+      <div class="gauge"><div class="fill" style="width:${Math.min(pr,1.3)/1.3*100}%;background:${color[tone(pr)]}"></div><div class="cap" style="left:${1/1.3*100}%">계약 ${d.power}kW</div></div>
+      <div class="bars" style="margin-top:18px">${kwList.slice(0,7).map(r=>{const e=E.find(x=>x.id===r.id);return `<div class="bar"><span>${e.name}${r.qty>1?" ×"+r.qty:""}</span><div class="t"><i style="width:${r.kw/maxKw*100}%;background:${CATS[e.cat].color}"></i></div><span class="n">${r.kw.toFixed(1)}kW</span></div>`}).join("")}</div>
+    </div>
+    <div class="panel"><h3>분류별 장비 수</h3><p class="desc">추천 구성에 들어간 장비 수량</p>
+      <div class="bars">${Object.entries(catCount).map(([c,n])=>`<div class="bar"><span>${CATS[c].name}</span><div class="t"><i style="width:${n/maxC*100}%;background:${CATS[c].color}"></i></div><span class="n">${n}개</span></div>`).join("")}</div>
+    </div>
+  </div>
+  <div class="panel"><h3>카운터 배치 길이</h3><p class="desc">카운터 위에 올리는 장비의 대략 폭. 테이블 냉장고·식기세척기는 카운터 아래로 계산했어요.</p>
+    <b style="font-size:13px">프론트</b>${strip("front",d.front)}
+    <b style="font-size:13px">백</b>${strip("back",d.back)}
+  </div>
+  <div class="panel"><h3>추천 장비 목록</h3><p class="desc">행의 장비 이름을 누르면 고를 때 확인할 점이 나옵니다.</p>
+    <div style="overflow-x:auto"><table>
+      <thead><tr><th></th><th>장비</th><th>추천 규격</th><th>근거</th><th>전력</th><th>구매처</th></tr></thead>
+      <tbody>${d.rec.map(r=>{const e=E.find(x=>x.id===r.id),c=CATS[e.cat],kw=encodeURIComponent(e.kw);return `<tr>
+        <td><div class="ic" style="background:${c.bg};color:${c.color}">${IC[e.id]}</div></td>
+        <td><a href="#" data-id="${e.id}" class="open" style="font-size:14px;color:var(--ink)">${e.name}</a>${r.qty>1?` ×${r.qty}`:""}<br><span class="pill ${r.must?"":"opt"}">${r.must?"필수":"선택"}</span></td>
+        <td>${r.spec}</td><td class="why">${r.why}</td>
+        <td style="white-space:nowrap">${r.kw?r.kw.toFixed(1)+"kW":"—"}</td>
+        <td><a href="https://search.shopping.naver.com/search/all?query=${kw}" target="_blank" rel="noopener">네이버</a> · <a href="https://search.danawa.com/dsearch.php?query=${kw}" target="_blank" rel="noopener">다나와</a></td></tr>`}).join("")}</tbody>
+    </table></div>
+  </div>
+  <div class="foot">이 리포트의 수치는 일반적인 대표값(소비전력·장비 폭·얼음 1잔 180g·동시 사용률 70%)으로 계산한 대략적인 추정입니다. 실제 값은 모델마다 다르니 구매 전 제조사 사양서, 전기 시공업체, 매장 도면으로 꼭 확인하세요.</div>`;
+  R.querySelectorAll(".open").forEach(a=>a.onclick=ev=>{ev.preventDefault();openModal(a.dataset.id);});
+  R.scrollIntoView({behavior:"smooth",block:"start"});
+}
+
+// 단계 요약
+function sums(){
+  document.getElementById("cupsv").textContent=val("cups")+"잔";
+  document.getElementById("icerv").textContent=val("icer")+"%";
+  document.getElementById("peakv").textContent=val("peak")+"%";
+  document.getElementById("sum1").textContent=`${val("area")}평 · ${val("seats")}석`;
+  document.getElementById("sum2").textContent=`${document.querySelectorAll("#menus input:checked").length}개 선택`;
+  document.getElementById("sum3").textContent=`${val("cups")}잔/일`;
+  document.getElementById("sum4").textContent=`${val("staff")}명 · ${val("power")}kW`;
+}
+document.querySelectorAll(".side input,.side select").forEach(el=>el.addEventListener("input",sums));
+document.getElementById("go").onclick=analyze;
+sums();
+
+// 탭
+document.querySelectorAll("nav button").forEach(b=>b.onclick=()=>{
+  document.querySelectorAll("nav button").forEach(x=>x.classList.toggle("on",x===b));
+  document.querySelectorAll(".view").forEach(v=>v.classList.toggle("on",v.id==="v-"+b.dataset.v));
+});
+
+// 장비 사전
+let dq="",dc="all";
+function renderDict(){
+  const ch=document.getElementById("chips");
+  ch.innerHTML=[["all","전체"],...Object.entries(CATS).map(([k,v])=>[k,v.name])].map(([k,n])=>`<button class="chip ${dc===k?"on":""}" data-c="${k}">${n}</button>`).join("");
+  ch.querySelectorAll(".chip").forEach(b=>b.onclick=()=>{dc=b.dataset.c;renderDict();});
+  const q=dq.trim().toLowerCase();
+  const list=E.filter(e=>(dc==="all"||e.cat===dc)&&(!q||[e.name,e.alias,e.use,...e.tags].join(" ").toLowerCase().includes(q)));
+  document.getElementById("grid").innerHTML=list.map(e=>{const c=CATS[e.cat];return `<div class="card" data-id="${e.id}"><div class="art" style="background:${c.bg};color:${c.color}">${IC[e.id]}</div><div class="cbody"><span class="c" style="color:${c.color}">${c.name} · ${e.must?"필수":"선택"}</span><h4>${e.name}</h4><p>${e.use}</p></div></div>`}).join("")||'<p style="color:var(--muted)">찾는 장비가 없어요.</p>';
+  document.querySelectorAll(".card").forEach(el=>el.onclick=()=>openModal(el.dataset.id));
+}
+document.getElementById("q").oninput=e=>{dq=e.target.value;renderDict();};
+renderDict();
+
+function openModal(id){
+  const e=E.find(x=>x.id===id),c=CATS[e.cat],kw=encodeURIComponent(e.kw);
+  document.getElementById("modal").innerHTML=`<button class="x">×</button>
+   <span style="color:${c.color};font-size:12px;font-weight:700">${c.name} · ${e.zone} · ${e.must?"필수":"선택"}</span>
+   <h2>${e.name}</h2><div style="color:var(--muted);font-size:13px">${e.alias}</div>
+   <p>${e.use}</p><b style="font-size:13px;color:var(--muted)">고를 때 확인할 점</b>
+   <ul>${e.check.map(x=>`<li>${x}</li>`).join("")}</ul>
+   <div class="buy"><a href="https://search.shopping.naver.com/search/all?query=${kw}" target="_blank" rel="noopener">네이버쇼핑 검색</a><a href="https://search.danawa.com/dsearch.php?query=${kw}" target="_blank" rel="noopener">다나와 가격비교</a></div>`;
+  document.getElementById("scrim").classList.add("open");
+  document.querySelector("#modal .x").onclick=()=>document.getElementById("scrim").classList.remove("open");
+}
+document.getElementById("scrim").onclick=ev=>{if(ev.target.id==="scrim")ev.target.classList.remove("open");};
+document.addEventListener("keydown",ev=>{if(ev.key==="Escape")document.getElementById("scrim").classList.remove("open");});
+</script>
+</body>
+</html>
