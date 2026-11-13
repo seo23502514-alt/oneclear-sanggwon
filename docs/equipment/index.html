@@ -142,12 +142,34 @@ td a{color:var(--brand);font-weight:700;font-size:12.5px;white-space:nowrap}
 .rhead>div{min-width:0}.rhead p{word-break:keep-all}
 @media(max-width:520px){.kpi .v{font-size:22px}.kpi{padding:12px}.grade{margin-left:0}}
 .report{grid-template-columns:minmax(0,1fr)}.strip div{min-width:0}
+.barwrap{max-width:1400px;margin:0 auto;padding:20px;display:grid;gap:16px}
+.bartools{display:flex;flex-wrap:wrap;gap:12px;align-items:end}
+.bartools .f{min-width:130px}
+.btns{display:flex;gap:6px;flex-wrap:wrap;margin-left:auto}
+.btns button,.selbtn button{font:inherit;font-size:13.5px;font-weight:700;padding:9px 12px;border-radius:8px;border:1.5px solid var(--ink);background:#fff;cursor:pointer}
+.btns button:first-child{background:var(--ink);color:#fff}
+.barmsg{font-size:12.5px;color:var(--ok);flex-basis:100%}
+.barmsg:empty{display:none}
+.bargrid{display:grid;grid-template-columns:minmax(0,1fr) 340px;gap:16px;align-items:start}
+@media(max-width:1000px){.bargrid{grid-template-columns:minmax(0,1fr)}}
+.barcv h3 small{font-weight:400;color:var(--muted);font-size:12px;margin-left:6px}
+#barcanvas svg{width:100%;height:auto;display:block;touch-action:none;user-select:none;border-radius:10px;border:1px solid var(--line)}
+#barside{display:grid;gap:12px}
+.selp{border-color:var(--ink)}
+.selbtn{display:flex;gap:6px;flex-wrap:wrap;margin:6px 0}
+.wlab{font-size:13px;color:var(--muted);display:flex;align-items:center;gap:8px}
+.wlab input{width:110px;font:inherit;padding:7px 9px;border:1.5px solid var(--line);border-radius:8px}
+.blist{margin:4px 0 12px;padding-left:20px;font-size:13px}
+.blist li span{color:var(--muted);float:right}
+.blist li.u{color:var(--muted)}
+.tobar{font:inherit;font-weight:900;font-size:14px;padding:11px 16px;border-radius:10px;border:0;background:#fff;color:var(--brand);cursor:pointer}
+@media print{.top,.bartools,#barside .selp,.view:not(#v-bar){display:none!important}.bargrid{grid-template-columns:1fr}}
 </style>
 </head>
 <body>
 <div class="top"><div class="in">
   <div class="logo">장비찾기 <small>카페 장비 시각가이드</small></div>
-  <nav><button class="on" data-v="analyze">장비 구성 분석</button><button data-v="dict">장비 사전</button></nav>
+  <nav><button class="on" data-v="analyze">장비 구성 분석</button><button data-v="bar">바 설계</button><button data-v="dict">장비 사전</button></nav>
   <form class="psearch" id="pform"><input id="pq" type="search" placeholder="제품명·모델명 검색 (예: 시모넬리 아피아, 호시자키 제빙기)" aria-label="제품명 검색"><button type="submit">검색</button></form>
 </div></div>
 
@@ -203,6 +225,26 @@ td a{color:var(--brand);font-weight:700;font-size:12.5px;white-space:nowrap}
 </div>
 </section>
 
+<section class="view" id="v-bar">
+<div class="barwrap">
+  <div class="bartools panel">
+    <div class="f"><label>바 형태</label><select id="bShape"><option value="parallel">11자형 (프론트+백)</option><option value="L">ㄱ자형</option><option value="line">일자형 (한 줄)</option></select></div>
+    <div class="f"><label>픽업 위치</label><select id="bPick"><option value="right">오른쪽</option><option value="left">왼쪽</option></select></div>
+    <div class="f"><label>프론트 길이 (mm)</label><input type="number" id="bFl" value="4000" step="100"></div>
+    <div class="f"><label>백·옆 길이 (mm)</label><input type="number" id="bBl" value="3500" step="100"></div>
+    <div class="f"><label>프론트 깊이 (mm)</label><input type="number" id="bFd" value="700" step="50"></div>
+    <div class="f"><label>백 깊이 (mm)</label><input type="number" id="bBd" value="600" step="50"></div>
+    <div class="f"><label>통로 폭 (mm)</label><input type="number" id="bAisle" value="1000" step="50"></div>
+    <div class="btns"><button id="bReset">조건대로 다시 배치</button><button id="bPng">PNG 저장</button><button id="bPrint">인쇄</button></div>
+    <span id="barmsg" class="barmsg"></span>
+  </div>
+  <div class="bargrid">
+    <div class="panel barcv"><h3>바 평면도 <small>위에서 내려다본 모습 · 단위 mm</small></h3><div id="barcanvas"></div>
+      <p class="desc" style="margin-top:8px">카운터 길이는 「장비 구성 분석」의 프론트·백 카운터 길이를 씁니다. 점선은 카운터 아래에 들어가는 장비, 빗금은 남는 작업 공간이에요.</p></div>
+    <div id="barside"></div>
+  </div>
+</div>
+</section>
 <section class="view" id="v-dict"><div class="dict">
   <div class="dtools"><input id="q" type="search" placeholder="장비 이름·브랜드·하고 싶은 일로 검색 (예: 얼음, 메저, 세척)"></div>
   <div class="dtools" id="chips"></div>
@@ -376,7 +418,7 @@ const SPEC = {
 const ICE_SIZES=[30,50,70,100,150,200];
 const val=id=>+document.getElementById(id).value;
 
-function analyze(){
+function analyze(silent){
   const area=val("area"),seats=val("seats"),type=document.getElementById("type").value;
   const menus=[...document.querySelectorAll("#menus input:checked")].map(i=>i.value);
   const has=m=>menus.includes(m);
@@ -457,13 +499,14 @@ function analyze(){
   const grade = pen===0?"A":pen<=1?"B":pen<=3?"C":"D";
   const gtxt = {A:"바로 진행 가능",B:"일부 확인 필요",C:"조정 필요",D:"재검토 필요"}[grade];
 
-  renderReport({area,seats,type,cups,icer,peak,staff,power,front,back,rec,totalKw,simKw,useFront,useBack,iceDay,iceSize,al,grade,gtxt,groups});
+  renderReport({silent:!!silent,area,seats,type,cups,icer,peak,staff,power,front,back,rec,totalKw,simKw,useFront,useBack,iceDay,iceSize,al,grade,gtxt,groups});
 }
 
 const TYPE_N={takeout:"테이크아웃 중심",hall:"홀 중심 카페",dessert:"디저트 카페",senior:"시니어 운영 카페"};
 function tone(r){return r>1?"bad":r>0.75?"warn":"ok"}
 
 function renderReport(d){
+  LAST=d;
   const R=document.getElementById("report");
   const must=d.rec.filter(r=>r.must).length;
   const pr=d.simKw/d.power, fr=d.useFront/d.front, br=d.useBack/d.back;
@@ -484,6 +527,7 @@ function renderReport(d){
     <div><h2>장비 구성 분석 리포트</h2>
     <p>${TYPE_N[d.type]} · ${d.area}평 · ${d.seats}석 · 하루 ${d.cups}잔 · 피크 1시간 약 ${d.peak}잔</p></div>
     <div class="grade"><b>${d.grade}</b><span>${d.gtxt}</span></div>
+    <button id="toBar" class="tobar">이 조건으로 바 설계 →</button>
   </div>
   <div class="kpis">
     <div class="kpi"><div class="l">추천 장비</div><div class="v">${d.rec.length}<small>종</small></div><div class="s">필수 ${must} · 선택 ${d.rec.length-must}</div></div>
@@ -519,7 +563,8 @@ function renderReport(d){
   </div>
   <div class="foot">이 리포트의 수치는 일반적인 대표값(소비전력·장비 폭·얼음 1잔 180g·동시 사용률 70%)으로 계산한 대략적인 추정입니다. 실제 값은 모델마다 다르니 구매 전 제조사 사양서, 전기 시공업체, 매장 도면으로 꼭 확인하세요.</div>`;
   R.querySelectorAll(".open").forEach(a=>a.onclick=ev=>{ev.preventDefault();openModal(a.dataset.id);});
-  R.scrollIntoView({behavior:"smooth",block:"start"});
+  R.querySelector("#toBar").onclick=openBar;
+  if(!d.silent) R.scrollIntoView({behavior:"smooth",block:"start"});
 }
 
 // 단계 요약
@@ -540,6 +585,7 @@ sums();
 document.querySelectorAll("nav button").forEach(b=>b.onclick=()=>{
   document.querySelectorAll("nav button").forEach(x=>x.classList.toggle("on",x===b));
   document.querySelectorAll(".view").forEach(v=>v.classList.toggle("on",v.id==="v-"+b.dataset.v));
+  if(b.dataset.v==="bar"&&!BAR) buildBar();
 });
 
 // 장비 사전
@@ -641,6 +687,192 @@ function openModal(id){
 }
 document.getElementById("scrim").onclick=ev=>{if(ev.target.id==="scrim")ev.target.classList.remove("open");};
 document.addEventListener("keydown",ev=>{if(ev.key==="Escape")document.getElementById("scrim").classList.remove("open");});
+
+// ===== 바 설계 =====
+let LAST=null;           // 마지막 분석 결과
+let BAR=null;            // {counters:{front:[...],back:[...]}, opts}
+const BAR_ORDER_FRONT=["pos","showcase","espresso","knock","grinder","hotwater","WORK","blender","drip","PICKUP"];
+const BAR_ORDER_BACK=["sink","sterilizer","induction","oven","waffle","freezer","coldbrew","WORK","dispenser","ice"];
+let selUid=null, uidSeq=1;
+
+function barOpts(){
+  const g=id=>document.getElementById(id);
+  return {shape:g("bShape").value, fd:+g("bFd").value, bd:+g("bBd").value, aisle:+g("bAisle").value, pick:g("bPick").value};
+}
+function makeBlock(id,w,label){return {uid:uidSeq++,id,w,label};}
+function buildBar(){
+  if(!LAST) analyze(true);
+  const d=LAST, front=[], back=[], underF=[], underB=[];
+  const expand=r=>{const n=(r.id==="tablefridge"||r.id==="dishwasher")?r.qty:r.qty; const one=r.w/Math.max(1,r.qty); return Array.from({length:n},()=>one);};
+  const byId={}; d.rec.forEach(r=>byId[r.id]=r);
+  const push=(arr,id)=>{const r=byId[id]; if(!r||r.w<=0) return; expand(r).forEach(w=>arr.push(makeBlock(id,w)));};
+  BAR_ORDER_FRONT.forEach(id=>{ if(id==="WORK") front.push(makeBlock("WORK",0,"제조 작업대")); else if(id==="PICKUP") front.push(makeBlock("PICKUP",500,"픽업대")); else if(SPEC[id]&&SPEC[id].z==="front") push(front,id); });
+  // 프론트 순서에 없지만 front 존인 장비
+  d.rec.filter(r=>r.z==="front"&&!BAR_ORDER_FRONT.includes(r.id)).forEach(r=>push(front,r.id));
+  BAR_ORDER_BACK.forEach(id=>{ if(id==="WORK") back.push(makeBlock("WORK",0,"작업대")); else if(SPEC[id]&&SPEC[id].z==="back") push(back,id); });
+  d.rec.filter(r=>r.z==="back"&&!BAR_ORDER_BACK.includes(r.id)).forEach(r=>push(back,r.id));
+  // 카운터 아래
+  const tf=byId.tablefridge; if(tf){const w=parseInt(tf.spec)||1500; for(let i=0;i<tf.qty;i++)(i===0?underF:underB).push(makeBlock("tablefridge",w));}
+  if(byId.dishwasher) underB.push(makeBlock("dishwasher",600));
+  BAR={front,back,underF,underB,flen:d.front,blen:d.back};
+  document.getElementById("bFl").value=d.front; document.getElementById("bBl").value=d.back;
+  selUid=null; renderBar();
+}
+function flexW(list,len){const used=list.filter(b=>b.id!=="WORK").reduce((a,b)=>a+b.w,0);return Math.max(0,len-used);}
+function nameOf(b){ if(b.label) return b.label; const e=E.find(x=>x.id===b.id); return e?e.name:b.id; }
+function colorOf(b){ if(b.id==="WORK") return "#d9dde3"; if(b.id==="PICKUP") return "#f2c48d"; const e=E.find(x=>x.id===b.id); return e?CATS[e.cat].color:"#999"; }
+
+function renderBar(){
+  if(!BAR) return;
+  const o=barOpts(), M=500;
+  const fl=BAR.flen, bl=BAR.blen;
+  // 픽업 위치에 따라 좌우 반전
+  const F = o.pick==="left"?[...BAR.front].reverse():BAR.front;
+  const counters=[]; // {key,x,y,len,depth,dir:'h'|'v',list,under}
+  counters.push({key:"front",name:"프론트 카운터",x:M,y:M+600,len:fl,depth:o.fd,dir:"h",list:F,under:BAR.underF});
+  if(o.shape==="parallel") counters.push({key:"back",name:"백 카운터",x:M,y:M+600+o.fd+o.aisle,len:bl,depth:o.bd,dir:"h",list:BAR.back,under:BAR.underB});
+  else if(o.shape==="L"){ const atRight=o.pick!=="right"; counters.push({key:"back",name:"옆 카운터 (ㄱ자)",x:atRight?M+fl-o.bd:M,y:M+600+o.fd,len:bl,depth:o.bd,dir:"v",list:BAR.back,under:BAR.underB}); }
+  // 일자형: 백 장비도 프론트 뒤에 이어서(한 줄)
+  let single=o.shape==="line";
+  if(single){ counters[0].list=[...F,...BAR.back.filter(b=>b.id!=="WORK")]; counters[0].under=[...BAR.underF,...BAR.underB]; }
+
+  const maxX=Math.max(...counters.map(c=>c.dir==="h"?c.x+Math.max(c.len,sumW(c.list,c.len)):c.x+c.depth))+M;
+  const maxY=Math.max(...counters.map(c=>c.dir==="h"?c.y+c.depth:c.y+Math.max(c.len,sumW(c.list,c.len))))+M+(o.shape==="parallel"?0:600);
+  let svg=`<svg id="barsvg" viewBox="0 0 ${maxX} ${maxY}" xmlns="http://www.w3.org/2000/svg" font-family="Noto Sans KR, sans-serif">
+   <defs><pattern id="hatch" width="60" height="60" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><rect width="60" height="60" fill="#eef0f3"/><rect width="20" height="60" fill="#e2e5ea"/></pattern>
+   <marker id="arr" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M0,0L10,5L0,10z" fill="#6b4226"/></marker></defs>
+   <rect width="${maxX}" height="${maxY}" fill="#fbfaf8"/>
+   <rect x="${M}" y="${M}" width="${maxX-2*M}" height="520" fill="#f3ece3" rx="30"/>
+   <text x="${M+40}" y="${M+130}" font-size="90" fill="#8a6a50" font-weight="700">손님 공간</text>`;
+  const pos={}; // uid -> {cx,cy}
+  counters.forEach(c=>{
+    const total=Math.max(c.len,sumW(c.list,c.len)), over=sumW(c.list,c.len)>c.len;
+    const W=c.dir==="h"?c.len:c.depth, H=c.dir==="h"?c.depth:c.len;
+    svg+=`<rect x="${c.x}" y="${c.y}" width="${W}" height="${H}" fill="#fff" stroke="#3b3027" stroke-width="16"/>`;
+    // under
+    let u=0; c.under.forEach(b=>{ const L=b.w; const r=c.dir==="h"?[c.x+u,c.y+c.depth*0.55,L,c.depth*0.42]:[c.x+c.depth*0.03,c.y+u,c.depth*0.42,L];
+      svg+=`<rect x="${r[0]}" y="${r[1]}" width="${r[2]}" height="${r[3]}" fill="none" stroke="${colorOf(b)}" stroke-width="10" stroke-dasharray="40 25"/>`;
+      const tx=r[0]+r[2]/2, ty=r[1]+r[3]/2, ufs=Math.min(70,L/9); svg+=`<text x="${tx}" y="${ty}" font-size="${ufs}" fill="${colorOf(b)}" text-anchor="middle" dominant-baseline="middle" ${c.dir==="v"?`transform="rotate(90 ${tx} ${ty})"`:""}>아래: ${nameOf(b)} ${L}</text>`; u+=L; });
+    let t=0;
+    c.list.forEach(b=>{
+      const L=b.id==="WORK"?flexW(c.list,c.len):b.w; if(L<=0){t+=0;return;}
+      const pad=30;
+      const r=c.dir==="h"?[c.x+t,c.y+pad,L,c.depth*(c.under.length?0.5:1)-pad*2]:[c.x+pad+(c.under.length?c.depth*0.45:0),c.y+t,c.depth*(c.under.length?0.55:1)-pad*2,L];
+      const sel=b.uid===selUid, out=t+L>c.len;
+      const fill=b.id==="WORK"?"url(#hatch)":colorOf(b);
+      svg+=`<g class="blk" data-uid="${b.uid}" data-c="${c.key}" style="cursor:grab"><rect x="${r[0]+6}" y="${r[1]}" width="${Math.max(0,r[2]-12)}" height="${r[3]}" rx="18" fill="${fill}" fill-opacity="${b.id==="WORK"?1:.9}" stroke="${out?"#c0392b":sel?"#111":"none"}" stroke-width="${out||sel?18:0}" ${out?'stroke-dasharray="40 20"':""}/>`;
+      const tx=r[0]+r[2]/2, ty=r[1]+r[3]/2, fs=Math.min(78,Math.max(46,(c.dir==="h"?L:r[2])/6));
+      const nm=nameOf(b).replace(/[·].*/,""), tc=b.id==="WORK"?"#555":"#fff";
+      svg+=`<text x="${tx}" y="${ty-20}" font-size="${fs}" font-weight="700" fill="${tc}" text-anchor="middle" dominant-baseline="middle" pointer-events="none" ${c.dir==="v"?`transform="rotate(90 ${tx} ${ty})"`:""}>${nm}</text>
+            <text x="${tx}" y="${ty+fs*0.75}" font-size="${fs*0.8}" fill="${tc}" fill-opacity=".85" text-anchor="middle" dominant-baseline="middle" pointer-events="none" ${c.dir==="v"?`transform="rotate(90 ${tx} ${ty})"`:""}>${L}</text></g>`;
+      pos[b.uid]={cx:tx,cy:ty,b,c:c.key};
+      t+=L;
+    });
+    // 치수
+    if(c.dir==="h"){ const yy=c.key==="front"?c.y-70:c.y+c.depth+90;
+      svg+=`<line x1="${c.x}" y1="${yy}" x2="${c.x+c.len}" y2="${yy}" stroke="#555" stroke-width="6"/><line x1="${c.x}" y1="${yy-30}" x2="${c.x}" y2="${yy+30}" stroke="#555" stroke-width="6"/><line x1="${c.x+c.len}" y1="${yy-30}" x2="${c.x+c.len}" y2="${yy+30}" stroke="#555" stroke-width="6"/>
+      <text x="${c.x+c.len/2}" y="${yy+(c.key==="front"?-25:75)}" font-size="70" text-anchor="middle" fill="${over?"#c0392b":"#333"}" font-weight="700">${c.name} ${c.len.toLocaleString()} × ${c.depth}${over?` (장비 ${sumW(c.list,c.len).toLocaleString()} — 넘침)`:""}</text>`;
+    } else { const xx=c.x+c.depth+80;
+      svg+=`<text x="${xx}" y="${c.y+c.len/2}" font-size="70" fill="${over?"#c0392b":"#333"}" font-weight="700" transform="rotate(90 ${xx} ${c.y+c.len/2})" text-anchor="middle">${c.name} ${c.len.toLocaleString()} × ${c.depth}${over?" (넘침)":""}</text>`; }
+  });
+  // 통로
+  if(o.shape==="parallel"){ const f=counters[0], y1=f.y+f.depth, y2=y1+o.aisle, xx=f.x+Math.min(f.len,counters[1].len)+250;
+    svg+=`<line x1="${xx}" y1="${y1}" x2="${xx}" y2="${y2}" stroke="${o.aisle<900?"#c0392b":"#2e8b57"}" stroke-width="8" marker-end="url(#arr)" marker-start="url(#arr)"/>
+    <text x="${xx+40}" y="${(y1+y2)/2+25}" font-size="70" fill="${o.aisle<900?"#c0392b":"#2e8b57"}" font-weight="700">통로 ${o.aisle}</text>
+    <text x="${f.x+40}" y="${(y1+y2)/2+25}" font-size="60" fill="#888">직원 동선</text>`; }
+  // 흐름 번호
+  const find=id=>Object.values(pos).find(p=>p.b.id===id);
+  const steps=[["pos","① 주문"],["espresso","② 제조"],["PICKUP","③ 픽업"]];
+  steps.forEach(([id,t])=>{const p=find(id); if(!p) return; svg+=`<g pointer-events="none"><circle cx="${p.cx}" cy="${M+340}" r="65" fill="#6b4226"/><text x="${p.cx}" y="${M+364}" font-size="70" fill="#fff" text-anchor="middle" font-weight="700">${t[0]}</text><text x="${p.cx}" y="${M+245}" font-size="62" fill="#6b4226" text-anchor="middle" font-weight="700">${t.slice(2)}</text></g>`;});
+  svg+=`</svg>`;
+  document.getElementById("barcanvas").innerHTML=svg;
+  bindDrag();
+  renderBarSide(counters,pos,o);
+}
+function sumW(list,len){return list.filter(b=>b.id!=="WORK").reduce((a,b)=>a+b.w,0)+(list.some(b=>b.id==="WORK")?0:0);}
+
+function renderBarSide(counters,pos,o){
+  const chk=[]; const P=id=>Object.values(pos).filter(p=>p.b.id===id);
+  const dist=(a,b)=>Math.hypot(a.cx-b.cx,a.cy-b.cy);
+  if(o.shape==="parallel"){
+    if(o.aisle<900) chk.push(["bad",`통로 ${o.aisle}mm는 좁습니다. 한 사람이 지나가려면 최소 900mm, 두 사람이 엇갈리면 1,000~1,200mm가 필요해요.`]);
+    else if(LAST&&LAST.staff>=3&&o.aisle<1100) chk.push(["warn",`피크 ${LAST.staff}명 근무면 통로를 1,100mm 이상으로 잡는 게 편해요.`]);
+    else chk.push(["ok",`통로 ${o.aisle}mm — 직원 동선 여유 괜찮아요.`]);
+  }
+  counters.forEach(c=>{const u=sumW(c.list,c.len); if(u>c.len) chk.push(["bad",`${c.name}: 장비 폭 ${u.toLocaleString()}mm가 카운터 ${c.len.toLocaleString()}mm보다 ${(u-c.len).toLocaleString()}mm 깁니다. 빨간 점선 장비를 다른 카운터로 옮기거나 카운터를 늘리세요.`]);
+    else { const w=c.len-u; if(c.key==="front"&&w<800) chk.push(["warn",`프론트 작업 공간이 ${w}mm뿐이에요. 음료를 만들려면 800mm 이상 남기는 게 좋아요.`]); }
+    const ul=c.under.reduce((a,b)=>a+b.w,0); if(ul>c.len) chk.push(["warn",`${c.name} 아래 장비(${ul.toLocaleString()}mm)가 카운터보다 깁니다.`]); });
+  const es=P("espresso")[0], gr=P("grinder")[0], hw=P("hotwater")[0], bl=P("blender")[0], ic=P("ice")[0];
+  if(es&&gr) chk.push(dist(es,gr)<=1300?["ok","그라인더가 에스프레소 머신 바로 옆에 있어요."]:["warn","그라인더를 에스프레소 머신 바로 옆으로 붙이세요. 떨어지면 추출 동선이 길어져요."]);
+  if(es&&hw) chk.push(dist(es,hw)<=1800?["ok","온수기가 머신 가까이 있어 아메리카노 동선이 짧아요."]:["warn","온수기를 머신 가까이 두면 아메리카노가 빨라져요."]);
+  if(bl&&ic) chk.push(dist(bl,ic)<=2200?["ok","블렌더와 제빙기가 가까워요."]:["warn","블렌더와 제빙기가 멀어요. 얼음을 들고 오가는 거리가 길어집니다. 제빙기를 블렌더 등 뒤쪽으로 옮겨 보세요."]);
+  if(P("PICKUP")[0]&&P("pos")[0]&&o.shape!=="line") chk.push(["ok","주문(①)과 픽업(③)이 양 끝으로 나뉘어 손님 줄이 엉키지 않아요."]);
+  chk.push(["warn","에스프레소 머신·제빙기·식기세척기는 급수·배수와 전용 전기가 필요해요. 배관·콘센트 위치를 이 배치에 맞춰 시공 업체와 확인하세요."]);
+  const sel=selUid?findBlock(selUid):null;
+  document.getElementById("barside").innerHTML=`
+    ${sel?`<div class="panel selp"><h3>선택: ${nameOf(sel.b)}</h3><p class="desc">${sel.b.id==="WORK"?"남는 길이가 자동으로 작업대가 됩니다.":`폭 ${sel.b.w}mm`}</p>
+      <div class="selbtn"><button data-a="left">← 왼쪽</button><button data-a="right">오른쪽 →</button>${o.shape!=="line"?`<button data-a="swap">${sel.key==="front"?"백 카운터로":"프론트로"}</button>`:""}${sel.b.id!=="WORK"?`<button data-a="del">빼기</button>`:""}</div>
+      ${sel.b.id!=="WORK"?`<label class="wlab">폭(mm) <input type="number" id="selW" value="${sel.b.w}" step="50" min="100"></label>`:""}</div>`
+     :`<div class="panel"><p class="desc" style="margin:0">평면도의 장비를 <b>끌어서</b> 순서를 바꾸거나 다른 카운터로 옮길 수 있어요. 눌러서 선택하면 폭을 바꾸거나 뺄 수 있습니다.</p></div>`}
+    <div class="panel"><h3>배치 점검</h3><div class="alerts">${chk.map(a=>`<div class="alert ${a[0]}"><span>${a[1]}</span></div>`).join("")}</div></div>
+    <div class="panel"><h3>배치 목록</h3>${counters.map(c=>`<b style="font-size:13px">${c.name}</b><ol class="blist">${c.list.map(b=>`<li>${nameOf(b)} <span>${b.id==="WORK"?flexW(c.list,c.len):b.w}mm</span></li>`).join("")}${c.under.map(b=>`<li class="u">아래: ${nameOf(b)} <span>${b.w}mm</span></li>`).join("")}</ol>`).join("")}</div>`;
+  document.querySelectorAll(".selbtn button").forEach(b=>b.onclick=()=>actSel(b.dataset.a));
+  const sw=document.getElementById("selW"); if(sw) sw.onchange=()=>{const s=findBlock(selUid); if(s){s.b.w=Math.max(100,+sw.value||s.b.w); renderBar();}};
+}
+function listOf(key){return key==="front"?BAR.front:BAR.back;}
+function findBlock(uid){for(const key of ["front","back"]){const l=listOf(key),i=l.findIndex(b=>b.uid===uid); if(i>=0) return {key,i,b:l[i],list:l};} return null;}
+function actSel(a){
+  const s=findBlock(selUid); if(!s) return; const o=barOpts(); const flip=(o.pick==="left"&&s.key==="front");
+  if(a==="left"||a==="right"){ let dir=a==="left"?-1:1; if(flip) dir=-dir; const j=s.i+dir; if(j<0||j>=s.list.length) return; [s.list[s.i],s.list[j]]=[s.list[j],s.list[s.i]]; }
+  if(a==="swap"){ if(s.b.id==="WORK") return; s.list.splice(s.i,1); listOf(s.key==="front"?"back":"front").push(s.b); }
+  if(a==="del"){ s.list.splice(s.i,1); selUid=null; }
+  renderBar();
+}
+function bindDrag(){
+  const svg=document.getElementById("barsvg"); if(!svg) return;
+  const pt=ev=>{const p=svg.createSVGPoint();p.x=ev.clientX;p.y=ev.clientY;return p.matrixTransform(svg.getScreenCTM().inverse());};
+  svg.querySelectorAll(".blk").forEach(g=>{
+    g.addEventListener("pointerdown",ev=>{
+      ev.preventDefault(); const uid=+g.dataset.uid; const start=pt(ev); let moved=false;
+      g.setPointerCapture(ev.pointerId); g.style.cursor="grabbing";
+      const mv=e=>{const p=pt(e); const dx=p.x-start.x, dy=p.y-start.y; if(Math.abs(dx)+Math.abs(dy)>40) moved=true; g.setAttribute("transform",`translate(${dx} ${dy})`); g.style.opacity=.75;};
+      const up=e=>{g.removeEventListener("pointermove",mv);g.removeEventListener("pointerup",up);
+        if(!moved){selUid=selUid===uid?null:uid; renderBar(); return;}
+        dropAt(uid,pt(e)); };
+      g.addEventListener("pointermove",mv); g.addEventListener("pointerup",up);
+    });
+  });
+}
+function dropAt(uid,p){
+  const s=findBlock(uid); if(!s) return;
+  // 가장 가까운 카운터와 그 안의 위치 계산
+  const others=[...document.querySelectorAll("#barsvg .blk")].filter(g=>+g.dataset.uid!==uid).map(g=>{const r=g.querySelector("rect");const x=+r.getAttribute("x"),y=+r.getAttribute("y"),w=+r.getAttribute("width"),h=+r.getAttribute("height");return {uid:+g.dataset.uid,c:g.dataset.c,cx:x+w/2,cy:y+h/2};});
+  if(!others.length) return;
+  let best=others[0],bd=1e12; others.forEach(o=>{const d=Math.hypot(o.cx-p.x,(o.cy-p.y)*1.5); if(d<bd){bd=d;best=o;}});
+  const o=barOpts(), vertical=o.shape==="L"&&best.c==="back";
+  const target=findBlock(best.uid); if(!target) return;
+  if(o.shape==="line" && s.key!==target.key) return renderBar();
+  s.list.splice(s.i,1);
+  const t2=findBlock(best.uid);
+  let after = vertical ? p.y>best.cy : p.x>best.cx;
+  if(o.pick==="left"&&t2.key==="front"&&!vertical) after=!after;
+  t2.list.splice(t2.i+(after?1:0),0,s.b);
+  selUid=uid; renderBar();
+}
+function svgText(){const s=document.getElementById("barsvg"); return s?new XMLSerializer().serializeToString(s):"";}
+function barSavePng(){
+  const txt=svgText(); if(!txt) return; const img=new Image();
+  img.onload=()=>{const c=document.createElement("canvas"); const vb=document.getElementById("barsvg").viewBox.baseVal; const k=2400/vb.width; c.width=2400; c.height=Math.round(vb.height*k); c.getContext("2d").drawImage(img,0,0,c.width,c.height);
+    c.toBlob(b=>{try{const a=document.createElement("a");a.href=URL.createObjectURL(b);a.download="바설계.png";document.body.appendChild(a);a.click();a.remove();barMsg("PNG를 저장했어요. 저장이 안 되면 화면을 캡처해 주세요.");}catch(e){barMsg("이 화면에서는 저장이 막혀 있어요. 화면을 캡처해 주세요.");}});};
+  img.src="data:image/svg+xml;charset=utf-8,"+encodeURIComponent(txt);
+}
+function barMsg(t){const m=document.getElementById("barmsg"); m.textContent=t; setTimeout(()=>m.textContent="",4000);}
+["bShape","bFd","bBd","bAisle","bPick"].forEach(id=>document.getElementById(id).addEventListener("change",renderBar));
+["bFl","bBl"].forEach(id=>document.getElementById(id).addEventListener("change",()=>{if(!BAR)return;BAR.flen=Math.max(500,+document.getElementById("bFl").value||BAR.flen);BAR.blen=Math.max(500,+document.getElementById("bBl").value||BAR.blen);renderBar();}));
+document.getElementById("bReset").onclick=buildBar;
+document.getElementById("bPng").onclick=barSavePng;
+document.getElementById("bPrint").onclick=()=>{try{window.print()}catch(e){barMsg("인쇄가 막혀 있어요. 브라우저 메뉴에서 인쇄해 주세요.")}};
+function openBar(){ document.querySelector('nav button[data-v="bar"]').click(); buildBar(); }
 </script>
 </body>
 </html>
