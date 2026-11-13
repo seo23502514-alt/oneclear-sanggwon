@@ -175,6 +175,7 @@ td a{color:var(--brand);font-weight:700;font-size:12.5px;white-space:nowrap}
 .plist{display:grid;gap:6px}.prow{display:flex;gap:10px;align-items:center;justify-content:space-between;border:1.5px solid var(--line);border-radius:10px;padding:9px 12px}
 .prow b{display:block;font-size:14px}.prow small{color:var(--muted);font-size:12px}
 .prow button{font:inherit;font-size:13px;font-weight:700;padding:8px 10px;border:0;border-radius:8px;background:var(--accent);color:#fff;cursor:pointer;white-space:nowrap}
+.bartools .f select{min-width:230px}
 </style>
 </head>
 <body>
@@ -239,10 +240,11 @@ td a{color:var(--brand);font-weight:700;font-size:12.5px;white-space:nowrap}
 <section class="view" id="v-bar">
 <div class="barwrap">
   <div class="bartools panel">
-    <div class="f"><label>바 형태</label><select id="bShape"><option value="parallel">11자형 (프론트+백)</option><option value="L">ㄱ자형</option><option value="line">일자형 (한 줄)</option></select></div>
+    <div class="f"><label>바 형태</label><select id="bShape"><option value="parallel">11자형 (프론트+백)</option><option value="U">ㄷ자형 (프론트+옆+백)</option><option value="island">아일랜드형 (섬 프론트+백)</option><option value="Lfront">ㄱ자 프론트+백 (손님 쪽 꺾임)</option><option value="L">ㄱ자형 (프론트+옆)</option><option value="line">일자형 (한 줄)</option></select></div>
     <div class="f"><label>픽업 위치</label><select id="bPick"><option value="right">오른쪽</option><option value="left">왼쪽</option></select></div>
     <div class="f"><label>프론트 길이 (mm)</label><input type="number" id="bFl" value="4000" step="100"></div>
     <div class="f"><label>백·옆 길이 (mm)</label><input type="number" id="bBl" value="3500" step="100"></div>
+    <div class="f"><label>꺾인 카운터 길이 (mm)</label><input type="number" id="bSl" value="1800" step="100"></div>
     <div class="f"><label>프론트 깊이 (mm)</label><input type="number" id="bFd" value="700" step="50"></div>
     <div class="f"><label>백 깊이 (mm)</label><input type="number" id="bBd" value="600" step="50"></div>
     <div class="f"><label>통로 폭 (mm)</label><input type="number" id="bAisle" value="1000" step="50"></div>
@@ -802,7 +804,7 @@ function buildBar(){
   // 카운터 아래
   const tf=byId.tablefridge; if(tf){const w=parseInt(tf.spec)||1500; for(let i=0;i<tf.qty;i++)(i===0?underF:underB).push(makeBlock("tablefridge",w));}
   if(byId.dishwasher) underB.push(makeBlock("dishwasher",600));
-  BAR={front,back,underF,underB,flen:d.front,blen:d.back};
+  BAR={front,back,side:[makeBlock("WORK",0,"작업대")],underF,underB,flen:d.front,blen:d.back,slen:+document.getElementById("bSl").value||1800};
   document.getElementById("bFl").value=d.front; document.getElementById("bBl").value=d.back;
   selUid=null; renderBar();
 }
@@ -813,25 +815,34 @@ function colorOf(b){ if(b.id==="WORK") return "#d9dde3"; if(b.id==="PICKUP") ret
 function renderBar(){
   if(!BAR) return;
   const o=barOpts(), M=500;
-  const fl=BAR.flen, bl=BAR.blen;
+  const fl=BAR.flen, bl=BAR.blen, sl=BAR.slen||1800;
   // 픽업 위치에 따라 좌우 반전
   const F = o.pick==="left"?[...BAR.front].reverse():BAR.front;
-  const counters=[]; // {key,x,y,len,depth,dir:'h'|'v',list,under}
-  counters.push({key:"front",name:"프론트 카운터",x:M,y:M+600,len:fl,depth:o.fd,dir:"h",list:F,under:BAR.underF});
-  if(o.shape==="parallel") counters.push({key:"back",name:"백 카운터",x:M,y:M+600+o.fd+o.aisle,len:bl,depth:o.bd,dir:"h",list:BAR.back,under:BAR.underB});
-  else if(o.shape==="L"){ const atRight=o.pick!=="right"; counters.push({key:"back",name:"옆 카운터 (ㄱ자)",x:atRight?M+fl-o.bd:M,y:M+600+o.fd,len:bl,depth:o.bd,dir:"v",list:BAR.back,under:BAR.underB}); }
-  // 일자형: 백 장비도 프론트 뒤에 이어서(한 줄)
-  let single=o.shape==="line";
-  if(single){ counters[0].list=[...F,...BAR.back.filter(b=>b.id!=="WORK")]; counters[0].under=[...BAR.underF,...BAR.underB]; }
+  const sh=o.shape, right=o.pick!=="left", S=BAR.side;
+  const usesSide=sh==="U"||sh==="Lfront";
+  const backExtra=usesSide?[]:S.filter(b=>b.id!=="WORK");
+  const IX=sh==="island"?700:0;           // 아일랜드: 양옆 손님 통로
+  const T=sh==="Lfront"?600+sl:600;        // 손님 공간 높이
+  const FY=M+T, BY=FY+o.fd+o.aisle;
+  const counters=[]; // {key,x,y,len,depth,dir:'h'|'v',align,list,under}
+  counters.push({key:"front",name:sh==="island"?"프론트 아일랜드":"프론트 카운터",x:M+IX,y:FY,len:fl,depth:o.fd,dir:"h",list:F,under:BAR.underF});
+  if(["parallel","island","U","Lfront"].includes(sh)) counters.push({key:"back",name:"백 카운터",x:M+IX,y:BY,len:bl,depth:o.bd,dir:"h",list:[...BAR.back,...backExtra],under:BAR.underB});
+  if(sh==="U"){ const closedLeft=right; const xr=M+Math.min(fl,bl)-o.bd;
+    counters.push({key:"side",name:"옆 카운터 (ㄷ자)",x:closedLeft?M:xr,y:FY+o.fd,len:o.aisle,depth:o.bd,dir:"v",align:closedLeft?"start":"end",list:S,under:[]}); }
+  if(sh==="Lfront") counters.push({key:"side",name:"꺾인 카운터 (손님 쪽)",x:right?M+fl-o.fd:M,y:FY-sl,len:sl,depth:o.fd,dir:"v",align:right?"end":"start",list:S,under:[]});
+  if(sh==="L"){ const atRight=!right; counters.push({key:"back",name:"옆 카운터 (ㄱ자)",x:atRight?M+fl-o.bd:M,y:FY+o.fd,len:bl,depth:o.bd,dir:"v",align:atRight?"end":"start",list:[...BAR.back,...backExtra],under:BAR.underB}); }
+  if(sh==="line"){ counters[0].list=[...F,...BAR.back.filter(b=>b.id!=="WORK"),...backExtra]; counters[0].under=[...BAR.underF,...BAR.underB]; }
 
-  const maxX=Math.max(...counters.map(c=>c.dir==="h"?c.x+Math.max(c.len,sumW(c.list,c.len)):c.x+c.depth))+M;
-  const maxY=Math.max(...counters.map(c=>c.dir==="h"?c.y+c.depth:c.y+Math.max(c.len,sumW(c.list,c.len))))+M+(o.shape==="parallel"?0:600);
+  const maxX=Math.max(...counters.map(c=>c.dir==="h"?c.x+Math.max(c.len,sumW(c.list,c.len)):c.x+c.depth))+M+IX;
+  const maxY=Math.max(...counters.map(c=>c.dir==="h"?c.y+c.depth+120:c.y+Math.max(c.len,sumW(c.list,c.len))))+M+(sh==="L"||sh==="line"?600:0);
   let svg=`<svg id="barsvg" viewBox="0 0 ${maxX} ${maxY}" xmlns="http://www.w3.org/2000/svg" font-family="Noto Sans KR, sans-serif">
    <defs><pattern id="hatch" width="60" height="60" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><rect width="60" height="60" fill="#eef0f3"/><rect width="20" height="60" fill="#e2e5ea"/></pattern>
    <marker id="arr" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M0,0L10,5L0,10z" fill="#6b4226"/></marker></defs>
    <rect width="${maxX}" height="${maxY}" fill="#fbfaf8"/>
-   <rect x="${M}" y="${M}" width="${maxX-2*M}" height="520" fill="#f3ece3" rx="30"/>
-   <text x="${M+40}" y="${M+130}" font-size="90" fill="#8a6a50" font-weight="700">손님 공간</text>`;
+   <rect x="${M}" y="${M}" width="${maxX-2*M}" height="${sh==="island"?T+o.fd:T-80}" fill="#f3ece3" rx="30"/>
+   <text x="${M+40}" y="${M+130}" font-size="90" fill="#8a6a50" font-weight="700">손님 공간</text>
+   ${sh==="island"?`<text x="${M+60}" y="${FY+o.fd+o.aisle/2+25}" font-size="60" fill="#2e8b57" font-weight="700">← 출입</text><text x="${M+IX+Math.max(fl,bl)+60}" y="${FY+o.fd+o.aisle/2+25}" font-size="60" fill="#2e8b57" font-weight="700">출입 →</text>`:""}
+   ${sh==="U"?`<text x="${right?M+Math.min(fl,bl)+80:M-380}" y="${FY+o.fd+o.aisle/2+25}" font-size="60" fill="#2e8b57" font-weight="700">${right?"출입 →":"← 출입"}</text>`:""}`;
   const pos={}; // uid -> {cx,cy}
   counters.forEach(c=>{
     const total=Math.max(c.len,sumW(c.list,c.len)), over=sumW(c.list,c.len)>c.len;
@@ -846,10 +857,10 @@ function renderBar(){
       const L=b.id==="WORK"?flexW(c.list,c.len):b.w; if(L<=0){t+=0;return;}
       const pad=30;
       const fr=b.d?Math.min(1,b.d/c.depth):(c.under.length?0.5:1), hh=(c.depth-pad*2)*fr;
-      const r=c.dir==="h"?[c.x+t,c.y+pad,L,hh]:[c.x+c.depth-pad-hh,c.y+t,hh,L];
+      const r=c.dir==="h"?[c.x+t,c.y+pad,L,hh]:[c.align==="start"?c.x+pad:c.x+c.depth-pad-hh,c.y+t,hh,L];
       const sel=b.uid===selUid, out=t+L>c.len||(b.d&&b.d>c.depth);
       const fill=b.id==="WORK"?"url(#hatch)":colorOf(b);
-      svg+=`<g class="blk" data-uid="${b.uid}" data-c="${c.key}" style="cursor:grab"><rect x="${r[0]+6}" y="${r[1]}" width="${Math.max(0,r[2]-12)}" height="${r[3]}" rx="18" fill="${fill}" fill-opacity="${b.id==="WORK"?1:.9}" stroke="${out?"#c0392b":sel?"#111":"none"}" stroke-width="${out||sel?18:0}" ${out?'stroke-dasharray="40 20"':""}/>`;
+      svg+=`<g class="blk" data-uid="${b.uid}" data-c="${c.key}" data-v="${c.dir==="v"?1:0}" style="cursor:grab"><rect x="${r[0]+6}" y="${r[1]}" width="${Math.max(0,r[2]-12)}" height="${r[3]}" rx="18" fill="${fill}" fill-opacity="${b.id==="WORK"?1:.9}" stroke="${out?"#c0392b":sel?"#111":"none"}" stroke-width="${out||sel?18:0}" ${out?'stroke-dasharray="40 20"':""}/>`;
       const tx=r[0]+r[2]/2, ty=r[1]+r[3]/2, fs=Math.min(78,Math.max(46,(c.dir==="h"?L:r[2])/6));
       const nm=(b.model&&L>=450?(b.model.length>14?b.model.slice(0,13)+"…":b.model):(b.model?b.model.split(" ").slice(-1)[0]:nameOf(b).replace(/[·].*/,""))), tc=b.id==="WORK"?"#555":"#fff";
       svg+=`<text x="${tx}" y="${ty-20}" font-size="${fs}" font-weight="700" fill="${tc}" text-anchor="middle" dominant-baseline="middle" pointer-events="none" ${c.dir==="v"?`transform="rotate(90 ${tx} ${ty})"`:""}>${nm}</text>
@@ -858,21 +869,22 @@ function renderBar(){
       t+=L;
     });
     // 치수
-    if(c.dir==="h"){ const yy=c.key==="front"?c.y-70:c.y+c.depth+90;
+    if(c.dir==="h"){ const top=c.key==="front"&&sh!=="Lfront"; const yy=top?c.y-70:c.y+c.depth+90;
       svg+=`<line x1="${c.x}" y1="${yy}" x2="${c.x+c.len}" y2="${yy}" stroke="#555" stroke-width="6"/><line x1="${c.x}" y1="${yy-30}" x2="${c.x}" y2="${yy+30}" stroke="#555" stroke-width="6"/><line x1="${c.x+c.len}" y1="${yy-30}" x2="${c.x+c.len}" y2="${yy+30}" stroke="#555" stroke-width="6"/>
-      <text x="${c.x+c.len/2}" y="${yy+(c.key==="front"?-25:75)}" font-size="70" text-anchor="middle" fill="${over?"#c0392b":"#333"}" font-weight="700">${c.name} ${c.len.toLocaleString()} × ${c.depth}${over?` (장비 ${sumW(c.list,c.len).toLocaleString()} — 넘침)`:""}</text>`;
-    } else { const xx=c.x+c.depth+80;
+      <text x="${c.x+c.len/2}" y="${yy+(top?-25:75)}" font-size="70" text-anchor="middle" fill="${over?"#c0392b":"#333"}" font-weight="700">${c.name} ${c.len.toLocaleString()} × ${c.depth}${over?` (장비 ${sumW(c.list,c.len).toLocaleString()} — 넘침)`:""}</text>`;
+    } else { const xx=c.align==="start"?c.x-80:c.x+c.depth+80;
       svg+=`<text x="${xx}" y="${c.y+c.len/2}" font-size="70" fill="${over?"#c0392b":"#333"}" font-weight="700" transform="rotate(90 ${xx} ${c.y+c.len/2})" text-anchor="middle">${c.name} ${c.len.toLocaleString()} × ${c.depth}${over?" (넘침)":""}</text>`; }
   });
   // 통로
-  if(o.shape==="parallel"){ const f=counters[0], y1=f.y+f.depth, y2=y1+o.aisle, xx=f.x+Math.min(f.len,counters[1].len)+250;
+  if(["parallel","island","U","Lfront"].includes(sh)){ const f=counters[0], bk=counters[1], y1=f.y+f.depth, y2=y1+o.aisle, xx=(sh==="U"||sh==="island")?f.x+Math.min(f.len,bk.len)/2:f.x+Math.min(f.len,bk.len)+250;
     svg+=`<line x1="${xx}" y1="${y1}" x2="${xx}" y2="${y2}" stroke="${o.aisle<900?"#c0392b":"#2e8b57"}" stroke-width="8" marker-end="url(#arr)" marker-start="url(#arr)"/>
     <text x="${xx+40}" y="${(y1+y2)/2+25}" font-size="70" fill="${o.aisle<900?"#c0392b":"#2e8b57"}" font-weight="700">통로 ${o.aisle}</text>
-    <text x="${f.x+40}" y="${(y1+y2)/2+25}" font-size="60" fill="#888">직원 동선</text>`; }
+    <text x="${f.x+(sh==="U"&&right?o.bd+80:40)}" y="${(y1+y2)/2+25}" font-size="60" fill="#888">직원 동선</text>`; }
   // 흐름 번호
   const find=id=>Object.values(pos).find(p=>p.b.id===id);
   const steps=[["pos","① 주문"],["espresso","② 제조"],["PICKUP","③ 픽업"]];
-  steps.forEach(([id,t])=>{const p=find(id); if(!p) return; svg+=`<g pointer-events="none"><circle cx="${p.cx}" cy="${M+340}" r="65" fill="#6b4226"/><text x="${p.cx}" y="${M+364}" font-size="70" fill="#fff" text-anchor="middle" font-weight="700">${t[0]}</text><text x="${p.cx}" y="${M+245}" font-size="62" fill="#6b4226" text-anchor="middle" font-weight="700">${t.slice(2)}</text></g>`;});
+  const legX=sh==="Lfront"?(right?M+fl-o.fd:M+o.fd):null;
+  steps.forEach(([id,t])=>{const p0=find(id); if(!p0) return; const p={cx:legX===null?p0.cx:(right?Math.min(p0.cx,legX-180):Math.max(p0.cx,legX+180))}; svg+=`<g pointer-events="none"><circle cx="${p.cx}" cy="${FY-260}" r="65" fill="#6b4226"/><text x="${p.cx}" y="${FY-236}" font-size="70" fill="#fff" text-anchor="middle" font-weight="700">${t[0]}</text><text x="${p.cx}" y="${FY-355}" font-size="62" fill="#6b4226" text-anchor="middle" font-weight="700">${t.slice(2)}</text></g>`;});
   svg+=`</svg>`;
   document.getElementById("barcanvas").innerHTML=svg;
   bindDrag();
@@ -883,7 +895,13 @@ function sumW(list,len){return list.filter(b=>b.id!=="WORK").reduce((a,b)=>a+b.w
 function renderBarSide(counters,pos,o){
   const chk=[]; const P=id=>Object.values(pos).filter(p=>p.b.id===id);
   const dist=(a,b)=>Math.hypot(a.cx-b.cx,a.cy-b.cy);
-  if(o.shape==="parallel"){
+  const SH={U:["ok","ㄷ자형은 한쪽 끝만 열려 있어요. 열린 쪽(출입)이 직원 출입구라, 막힌 쪽 안쪽은 막다른 곳이 됩니다. 자주 쓰는 장비는 열린 쪽 가까이 두세요."],
+    island:["warn","아일랜드형은 통로 양 끝이 열려 출입이 편한 대신, 손님이 옆에서 작업대 안을 볼 수 있어요. 급배수·전기를 바닥 밑으로 아일랜드까지 끌어와야 하니 시공 전에 배관 경로를 먼저 정하세요."],
+    Lfront:["ok","꺾인 카운터가 손님 쪽으로 나와 있어 쇼케이스·픽업대를 두기 좋아요. 주문 줄과 픽업 줄이 서로 다른 방향으로 갈라지는지 확인하세요."],
+    L:["ok","ㄱ자형은 몸을 돌려 쓰는 구조예요. 코너 안쪽 600mm 정도는 손이 잘 안 닿으니 작업대나 수납으로 두세요."],
+    line:["warn","일자형은 모든 장비가 한 줄이라 좌우로 오가는 거리가 길어요. 한 명이 운영하는 작은 매장에 맞는 형태예요."]};
+  if(SH[o.shape]) chk.push(SH[o.shape]);
+  if(["parallel","island","U","Lfront"].includes(o.shape)){
     if(o.aisle<900) chk.push(["bad",`통로 ${o.aisle}mm는 좁습니다. 한 사람이 지나가려면 최소 900mm, 두 사람이 엇갈리면 1,000~1,200mm가 필요해요.`]);
     else if(LAST&&LAST.staff>=3&&o.aisle<1100) chk.push(["warn",`피크 ${LAST.staff}명 근무면 통로를 1,100mm 이상으로 잡는 게 편해요.`]);
     else chk.push(["ok",`통로 ${o.aisle}mm — 직원 동선 여유 괜찮아요.`]);
@@ -903,7 +921,7 @@ function renderBarSide(counters,pos,o){
   const sel=selUid?findBlock(selUid):null;
   document.getElementById("barside").innerHTML=`
     ${sel?`<div class="panel selp"><h3>선택: ${nameOf(sel.b)}</h3><p class="desc">${sel.b.id==="WORK"?"남는 길이가 자동으로 작업대가 됩니다.":`${sel.b.model?`<b style="color:var(--ink)">${sel.b.model}</b><br>`:""}폭 ${sel.b.w}mm${sel.b.d?` × 깊이 ${sel.b.d}mm`:" (깊이 미지정)"}${sel.b.kw?` · ${sel.b.kw}kW`:""}${sel.b.src?` · <a href="${sel.b.src}" target="_blank" rel="noopener">사양 출처</a>`:""}`}</p>
-      <div class="selbtn"><button data-a="left">← 왼쪽</button><button data-a="right">오른쪽 →</button>${o.shape!=="line"?`<button data-a="swap">${{front:"백 카운터로",back:"프론트로",uf:"백 카운터 아래로",ub:"프론트 아래로"}[sel.key]}</button>`:""}${sel.b.id!=="WORK"?`<button data-a="del">빼기</button>`:""}</div>
+      <div class="selbtn"><button data-a="left">← 왼쪽</button><button data-a="right">오른쪽 →</button>${o.shape!=="line"?`${["uf","ub"].includes(sel.key)?`<button data-a="swap">${sel.key==="uf"?"백 카운터 아래로":"프론트 아래로"}</button>`:counters.filter(c=>c.key!==sel.key&&!(o.shape==="line")).map(c=>`<button data-a="to:${c.key}">→ ${c.name.replace(/ \(.*\)/,"")}</button>`).join("")}`:""}${sel.b.id!=="WORK"?`<button data-a="del">빼기</button>`:""}</div>
       ${sel.b.id!=="WORK"?`<label class="wlab">폭(mm) <input type="number" id="selW" value="${sel.b.w}" step="10" min="100"></label>`:""}
       ${sel.b.id!=="WORK"&&sel.b.id!=="PICKUP"?prodPickerHtml(sel):""}</div>`
      :`<div class="panel"><p class="desc" style="margin:0">평면도의 장비를 <b>끌어서</b> 순서를 바꾸거나 다른 카운터로 옮길 수 있어요. 눌러서 선택하면 폭을 바꾸거나 뺄 수 있습니다.</p></div>`}
@@ -914,11 +932,12 @@ function renderBarSide(counters,pos,o){
   const sw=document.getElementById("selW"); if(sw) sw.onchange=()=>{const s=findBlock(selUid); if(s){s.b.w=Math.max(100,+sw.value||s.b.w); renderBar();}};
   if(sel&&sel.b.id!=="WORK"&&sel.b.id!=="PICKUP") bindProdPicker(sel);
 }
-function listOf(key){return {front:BAR.front,back:BAR.back,uf:BAR.underF,ub:BAR.underB}[key];}
-function findBlock(uid){for(const key of ["front","back","uf","ub"]){const l=listOf(key),i=l.findIndex(b=>b.uid===uid); if(i>=0) return {key,i,b:l[i],list:l};} return null;}
+function listOf(key){return {front:BAR.front,back:BAR.back,side:BAR.side,uf:BAR.underF,ub:BAR.underB}[key];}
+function findBlock(uid){for(const key of ["front","back","side","uf","ub"]){const l=listOf(key),i=l.findIndex(b=>b.uid===uid); if(i>=0) return {key,i,b:l[i],list:l};} return null;}
 function actSel(a){
   const s=findBlock(selUid); if(!s) return; const o=barOpts(); const flip=(o.pick==="left"&&(s.key==="front"));
   if(a==="left"||a==="right"){ let dir=a==="left"?-1:1; if(flip) dir=-dir; const j=s.i+dir; if(j<0||j>=s.list.length) return; [s.list[s.i],s.list[j]]=[s.list[j],s.list[s.i]]; }
+  if(a.startsWith("to:")){ if(s.b.id==="WORK") return; s.list.splice(s.i,1); const tl=listOf(a.slice(3)); const wi=tl.findIndex(b=>b.id==="WORK"); tl.splice(wi>=0?wi:tl.length,0,s.b); }
   if(a==="swap"){ if(s.b.id==="WORK") return; s.list.splice(s.i,1); listOf({front:"back",back:"front",uf:"ub",ub:"uf"}[s.key]).push(s.b); }
   if(a==="del"){ s.list.splice(s.i,1); selUid=null; }
   renderBar();
@@ -942,10 +961,10 @@ function bindDrag(){
 function dropAt(uid,p){
   const s=findBlock(uid); if(!s) return;
   // 가장 가까운 카운터와 그 안의 위치 계산
-  const others=[...document.querySelectorAll("#barsvg .blk")].filter(g=>+g.dataset.uid!==uid).map(g=>{const r=g.querySelector("rect");const x=+r.getAttribute("x"),y=+r.getAttribute("y"),w=+r.getAttribute("width"),h=+r.getAttribute("height");return {uid:+g.dataset.uid,c:g.dataset.c,cx:x+w/2,cy:y+h/2};});
+  const others=[...document.querySelectorAll("#barsvg .blk")].filter(g=>+g.dataset.uid!==uid).map(g=>{const r=g.querySelector("rect");const x=+r.getAttribute("x"),y=+r.getAttribute("y"),w=+r.getAttribute("width"),h=+r.getAttribute("height");return {uid:+g.dataset.uid,c:g.dataset.c,v:g.dataset.v==="1",cx:x+w/2,cy:y+h/2};});
   if(!others.length) return;
   let best=others[0],bd=1e12; others.forEach(o=>{const d=Math.hypot(o.cx-p.x,(o.cy-p.y)*1.5); if(d<bd){bd=d;best=o;}});
-  const o=barOpts(), vertical=o.shape==="L"&&best.c==="back";
+  const o=barOpts(), vertical=best.v;
   const target=findBlock(best.uid); if(!target) return;
   if(o.shape==="line" && s.key!==target.key) return renderBar();
   s.list.splice(s.i,1);
@@ -964,7 +983,13 @@ function barSavePng(){
   img.src="data:image/svg+xml;charset=utf-8,"+encodeURIComponent(txt);
 }
 function barMsg(t){const m=document.getElementById("barmsg"); m.textContent=t; setTimeout(()=>m.textContent="",4000);}
-["bShape","bFd","bBd","bAisle","bPick"].forEach(id=>document.getElementById(id).addEventListener("change",renderBar));
+function prepSide(){ if(!BAR) return; const sh=barOpts().shape; if(BAR.side.some(b=>b.id!=="WORK")) return;
+  const mv=(list,ids)=>ids.forEach(id=>{const i=list.findIndex(b=>b.id===id); if(i>=0){const [b]=list.splice(i,1); BAR.side.splice(BAR.side.length-1,0,b);}});
+  if(sh==="U") mv(BAR.back,["sterilizer"]);
+  if(sh==="Lfront") mv(BAR.front,["showcase"]); }
+document.getElementById("bShape").addEventListener("change",()=>{prepSide();renderBar();});
+["bFd","bBd","bAisle","bPick"].forEach(id=>document.getElementById(id).addEventListener("change",renderBar));
+document.getElementById("bSl").addEventListener("change",()=>{if(!BAR)return;BAR.slen=Math.max(500,+document.getElementById("bSl").value||1800);renderBar();});
 ["bFl","bBl"].forEach(id=>document.getElementById(id).addEventListener("change",()=>{if(!BAR)return;BAR.flen=Math.max(500,+document.getElementById("bFl").value||BAR.flen);BAR.blen=Math.max(500,+document.getElementById("bBl").value||BAR.blen);renderBar();}));
 document.getElementById("bReset").onclick=buildBar;
 document.getElementById("bPng").onclick=barSavePng;
