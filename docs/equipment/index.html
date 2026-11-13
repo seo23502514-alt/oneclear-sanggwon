@@ -177,6 +177,11 @@ td a{color:var(--brand);font-weight:700;font-size:12.5px;white-space:nowrap}
 .prow button{font:inherit;font-size:13px;font-weight:700;padding:8px 10px;border:0;border-radius:8px;background:var(--accent);color:#fff;cursor:pointer;white-space:nowrap}
 .bartools .f select{min-width:230px}
 .elevsvg{width:100%;height:auto;display:block;margin-top:12px;border:1px solid var(--line);border-radius:10px}
+.optbtn{font:inherit;font-size:11.5px;font-weight:700;margin-top:4px;padding:3px 8px;border-radius:6px;border:1.5px solid var(--accent);background:#fff;color:var(--accent);cursor:pointer}
+.optlist{display:grid;gap:6px}
+.optchip{font:inherit;text-align:left;border:1.5px dashed #c9bdae;background:#fbf8f3;border-radius:10px;padding:8px 10px;cursor:pointer}
+.optchip b{display:block;font-size:13.5px}.optchip small{color:var(--muted);font-size:12px}
+.optchip.on{border-style:solid;border-color:var(--ok);background:#e9f5ee}
 </style>
 </head>
 <body>
@@ -524,6 +529,7 @@ function tone(r){return r>1?"bad":r>0.75?"warn":"ok"}
 
 function renderReport(d){
   LAST=d;
+  if(!d.silent){ BAR=null; buildBar(); }
   const R=document.getElementById("report");
   const must=d.rec.filter(r=>r.must).length;
   const pr=d.simKw/d.power, fr=d.useFront/d.front, br=d.useBack/d.back;
@@ -544,7 +550,7 @@ function renderReport(d){
     <div><h2>장비 구성 분석 리포트</h2>
     <p>${TYPE_N[d.type]} · ${d.area}평 · ${d.seats}석 · 하루 ${d.cups}잔 · 피크 1시간 약 ${d.peak}잔</p></div>
     <div class="grade"><b>${d.grade}</b><span>${d.gtxt}</span></div>
-    <button id="toBar" class="tobar">이 조건으로 바 설계 →</button>
+    <button id="toBar" class="tobar">바 설계 보기 →</button>
   </div>
   <div class="kpis">
     <div class="kpi"><div class="l">추천 장비</div><div class="v">${d.rec.length}<small>종</small></div><div class="s">필수 ${must} · 선택 ${d.rec.length-must}</div></div>
@@ -552,6 +558,7 @@ function renderReport(d){
     <div class="kpi"><div class="l">하루 얼음 필요량</div><div class="v">${d.iceDay}<small>kg</small></div><div class="s">제빙기 ${d.iceSize}kg급 추천</div></div>
     <div class="kpi"><div class="l">프론트 카운터 점유</div><div class="v">${Math.round(fr*100)}<small>%</small></div><div class="s tone-${tone(fr/0.95)}">${d.useFront.toLocaleString()} / ${d.front.toLocaleString()}mm</div></div>
   </div>
+  <div class="panel" style="padding:12px 20px;font-size:13.5px;background:#e9f5ee;border-color:#cfe8d8">필수 장비 ${d.rec.filter(r=>r.must).length}종을 바 설계에 자동으로 배치했어요. 선택 장비는 목록의 「바에 배치 →」를 누르면 알맞은 자리에 들어가요.</div>
   <div class="panel"><h3>진단</h3><p class="desc">입력한 조건으로 본 주의할 점</p>
     <div class="alerts">${d.al.map(a=>`<div class="alert ${a[0]}"><b>${a[1]}</b><span>${a[2]}</span></div>`).join("")}</div></div>
   <div class="two">
@@ -572,7 +579,7 @@ function renderReport(d){
       <thead><tr><th></th><th>장비</th><th>추천 규격</th><th>근거</th><th>전력</th><th>구매처</th></tr></thead>
       <tbody>${d.rec.map(r=>{const e=E.find(x=>x.id===r.id),c=CATS[e.cat],kw=encodeURIComponent(e.kw);return `<tr>
         <td><div class="ic" style="background:${c.bg};color:${c.color}">${IC[e.id]}</div></td>
-        <td><a href="#" data-id="${e.id}" class="open" style="font-size:14px;color:var(--ink)">${e.name}</a>${r.qty>1?` ×${r.qty}`:""}<br><span class="pill ${r.must?"":"opt"}">${r.must?"필수":"선택"}</span></td>
+        <td><a href="#" data-id="${e.id}" class="open" style="font-size:14px;color:var(--ink)">${e.name}</a>${r.qty>1?` ×${r.qty}`:""}<br><span class="pill ${r.must?"":"opt"}">${r.must?"필수 · 바에 배치됨":"선택"}</span>${r.must?"":` <button class="optbtn" data-ri="${d.rec.indexOf(r)}">${recFootprint(r)?"바에 배치 →":"소도구"}</button>`}</td>
         <td>${r.spec}</td><td class="why">${r.why}</td>
         <td style="white-space:nowrap">${r.kw?r.kw.toFixed(1)+"kW":"—"}</td>
         <td><a href="https://search.shopping.naver.com/search/all?query=${kw}" target="_blank" rel="noopener">네이버</a> · <a href="https://search.danawa.com/dsearch.php?query=${kw}" target="_blank" rel="noopener">다나와</a></td></tr>`}).join("")}</tbody>
@@ -581,6 +588,7 @@ function renderReport(d){
   <div class="foot">이 리포트의 수치는 일반적인 대표값(소비전력·장비 폭·얼음 1잔 180g·동시 사용률 70%)으로 계산한 대략적인 추정입니다. 실제 값은 모델마다 다르니 구매 전 제조사 사양서, 전기 시공업체, 매장 도면으로 꼭 확인하세요.</div>`;
   R.querySelectorAll(".open").forEach(a=>a.onclick=ev=>{ev.preventDefault();openModal(a.dataset.id);});
   R.querySelector("#toBar").onclick=openBar;
+  R.querySelectorAll(".optbtn").forEach(b=>b.onclick=()=>toggleOptional(+b.dataset.ri,true));
   if(!d.silent) R.scrollIntoView({behavior:"smooth",block:"start"});
 }
 
@@ -879,23 +887,47 @@ function barOpts(){
   return {shape:g("bShape").value, fd:+g("bFd").value, bd:+g("bBd").value, aisle:+g("bAisle").value, pick:g("bPick").value};
 }
 function makeBlock(id,w,label){return {uid:uidSeq++,id,w,label};}
+function insertOrdered(list,blk,order){
+  const oi=id=>{const i=order.indexOf(id); return i<0?order.indexOf("WORK"):i;};
+  const k=oi(blk.id); let at=list.findIndex(x=>oi(x.id)>k); if(at<0) at=list.length; list.splice(at,0,blk); return at;
+}
+// 분석 결과 한 줄(rec)을 바에 배치. 놓은 블록 목록을 돌려줌
+function placeRec(ri){
+  const r=LAST.rec[ri], out=[]; if(!r) return out;
+  const n=Math.max(1,r.qty);
+  if(r.id==="tablefridge"){ const w=parseInt(r.spec)||1500; for(let i=0;i<n;i++){const b=makeBlock("tablefridge",w); b.rec=ri; (i===0?BAR.underF:BAR.underB).push(b); out.push(b);} return out; }
+  if(r.id==="dishwasher"){ const b=makeBlock("dishwasher",600); b.rec=ri; BAR.underB.push(b); out.push(b); return out; }
+  const z=SPEC[r.id]?SPEC[r.id].z:"none"; if(r.w<=0||(z!=="front"&&z!=="back")) return out;
+  const one=r.w/n;
+  for(let i=0;i<n;i++){ const b=makeBlock(r.id,one); b.rec=ri;
+    if(z==="front") insertOrdered(BAR.front,b,BAR_ORDER_FRONT); else insertOrdered(BAR.back,b,BAR_ORDER_BACK); out.push(b); }
+  return out;
+}
+function recPlaced(ri){ return ["front","back","side","uf","ub"].some(k=>listOf(k).some(b=>b.rec===ri)); }
+function removeRec(ri){ ["front","back","side","uf","ub"].forEach(k=>{const l=listOf(k); for(let i=l.length-1;i>=0;i--) if(l[i].rec===ri) l.splice(i,1);}); }
+function recFootprint(r){ return r.id==="tablefridge"||r.id==="dishwasher"||(r.w>0&&SPEC[r.id]&&["front","back"].includes(SPEC[r.id].z)); }
 function buildBar(){
   if(!LAST) analyze(true);
-  const d=LAST, front=[], back=[], underF=[], underB=[];
-  const expand=r=>{const n=(r.id==="tablefridge"||r.id==="dishwasher")?r.qty:r.qty; const one=r.w/Math.max(1,r.qty); return Array.from({length:n},()=>one);};
-  const byId={}; d.rec.forEach(r=>byId[r.id]=r);
-  const push=(arr,id)=>{const r=byId[id]; if(!r||r.w<=0) return; expand(r).forEach(w=>arr.push(makeBlock(id,w)));};
-  BAR_ORDER_FRONT.forEach(id=>{ if(id==="WORK") front.push(makeBlock("WORK",0,"제조 작업대")); else if(id==="PICKUP") front.push(makeBlock("PICKUP",500,"픽업대")); else if(SPEC[id]&&SPEC[id].z==="front") push(front,id); });
-  // 프론트 순서에 없지만 front 존인 장비
-  d.rec.filter(r=>r.z==="front"&&!BAR_ORDER_FRONT.includes(r.id)).forEach(r=>push(front,r.id));
-  BAR_ORDER_BACK.forEach(id=>{ if(id==="WORK") back.push(makeBlock("WORK",0,"작업대")); else if(SPEC[id]&&SPEC[id].z==="back") push(back,id); });
-  d.rec.filter(r=>r.z==="back"&&!BAR_ORDER_BACK.includes(r.id)).forEach(r=>push(back,r.id));
-  // 카운터 아래
-  const tf=byId.tablefridge; if(tf){const w=parseInt(tf.spec)||1500; for(let i=0;i<tf.qty;i++)(i===0?underF:underB).push(makeBlock("tablefridge",w));}
-  if(byId.dishwasher) underB.push(makeBlock("dishwasher",600));
-  BAR={front,back,side:[makeBlock("WORK",0,"작업대")],underF,underB,flen:d.front,blen:d.back,slen:+document.getElementById("bSl").value||1800};
+  const d=LAST;
+  BAR={front:[makeBlock("WORK",0,"제조 작업대"),makeBlock("PICKUP",500,"픽업대")],back:[makeBlock("WORK",0,"작업대")],side:[makeBlock("WORK",0,"작업대")],underF:[],underB:[],
+       flen:d.front,blen:d.back,slen:+document.getElementById("bSl").value||1800};
+  d.rec.forEach((r,ri)=>{ if(r.must) placeRec(ri); });
   document.getElementById("bFl").value=d.front; document.getElementById("bBl").value=d.back;
   selUid=null; renderBar();
+}
+function josa(w,a,b){const c=w.replace(/[^가-힣]/g,"").slice(-1); if(!c) return w+a; return w+(((c.charCodeAt(0)-0xAC00)%28)?a:b);}
+// 선택 장비를 눌렀을 때: 바에 넣거나 뺌
+function toggleOptional(ri,goTab){
+  if(!BAR) buildBar();
+  const r=LAST.rec[ri], e=E.find(x=>x.id===r.id), nm=e?e.name:r.id;
+  if(goTab) document.querySelector('nav button[data-v="bar"]').click();
+  if(recPlaced(ri)){ removeRec(ri); selUid=null; renderBar(); barMsg(`${josa(nm,"을","를")} 바 설계에서 뺐어요.`); return; }
+  if(!recFootprint(r)){ renderBar(); barMsg(`${josa(nm,"은","는")} 카운터 자리를 차지하지 않는 소도구라 평면도에는 그리지 않아요.`); return; }
+  const bl=placeRec(ri); selUid=bl.length?bl[0].uid:null; renderBar();
+  const f=bl.length?findBlock(bl[0].uid):null;
+  const where=f?{front:"프론트 카운터",back:"백 카운터",side:"옆 카운터",uf:"프론트 카운터 아래",ub:"백 카운터 아래"}[f.key]:"";
+  const nb=f&&f.list[f.i-1]?nameOf(f.list[f.i-1]):"";
+  barMsg(`${josa(nm,"을","를")} ${where}${nb&&!["uf","ub"].includes(f.key)?` ${nb} 옆`:""}에 놓았어요. 끌어서 위치를 바꿀 수 있어요.`);
 }
 function flexW(list,len){const used=list.filter(b=>b.id!=="WORK").reduce((a,b)=>a+b.w,0);return Math.max(0,len-used);}
 function nameOf(b){ if(b.label) return b.label; const e=E.find(x=>x.id===b.id); return e?e.name:b.id; }
@@ -1016,9 +1048,11 @@ function renderBarSide(counters,pos,o){
       ${sel.b.id!=="WORK"?`<label class="wlab">폭(mm) <input type="number" id="selW" value="${sel.b.w}" step="10" min="100"></label>`:""}
       ${sel.b.id!=="WORK"&&sel.b.id!=="PICKUP"?prodPickerHtml(sel):""}</div>`
      :`<div class="panel"><p class="desc" style="margin:0">평면도의 장비를 <b>끌어서</b> 순서를 바꾸거나 다른 카운터로 옮길 수 있어요. 눌러서 선택하면 폭을 바꾸거나 뺄 수 있습니다.</p></div>`}
+    ${LAST&&LAST.rec.some(r=>!r.must)?`<div class="panel"><h3>선택 장비</h3><p class="desc">눌러서 바에 넣거나 뺄 수 있어요. 넣으면 알맞은 자리를 자동으로 잡아요.</p><div class="optlist">${LAST.rec.map((r,ri)=>r.must?"":(()=>{const e=E.find(x=>x.id===r.id), on=recPlaced(ri); return `<button class="optchip ${on?"on":""}" data-ri="${ri}"><b>${on?"✓ ":"+ "}${e?e.name:r.id}</b><small>${r.spec}${recFootprint(r)?"":" · 소도구"}</small></button>`;})()).join("")}</div></div>`:""}
     <div class="panel"><h3>배치 점검</h3><div class="alerts">${chk.map(a=>`<div class="alert ${a[0]}"><span>${a[1]}</span></div>`).join("")}</div></div>
     <div class="panel"><h3>배치 목록</h3>${counters.map(c=>`<b style="font-size:13px">${c.name}</b><ol class="blist">${c.list.map(b=>`<li>${b.model?`<b>${b.model}</b>`:nameOf(b)} <span>${b.id==="WORK"?flexW(c.list,c.len):b.w}mm</span></li>`).join("")}${c.under.map(b=>`<li class="u" data-uid="${b.uid}" style="cursor:pointer">아래: ${b.model||nameOf(b)} <span>${b.w}${b.d?"×"+b.d:""}mm</span></li>`).join("")}</ol>`).join("")}</div>`;
   document.querySelectorAll(".selbtn button").forEach(b=>b.onclick=()=>actSel(b.dataset.a));
+  document.querySelectorAll(".optchip").forEach(b=>b.onclick=()=>toggleOptional(+b.dataset.ri,false));
   document.querySelectorAll(".blist li.u").forEach(li=>li.onclick=()=>{selUid=+li.dataset.uid; renderBar();});
   const sw=document.getElementById("selW"); if(sw) sw.onchange=()=>{const s=findBlock(selUid); if(s){s.b.w=Math.max(100,+sw.value||s.b.w); renderBar();}};
   if(sel&&sel.b.id!=="WORK"&&sel.b.id!=="PICKUP") bindProdPicker(sel);
@@ -1088,7 +1122,7 @@ document.getElementById("bSl").addEventListener("change",()=>{if(!BAR)return;BAR
 document.getElementById("bReset").onclick=buildBar;
 document.getElementById("bPng").onclick=barSavePng;
 document.getElementById("bPrint").onclick=()=>{try{window.print()}catch(e){barMsg("인쇄가 막혀 있어요. 브라우저 메뉴에서 인쇄해 주세요.")}};
-function openBar(){ document.querySelector('nav button[data-v="bar"]').click(); buildBar(); }
+function openBar(){ document.querySelector('nav button[data-v="bar"]').click(); if(!BAR) buildBar(); }
 </script>
 </body>
 </html>
