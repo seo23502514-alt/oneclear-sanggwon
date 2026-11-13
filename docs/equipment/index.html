@@ -182,6 +182,11 @@ td a{color:var(--brand);font-weight:700;font-size:12.5px;white-space:nowrap}
 .optchip{font:inherit;text-align:left;border:1.5px dashed #c9bdae;background:#fbf8f3;border-radius:10px;padding:8px 10px;cursor:pointer}
 .optchip b{display:block;font-size:13.5px}.optchip small{color:var(--muted);font-size:12px}
 .optchip.on{border-style:solid;border-color:var(--ok);background:#e9f5ee}
+.optgrp{margin-top:10px}.optttl{display:block;font-size:13px;margin-bottom:6px}.optttl small{font-weight:400;color:var(--muted);margin-left:4px}
+.optttl.must{color:var(--accent)}.optttl.opt{color:#6b7280}
+.optchip.must{border-color:#e7b98f;background:#fdf4ec}.optchip.must.on{border-style:solid;border-color:var(--accent);background:#fbe9d9}
+.optchip.tool{opacity:.6;cursor:default}
+.tg{font-style:normal;font-size:10.5px;font-weight:700;padding:1px 5px;border-radius:4px;color:#fff;margin-left:4px}.tg.must{background:var(--accent)}.tg.opt{background:#9aa1ab}
 </style>
 </head>
 <body>
@@ -558,7 +563,7 @@ function renderReport(d){
     <div class="kpi"><div class="l">하루 얼음 필요량</div><div class="v">${d.iceDay}<small>kg</small></div><div class="s">제빙기 ${d.iceSize}kg급 추천</div></div>
     <div class="kpi"><div class="l">프론트 카운터 점유</div><div class="v">${d.front>0?Math.round(fr*100):"—"}<small>%</small></div><div class="s tone-${tone(fr/0.95)}">${d.useFront.toLocaleString()} / ${d.front.toLocaleString()}mm</div></div>
   </div>
-  <div class="panel" style="padding:12px 20px;font-size:13.5px;background:#e9f5ee;border-color:#cfe8d8">필수 장비 ${d.rec.filter(r=>r.must).length}종을 바 설계에 자동으로 배치했어요. 선택 장비는 목록의 「바에 배치 →」를 누르면 알맞은 자리에 들어가요.</div>
+  <div class="panel" style="padding:12px 20px;font-size:13.5px;background:#e9f5ee;border-color:#cfe8d8">필수 장비 ${d.rec.filter(r=>r.must).length}종을 바 설계에 자동으로 배치했어요. 아래 목록이나 바 설계의 「장비 넣고 빼기」에서 필수·선택 장비를 넣고 뺄 수 있어요.</div>
   <div class="panel"><h3>진단</h3><p class="desc">입력한 조건으로 본 주의할 점</p>
     <div class="alerts">${d.al.map(a=>`<div class="alert ${a[0]}"><b>${a[1]}</b><span>${a[2]}</span></div>`).join("")}</div></div>
   <div class="two">
@@ -579,7 +584,7 @@ function renderReport(d){
       <thead><tr><th></th><th>장비</th><th>추천 규격</th><th>근거</th><th>전력</th><th>구매처</th></tr></thead>
       <tbody>${d.rec.map(r=>{const e=E.find(x=>x.id===r.id),c=CATS[e.cat],kw=encodeURIComponent(e.kw);return `<tr>
         <td><div class="ic" style="background:${c.bg};color:${c.color}">${IC[e.id]}</div></td>
-        <td><a href="#" data-id="${e.id}" class="open" style="font-size:14px;color:var(--ink)">${e.name}</a>${r.qty>1?` ×${r.qty}`:""}<br><span class="pill ${r.must?"":"opt"}">${r.must?"필수 · 바에 배치됨":"선택"}</span>${r.must?"":` <button class="optbtn" data-ri="${d.rec.indexOf(r)}">${recFootprint(r)?"바에 배치 →":"소도구"}</button>`}</td>
+        <td><a href="#" data-id="${e.id}" class="open" style="font-size:14px;color:var(--ink)">${e.name}</a>${r.qty>1?` ×${r.qty}`:""}<br><span class="pill ${r.must?"":"opt"}">${r.must?"필수":"선택"}</span>${recFootprint(r)?` <button class="optbtn" data-ri="${d.rec.indexOf(r)}">${r.must?"바에서 빼기":"바에 배치 →"}</button>`:""}</td>
         <td>${r.spec}</td><td class="why">${r.why}</td>
         <td style="white-space:nowrap">${r.kw?r.kw.toFixed(1)+"kW":"—"}</td>
         <td><a href="https://search.shopping.naver.com/search/all?query=${kw}" target="_blank" rel="noopener">네이버</a> · <a href="https://search.danawa.com/dsearch.php?query=${kw}" target="_blank" rel="noopener">다나와</a></td></tr>`}).join("")}</tbody>
@@ -588,7 +593,7 @@ function renderReport(d){
   <div class="foot">이 리포트의 수치는 일반적인 대표값(소비전력·장비 폭·얼음 1잔 180g·동시 사용률 70%)으로 계산한 대략적인 추정입니다. 실제 값은 모델마다 다르니 구매 전 제조사 사양서, 전기 시공업체, 매장 도면으로 꼭 확인하세요.</div>`;
   R.querySelectorAll(".open").forEach(a=>a.onclick=ev=>{ev.preventDefault();openModal(a.dataset.id);});
   R.querySelector("#toBar").onclick=openBar;
-  R.querySelectorAll(".optbtn").forEach(b=>b.onclick=()=>toggleOptional(+b.dataset.ri,true));
+  R.querySelectorAll(".optbtn").forEach(b=>b.onclick=()=>{const ri=+b.dataset.ri; toggleOptional(ri,!recPlaced(ri)); b.textContent=recPlaced(ri)?"바에서 빼기":"바에 넣기 →";});
   if(!d.silent) R.scrollIntoView({behavior:"smooth",block:"start"});
 }
 
@@ -603,7 +608,7 @@ function sums(){
   document.getElementById("sum4").textContent=`${val("staff")}명 · ${val("power")}kW`;
 }
 document.querySelectorAll(".side input,.side select").forEach(el=>el.addEventListener("input",sums));
-document.getElementById("go").onclick=analyze;
+document.getElementById("go").onclick=()=>analyze(false);
 sums();
 
 // 탭
@@ -982,6 +987,8 @@ function renderBar(){
       const sel=b.uid===selUid, out=t+L>c.len||(b.d&&b.d>c.depth);
       const fill=b.id==="WORK"?"url(#hatch)":colorOf(b);
       svg+=`<g class="blk" data-uid="${b.uid}" data-c="${c.key}" data-v="${c.dir==="v"?1:0}" style="cursor:grab"><rect x="${r[0]+6}" y="${r[1]}" width="${Math.max(0,r[2]-12)}" height="${r[3]}" rx="18" fill="${fill}" fill-opacity="${b.id==="WORK"?1:.9}" stroke="${out?"#c0392b":sel?"#111":"none"}" stroke-width="${out||sel?18:0}" ${out?'stroke-dasharray="40 20"':""}/>`;
+      const isOpt=b.rec!==undefined&&LAST&&LAST.rec[b.rec]&&!LAST.rec[b.rec].must;
+      if(isOpt) svg+=`<rect x="${r[0]+22}" y="${r[1]+16}" width="${Math.max(0,r[2]-44)}" height="${Math.max(0,r[3]-32)}" rx="12" fill="none" stroke="#fff" stroke-width="8" stroke-dasharray="26 16" pointer-events="none"/><text x="${r[0]+34}" y="${r[1]+70}" font-size="44" font-weight="700" fill="#fff" pointer-events="none">선택</text>`;
       const tx=r[0]+r[2]/2, ty=r[1]+r[3]/2, fs=Math.min(78,Math.max(46,(c.dir==="h"?L:r[2])/6));
       const nm=(b.model&&L>=450?(b.model.length>14?b.model.slice(0,13)+"…":b.model):(b.model?b.model.split(" ").slice(-1)[0]:nameOf(b).replace(/[·].*/,""))), tc=b.id==="WORK"?"#555":"#fff";
       svg+=`<text x="${tx}" y="${ty-20}" font-size="${fs}" font-weight="700" fill="${tc}" text-anchor="middle" dominant-baseline="middle" pointer-events="none" ${c.dir==="v"?`transform="rotate(90 ${tx} ${ty})"`:""}>${nm}</text>
@@ -1039,6 +1046,7 @@ function renderBarSide(counters,pos,o){
   if(es&&hw) chk.push(dist(es,hw)<=1800?["ok","온수기가 머신 가까이 있어 아메리카노 동선이 짧아요."]:["warn","온수기를 머신 가까이 두면 아메리카노가 빨라져요."]);
   if(bl&&ic) chk.push(dist(bl,ic)<=2200?["ok","블렌더와 제빙기가 가까워요."]:["warn","블렌더와 제빙기가 멀어요. 얼음을 들고 오가는 거리가 길어집니다. 제빙기를 블렌더 등 뒤쪽으로 옮겨 보세요."]);
   if(P("PICKUP")[0]&&P("pos")[0]&&o.shape!=="line") chk.push(["ok","주문(①)과 픽업(③)이 양 끝으로 나뉘어 손님 줄이 엉키지 않아요."]);
+  if(LAST){ const miss=LAST.rec.map((r,ri)=>({r,ri})).filter(x=>x.r.must&&recFootprint(x.r)&&!recPlaced(x.ri)); if(miss.length) chk.unshift(["warn",`필수 장비가 빠져 있어요: ${miss.map(x=>{const e=E.find(y=>y.id===x.r.id);return e?e.name:x.r.id;}).join(", ")}. 정말 필요 없는지 확인하세요.`]); }
   elevChecks(counters).forEach(x=>chk.push(x));
   chk.push(["warn","에스프레소 머신·제빙기·식기세척기는 급수·배수와 전용 전기가 필요해요. 배관·콘센트 위치를 이 배치에 맞춰 시공 업체와 확인하세요."]);
   const sel=selUid?findBlock(selUid):null;
@@ -1048,9 +1056,10 @@ function renderBarSide(counters,pos,o){
       ${sel.b.id!=="WORK"?`<label class="wlab">폭(mm) <input type="number" min="0" inputmode="numeric" id="selW" value="${sel.b.w}" step="10"></label>`:""}
       ${sel.b.id!=="WORK"&&sel.b.id!=="PICKUP"?prodPickerHtml(sel):""}</div>`
      :`<div class="panel"><p class="desc" style="margin:0">평면도의 장비를 <b>끌어서</b> 순서를 바꾸거나 다른 카운터로 옮길 수 있어요. 눌러서 선택하면 폭을 바꾸거나 뺄 수 있습니다.</p></div>`}
-    ${LAST&&LAST.rec.some(r=>!r.must)?`<div class="panel"><h3>선택 장비</h3><p class="desc">눌러서 바에 넣거나 뺄 수 있어요. 넣으면 알맞은 자리를 자동으로 잡아요.</p><div class="optlist">${LAST.rec.map((r,ri)=>r.must?"":(()=>{const e=E.find(x=>x.id===r.id), on=recPlaced(ri); return `<button class="optchip ${on?"on":""}" data-ri="${ri}"><b>${on?"✓ ":"+ "}${e?e.name:r.id}</b><small>${r.spec}${recFootprint(r)?"":" · 소도구"}</small></button>`;})()).join("")}</div></div>`:""}
+    ${LAST?`<div class="panel"><h3>장비 넣고 빼기</h3><p class="desc">눌러서 바에 넣거나 뺄 수 있어요. 넣으면 작업 흐름에 맞는 자리를 자동으로 잡아요.</p>
+      ${[["필수 장비",true],["선택 장비",false]].map(([t,m])=>{const rows=LAST.rec.map((r,ri)=>({r,ri})).filter(x=>!!x.r.must===m).sort((x,y)=>recFootprint(y.r)-recFootprint(x.r)); if(!rows.length) return ""; return `<div class="optgrp"><b class="optttl ${m?"must":"opt"}">${t} <small>${rows.filter(x=>recPlaced(x.ri)).length}/${rows.length} 배치</small></b><div class="optlist">${rows.map(({r,ri})=>{const e=E.find(x=>x.id===r.id), on=recPlaced(ri), fp=recFootprint(r); return `<button class="optchip ${m?"must":""} ${on?"on":""} ${fp?"":"tool"}" data-ri="${ri}"><b>${fp?(on?"✓ ":"+ "):"· "}${e?e.name:r.id}${r.qty>1?" ×"+r.qty:""}</b><small>${r.spec}${fp?(on?" · 배치됨 (누르면 빼기)":" · 빠져 있음 (누르면 넣기)"):" · 소도구, 평면도에 안 그림"}</small></button>`;}).join("")}</div></div>`;}).join("")}</div>`:""}
     <div class="panel"><h3>배치 점검</h3><div class="alerts">${chk.map(a=>`<div class="alert ${a[0]}"><span>${a[1]}</span></div>`).join("")}</div></div>
-    <div class="panel"><h3>배치 목록</h3>${counters.map(c=>`<b style="font-size:13px">${c.name}</b><ol class="blist">${c.list.map(b=>`<li>${b.model?`<b>${b.model}</b>`:nameOf(b)} <span>${b.id==="WORK"?flexW(c.list,c.len):b.w}mm</span></li>`).join("")}${c.under.map(b=>`<li class="u" data-uid="${b.uid}" style="cursor:pointer">아래: ${b.model||nameOf(b)} <span>${b.w}${b.d?"×"+b.d:""}mm</span></li>`).join("")}</ol>`).join("")}</div>`;
+    <div class="panel"><h3>배치 목록</h3>${counters.map(c=>`<b style="font-size:13px">${c.name}</b><ol class="blist">${c.list.map(b=>`<li>${b.model?`<b>${b.model}</b>`:nameOf(b)}${b.rec!==undefined&&LAST&&LAST.rec[b.rec]?(LAST.rec[b.rec].must?" <em class=\"tg must\">필수</em>":" <em class=\"tg opt\">선택</em>"):""} <span>${b.id==="WORK"?flexW(c.list,c.len):b.w}mm</span></li>`).join("")}${c.under.map(b=>`<li class="u" data-uid="${b.uid}" style="cursor:pointer">아래: ${b.model||nameOf(b)} <span>${b.w}${b.d?"×"+b.d:""}mm</span></li>`).join("")}</ol>`).join("")}</div>`;
   document.querySelectorAll(".selbtn button").forEach(b=>b.onclick=()=>actSel(b.dataset.a));
   document.querySelectorAll(".optchip").forEach(b=>b.onclick=()=>toggleOptional(+b.dataset.ri,false));
   document.querySelectorAll(".blist li.u").forEach(li=>li.onclick=()=>{selUid=+li.dataset.uid; renderBar();});
