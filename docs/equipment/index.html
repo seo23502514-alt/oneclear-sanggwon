@@ -221,6 +221,7 @@ td a{color:var(--brand);font-weight:700;font-size:12.5px;white-space:nowrap}
         <label><input type="checkbox" value="waffle">와플·토스트</label>
         <label><input type="checkbox" value="cake">케이크 진열</label>
         <label><input type="checkbox" value="bottle">병음료 판매</label>
+        <label><input type="checkbox" value="autosteam">오토스팀기 쓰기</label>
       </div></div></details>
     <details class="step" open><summary><span class="num">3</span>예상 판매량<span class="sum" id="sum3"></span></summary>
       <div class="fields">
@@ -304,6 +305,7 @@ const IC = {
   blender:S('<path d="M22 6h20l-3 30H25z"/><path d="M27 16h10"/><path d="M22 36h20l2 8H20z"/><rect x="18" y="44" width="28" height="12" rx="3"/><circle cx="32" cy="50" r="2"/>'),
   hotwater:S('<rect x="14" y="8" width="36" height="40" rx="4"/><path d="M24 48v4h16v-4"/><path d="M28 18c0 4 4 4 4 8M36 18c0 4 4 4 4 8"/><rect x="22" y="32" width="20" height="8" rx="2"/><path d="M12 56h40"/>'),
   dispenser:S('<path d="M18 6h28v12H18z"/><path d="M14 18h36v20H14z"/><path d="M26 38v6h12v-6"/><path d="M32 44v4"/><path d="M24 52h16v6H24z"/><path d="M20 26h6M38 26h6"/>'),
+  autosteam:S('<rect x="20" y="6" width="24" height="34" rx="4"/><path d="M32 40v6"/><path d="M24 46h16l2 10H22z"/><circle cx="32" cy="18" r="4"/><path d="M26 30h12"/>'),
   steamer:S('<path d="M24 22h16l4 30a4 4 0 0 1-4 4H24a4 4 0 0 1-4-4z"/><path d="M44 28h4a4 4 0 0 1 0 8h-3"/><path d="M28 8c0 4 4 4 4 8M36 8c0 4 4 4 4 8"/><path d="M22 32h20"/>'),
   dishwasher:S('<rect x="8" y="8" width="48" height="48" rx="4"/><path d="M8 18h48"/><circle cx="16" cy="13" r="1.5"/><circle cx="22" cy="13" r="1.5"/><circle cx="32" cy="38" r="12"/><path d="M26 36c2-3 6-3 8 0s6 3 8 0"/>'),
   sterilizer:S('<rect x="10" y="6" width="44" height="52" rx="4"/><rect x="16" y="12" width="32" height="34" rx="2"/><path d="M22 20h6l-1 8h-4zM36 20h6l-1 8h-4zM22 34h6l-1 8h-4zM36 34h6l-1 8h-4z"/><circle cx="32" cy="52" r="2"/>'),
@@ -364,6 +366,10 @@ const E = [
   use:"에이드·아이스티·식혜 등을 차갑게 보관하며 따르는 장비.",
   check:["탱크 개수와 용량","교반(섞기) 기능 여부","분해 세척 편의성"],
   tags:["에이드","아이스티","냉","보관"],kw:"업소용 음료 디스펜서"},
+ {id:"autosteam",cat:"bev",name:"오토스팀기",alias:"자동 밀크 스티머 · 오토 스티머",must:false,zone:"프론트",
+  use:"우유를 정해진 온도·거품으로 자동 스팀. 바리스타 손이 비어 피크가 빨라지고 맛이 일정해짐.",
+  check:["머신 스팀 연결형인지, 자체 보일러형인지 (자체 보일러형은 전력·급수 추가)","머신 연결형은 머신에 별도 스팀 보일러와 여유 스팀 용량이 있어야 함","배수(응축수) 연결 필요 여부","전용 피처가 필요한지와 피처 크기","머신 스팀 쪽 바로 옆에 놓을 자리(폭이 좁은 편)"],
+  tags:["우유","스팀","라떼","자동","시니어","피크"],kw:"자동 밀크 스티머 카페"},
  {id:"pitcher",cat:"bev",name:"스팀 피처·바 도구",alias:"밀크 피처 · 계량컵 · 바 스푼",must:true,zone:"프론트",
   use:"우유 스팀, 계량, 음료 제조용 소도구 묶음.",
   check:["피처 크기 2종 이상(350·600ml 등)","눈금 있는 계량컵·지거","스테인리스 재질"],
@@ -440,7 +446,8 @@ const SPEC = {
  pos:{kw:0.2,w:450,z:"front"},
  scale:{kw:0,w:0,z:"none"},
  tamper:{kw:0,w:0,z:"none"},
- knock:{kw:0,w:150,z:"front"}
+ knock:{kw:0,w:150,z:"front"},
+ autosteam:{kw:0.05,w:200,z:"front"}
 };
 const ICE_SIZES=[30,50,70,100,150,200];
 const val=id=>+document.getElementById(id).value;
@@ -484,6 +491,10 @@ function analyze(silent){
   if(has("cake")||has("bottle")) add("showcase",1,has("cake")&&has("bottle")?"케이크용 + 병음료용 각 1대 검토":has("cake")?"케이크용 사각/곡면 유리":"병음료용 수직형","진열 판매 메뉴가 있음",true,undefined,has("cake")&&has("bottle")?1600:900);
   if(has("bake")||has("smoothie")||iceDay>iceSize*0.85) add("freezer",1,"스탠드형 냉동고","냉동 과일·생지·여분 얼음 보관",false);
   // 음료
+  if(has("espresso")){
+    if(has("autosteam")) add("autosteam",groups>=3||peak>=70?2:1,groups>=3||peak>=70?"2대 (그룹 수만큼 검토)":"1대 (머신 스팀 연결형)","오토스팀기를 쓰기로 선택함 — 머신 스팀 바로 옆에 배치");
+    else if(senior||peak>=40||staff<=1) add("autosteam",1,"1대 (머신 스팀 연결형)",senior?"시니어·초보 직원도 우유 품질이 일정해짐":staff<=1?"1인 운영이면 스팀하는 동안 다른 일을 할 수 있음":`피크 1시간 약 ${peak}잔 — 스팀이 병목이 되기 쉬움`,false);
+  }
   if(has("smoothie")){ const b=cups>=300||peak>=60?2:1; add("blender",b,`방음 커버형 ${b}대`,b>1?"피크에 갈아 만드는 음료가 겹침":"스무디·프라페 메뉴 운영"); }
   add("hotwater",1,cups>=250?"20L 이상 직수형":"10L급 직수형","아메리카노·차 메뉴용 온수");
   if(has("ade")&&cups>=150) add("dispenser",1,"2구 냉음료 디스펜서","에이드·아이스티 베이스를 미리 만들어 두면 피크가 빨라짐",false);
@@ -654,7 +665,8 @@ const BRANDS = {
  pos:["포스","pos","키오스크","토스포스","토스 포스","배민포스","포스기","카드단말기"],
  scale:["저울","아카이아","acaia","타임모어","timemore","브루이스타","brewista"],
  tamper:["탬퍼","템퍼","디스트리뷰터","퓨크프레스","puqpress"],
- knock:["넉박스","노크박스","찌꺼기통"]
+ knock:["넉박스","노크박스","찌꺼기통"],
+ autosteam:["오토스팀","오토 스팀","오토스티머","오토 스티머","자동 스티머","자동스티머","밀크 스티머","milk steamer","퍼펙트무스","퍼펙트 무스","perfect moose","우버밀크","ubermilk"]
 };
 function detect(q){
   const t=q.toLowerCase().replace(/\s+/g," ");
@@ -735,6 +747,8 @@ const PRODUCTS=[
  {t:"grinder",n:"메저 슈퍼졸리 일렉트로닉",k:"mazzer super jolly electronic 메저 슈퍼졸리",w:240,d:420,h:610,kw:0.35,src:"https://cafedumonde.co.uk/commercial-coffee-machines/coffee-grinder/mazzer-super-jolly-electronic"},
  {t:"grinder",n:"유레카 아톰 스페셜티 75",k:"eureka atom 75 specialty 유레카 아톰",w:180,d:227,h:570,src:"https://eureka.co.it/en/catalogo/prodotti/macinacaffè+on+demand/1/5.aspx"},
  {t:"ice",n:"호시자키 IM-65NE (일 최대 63kg)",k:"hoshizaki im-65ne im65 호시자키",w:633,d:506,h:840,kw:0.37,src:"https://hoshizaki-europe.com/?p=27597"},
+ {t:"autosteam",n:"퍼펙트 무스 에픽 그렉 (머신 스팀 연결형)",k:"perfect moose epic greg 퍼펙트무스 그렉 오토스팀",w:120,d:350,h:620,kw:0.04,src:"https://alternativebrewing.com.au/products/perfect-moose-automatic-milk-steamer"},
+ {t:"autosteam",n:"퍼펙트 무스 잭 (자체 보일러형)",k:"perfect moose jack 퍼펙트무스 잭 오토스팀",w:120,d:490,h:620,kw:2.44,src:"https://www.hospitalityhub.com.au/perfect-moose-auto-milk-steamer-greg-jack/p/229597"},
  {t:"blender",n:"블렌텍 스텔스 885",k:"blendtec stealth 885 블렌텍 스텔스",w:218,d:229,h:439,kw:1.8,src:"https://blendtec.com/products/stealth-x"},
  {t:"blender",n:"바이타믹스 콰이어트 원",k:"vitamix quiet one 바이타믹스 콰이어트원",w:216,d:272,h:457,src:"https://www.vitamix.com/mx/en_us/commercial/products/the-quiet-one"},
  {t:"dishwasher",n:"윈터할터 UC-M",k:"winterhalter uc-m 윈터할터",w:600,d:617,h:715,kw:4.2,src:"https://www.catering-appliance.com/winterhalter-uc-m-dw-500mm-18-plate-undercounter-dishwasher-with-drain-pump-hardwired"},
@@ -801,7 +815,7 @@ function bindProdPicker(sel){
 const MOUNT={espresso:["top",540],grinder:["top",600],drip:["top",450],coldbrew:["top",600],showcase:["top",700],
  ice:["floor",840],freezer:["floor",1850],blender:["top",450],hotwater:["top",450],dispenser:["top",600],
  sink:["sink",300],induction:["top",100],oven:["top",550],waffle:["top",250],sterilizer:["top",600],pos:["top",400],
- knock:["flush",0],PICKUP:["flush",0],WORK:["flush",0],tablefridge:["under",800],dishwasher:["under",720]};
+ autosteam:["top",620],knock:["flush",0],PICKUP:["flush",0],WORK:["flush",0],tablefridge:["under",800],dishwasher:["under",720]};
 function mountOf(b){const m=MOUNT[b.id]||["top",400]; return [m[0], b.h||m[1]];}
 function elevOpts(){return {ch:Math.max(0,+document.getElementById("bCh").value||0), lh:+document.getElementById("bLh").value||0};}
 function elevCounterItems(c){
@@ -883,7 +897,7 @@ function elevChecks(counters){
 // ===== 바 설계 =====
 let LAST=null;           // 마지막 분석 결과
 let BAR=null;            // {counters:{front:[...],back:[...]}, opts}
-const BAR_ORDER_FRONT=["pos","showcase","espresso","knock","grinder","hotwater","WORK","blender","drip","PICKUP"];
+const BAR_ORDER_FRONT=["pos","showcase","espresso","autosteam","knock","grinder","hotwater","WORK","blender","drip","PICKUP"];
 const BAR_ORDER_BACK=["sink","sterilizer","induction","oven","waffle","freezer","coldbrew","WORK","dispenser","ice"];
 let selUid=null, uidSeq=1;
 
