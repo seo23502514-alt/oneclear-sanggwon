@@ -164,6 +164,17 @@ td a{color:var(--brand);font-weight:700;font-size:12.5px;white-space:nowrap}
 .blist li.u{color:var(--muted)}
 .tobar{font:inherit;font-weight:900;font-size:14px;padding:11px 16px;border-radius:10px;border:0;background:#fff;color:var(--brand);cursor:pointer}
 @media print{.top,.bartools,#barside .selp,.view:not(#v-bar){display:none!important}.bargrid{grid-template-columns:1fr}}
+.ppick{margin-top:12px;border-top:1px solid var(--line);padding-top:12px;display:grid;gap:6px}
+.ppick input,.pmanual input{font:inherit;font-size:13.5px;padding:8px 10px;border:1.5px solid var(--line);border-radius:8px;width:100%}
+#pplist{display:grid;gap:4px;max-height:220px;overflow:auto}
+.pitem{font:inherit;text-align:left;border:1px solid var(--line);background:#fafafa;border-radius:8px;padding:7px 9px;cursor:pointer}
+.pitem:hover{border-color:var(--ink)}.pitem span{display:block;font-size:13px;font-weight:700}.pitem small{color:var(--muted);font-size:12px}
+.pmanual summary{cursor:pointer;font-size:13px;color:var(--brand);font-weight:700;margin:4px 0}
+.pmanual{display:grid;gap:6px}.pmanual .row2{gap:6px}
+.pmanual button{font:inherit;font-weight:700;padding:8px;border:0;border-radius:8px;background:var(--accent);color:#fff;cursor:pointer;margin-top:6px}
+.plist{display:grid;gap:6px}.prow{display:flex;gap:10px;align-items:center;justify-content:space-between;border:1.5px solid var(--line);border-radius:10px;padding:9px 12px}
+.prow b{display:block;font-size:14px}.prow small{color:var(--muted);font-size:12px}
+.prow button{font:inherit;font-size:13px;font-weight:700;padding:8px 10px;border:0;border-radius:8px;background:var(--accent);color:#fff;cursor:pointer;white-space:nowrap}
 </style>
 </head>
 <body>
@@ -649,6 +660,7 @@ function productSearch(q){
     <span style="font-size:12px;color:var(--muted)">제품명 검색</span><h2>${q.replace(/</g,"&lt;")}</h2>
     ${e?`<div class="det" id="detcard" style="background:${CATS[e.cat].bg}"><div class="ic" style="color:${CATS[e.cat].color}">${IC[e.id]}</div><div><span>${CATS[e.cat].name} · 이 제품은 아마도</span><b>${e.name}</b><span>눌러서 고를 때 확인할 점 보기 →</span></div></div>`
       :`<p style="font-size:13.5px;color:var(--muted);margin:12px 0">어떤 장비인지 자동으로 알아보지 못했어요. 아래 링크로 바로 찾아보세요.</p>`}
+    ${(()=>{const ps=findProducts(q).slice(0,5); window._ps=ps; return ps.length?`<h3>등록된 사양 — 고르면 바 평면도에 그 크기로 들어가요</h3><div class="plist">${ps.map((p,i)=>`<div class="prow"><div><b>${p.n}</b><small>${prodLine(p)}</small></div><button data-pi="${i}">바 설계에 넣기</button></div>`).join("")}</div>`:`<h3>바 평면도에 넣기</h3><p style="font-size:13px;color:var(--muted);margin:0">등록된 사양이 없어요. 사양서에서 폭×깊이를 확인한 뒤 「바 설계」에서 장비를 눌러 직접 입력하세요.</p>`})()}
     <h3>가격·구매처</h3>
     <div class="links">
       ${L(`https://search.shopping.naver.com/search/all?query=${k}`,"네이버쇼핑","가격 비교·스토어")}
@@ -666,6 +678,7 @@ function productSearch(q){
   document.getElementById("scrim").classList.add("open");
   document.querySelector("#modal .x").onclick=()=>document.getElementById("scrim").classList.remove("open");
   const dc=document.getElementById("detcard"); if(dc) dc.onclick=()=>openModal(id);
+  document.querySelectorAll(".prow button").forEach(b=>b.onclick=()=>putProductInBar(window._ps[+b.dataset.pi]));
   document.querySelectorAll(".recent button").forEach(b=>b.onclick=()=>{document.getElementById("pq").value=b.dataset.q;productSearch(b.dataset.q);});
 }
 document.getElementById("pform").onsubmit=ev=>{ev.preventDefault();productSearch(document.getElementById("pq").value);};
@@ -687,6 +700,81 @@ function openModal(id){
 }
 document.getElementById("scrim").onclick=ev=>{if(ev.target.id==="scrim")ev.target.classList.remove("open");};
 document.addEventListener("keydown",ev=>{if(ev.key==="Escape")document.getElementById("scrim").classList.remove("open");});
+
+
+// ===== 제품 사양 목록 (판매처·제조사 사양 기준, 2026-11 확인) =====
+const PRODUCTS=[
+ {t:"espresso",n:"라마르조꼬 리네아 PB 2그룹",k:"la marzocco linea pb 2 라마르조꼬 리네아",w:710,d:590,kw:4.6,src:"https://www.1st-line.com/buy/la-marzocco-linea-pb-av-commercial-espresso-machine/"},
+ {t:"espresso",n:"라마르조꼬 리네아 PB 3그룹",k:"la marzocco linea pb 3 라마르조꼬 리네아",w:950,d:590,kw:6.1,src:"https://archipro.com.au/product/la-marzocco-linea-pb-la-marzocco-nz"},
+ {t:"espresso",n:"누오바 시모넬리 아피아 라이프 2그룹",k:"nuova simonelli appia life 2 시모넬리 아피아",w:784,d:545,kw:3.35,src:"https://hiangkie.com.hk/products/appia-life-2g"},
+ {t:"espresso",n:"누오바 시모넬리 아피아 라이프 2그룹 컴팩트",k:"nuova simonelli appia life compact 시모넬리 아피아 컴팩트",w:554,d:545,kw:2.9,src:"https://cdn.shopify.com/s/files/1/0197/6032/files/Appia_Life_2grp_Compact_1.pdf"},
+ {t:"espresso",n:"라심발리 M26 TE 2그룹",k:"la cimbali m26 te dt2 라심발리 심발리",w:794,d:528,kw:4.9,src:"https://www.coffeemachinedepot.com/products/la-cimbali-m26-te-dt-2-group-commercial-espresso-machine"},
+ {t:"espresso",n:"라심발리 M26 TE 2그룹 컴팩트",k:"la cimbali m26 compact 라심발리 심발리 컴팩트",w:594,d:528,kw:3.5,src:"https://business.ringtons.co.uk/6539"},
+ {t:"espresso",n:"베제라 모다 DE 2그룹",k:"bezzera moda de 2 베제라 모다",w:677,d:550,kw:5.0,src:"https://www.kwcommercial.com.au/media/assets/44330/fed-modade2b-moda-low-14fce8dfe8-v62f7d096a57b.pdf"},
+ {t:"espresso",n:"베제라 모다 DE 3그룹",k:"bezzera moda de 3 베제라 모다",w:877,d:550,kw:5.6,src:"https://www.kwcommercial.com.au/media/assets/44330/fed-modade2b-moda-low-14fce8dfe8-v62f7d096a57b.pdf"},
+ {t:"grinder",n:"말코닉 E65S GbW",k:"mahlkonig mahlkönig e65s gbw 말코닉 말콘익",w:195,d:283,kw:0.58,src:"https://mahlkoenig.us/products/e65s-gbw"},
+ {t:"grinder",n:"메저 슈퍼졸리 일렉트로닉",k:"mazzer super jolly electronic 메저 슈퍼졸리",w:240,d:420,kw:0.35,src:"https://cafedumonde.co.uk/commercial-coffee-machines/coffee-grinder/mazzer-super-jolly-electronic"},
+ {t:"grinder",n:"유레카 아톰 스페셜티 75",k:"eureka atom 75 specialty 유레카 아톰",w:180,d:227,src:"https://eureka.co.it/en/catalogo/prodotti/macinacaffè+on+demand/1/5.aspx"},
+ {t:"ice",n:"호시자키 IM-65NE (일 최대 63kg)",k:"hoshizaki im-65ne im65 호시자키",w:633,d:506,kw:0.37,src:"https://hoshizaki-europe.com/?p=27597"},
+ {t:"blender",n:"블렌텍 스텔스 885",k:"blendtec stealth 885 블렌텍 스텔스",w:218,d:229,kw:1.8,src:"https://blendtec.com/products/stealth-x"},
+ {t:"blender",n:"바이타믹스 콰이어트 원",k:"vitamix quiet one 바이타믹스 콰이어트원",w:216,d:272,src:"https://www.vitamix.com/mx/en_us/commercial/products/the-quiet-one"},
+ {t:"dishwasher",n:"윈터할터 UC-M",k:"winterhalter uc-m 윈터할터",w:600,d:617,kw:4.2,src:"https://www.catering-appliance.com/winterhalter-uc-m-dw-500mm-18-plate-undercounter-dishwasher-with-drain-pump-hardwired"},
+ {t:"tablefridge",n:"테이블 냉장고 1200 (일반 규격)",k:"테이블냉장고 1200",w:1200,d:700,generic:true},
+ {t:"tablefridge",n:"테이블 냉장고 1500 (일반 규격)",k:"테이블냉장고 1500",w:1500,d:700,generic:true},
+ {t:"tablefridge",n:"테이블 냉장고 1800 (일반 규격)",k:"테이블냉장고 1800",w:1800,d:700,generic:true}
+];
+function myProducts(){try{return JSON.parse(localStorage.getItem("eqMyProducts")||"[]")}catch(e){return []}}
+function saveMyProduct(p){try{const l=[p,...myProducts().filter(x=>x.n!==p.n)].slice(0,30);localStorage.setItem("eqMyProducts",JSON.stringify(l))}catch(e){}}
+function allProducts(){return [...myProducts().map(p=>({...p,mine:true})),...PRODUCTS];}
+function findProducts(q,type){
+  const t=(q||"").toLowerCase().replace(/\s+/g,"");
+  return allProducts().filter(p=>(!type||p.t===type)&&(!t||(p.n+p.k+(p.k||"")).toLowerCase().replace(/\s+/g,"").includes(t)||t.split("").length>1&&(p.k||"").toLowerCase().split(" ").some(w=>w.length>1&&t.includes(w))));
+}
+function prodLine(p){return `${p.w}×${p.d}mm${p.kw?` · ${p.kw}kW`:""}${p.generic?" · 일반 규격":p.mine?" · 내가 입력":""}`;}
+// 블록에 제품 적용
+function applyProduct(block,p){ block.w=p.w; block.d=p.d; block.model=p.n; block.kw=p.kw; block.src=p.src||""; }
+// 바 설계에 넣기 (상단 제품 검색에서)
+function putProductInBar(p){
+  if(!BAR) buildBar();
+  const lists=[["front",BAR.front],["back",BAR.back],["uf",BAR.underF],["ub",BAR.underB]];
+  let target=null;
+  for(const [,l] of lists){ target=l.find(b=>b.id===p.t&&!b.model); if(target) break; }
+  if(!target) for(const [,l] of lists){ target=l.find(b=>b.id===p.t); if(target) break; }
+  if(!target){ const z=SPEC[p.t]?SPEC[p.t].z:"front"; target=makeBlock(p.t,p.w); (z==="back"?BAR.back:z==="under"?BAR.underF:BAR.front).splice(-1,0,target); }
+  applyProduct(target,p); selUid=target.uid;
+  document.getElementById("scrim").classList.remove("open");
+  document.querySelector('nav button[data-v="bar"]').click(); renderBar();
+  barMsg(`${p.n}(${p.w}×${p.d}mm)을 평면도에 넣었어요.`);
+}
+function prodPickerHtml(sel){
+  const list=findProducts("",sel.b.id);
+  return `<div class="ppick"><b>실제 제품으로 바꾸기</b>
+   <input id="ppq" placeholder="제품명 검색 (예: 아피아, E65S)">
+   <div id="pplist">${prodListHtml(list)}</div>
+   <details class="pmanual"><summary>목록에 없으면 직접 입력</summary>
+     <input id="pmn" placeholder="제품명·모델명" value="${sel.b.model?sel.b.model.replace(/"/g,"&quot;"):""}">
+     <div class="row2"><input id="pmw" type="number" placeholder="폭 mm" value="${sel.b.w||""}"><input id="pmd" type="number" placeholder="깊이 mm" value="${sel.b.d||""}"></div>
+     <input id="pmk" type="number" step="0.1" placeholder="소비전력 kW (모르면 비움)">
+     <button id="pmok">이 크기로 적용</button>
+     <p class="desc" style="margin:4px 0 0">사양서의 W(폭)×D(깊이)를 넣으세요. 입력한 제품은 이 브라우저에 저장돼 다음에도 목록에 나와요.</p>
+   </details></div>`;
+}
+function prodListHtml(list){
+  if(!list.length) return `<p class="desc" style="margin:6px 0">등록된 제품이 없어요. 아래에서 직접 입력하세요.</p>`;
+  return list.map((p,i)=>`<button class="pitem" data-i="${i}"><span>${p.n}</span><small>${prodLine(p)}</small></button>`).join("");
+}
+function bindProdPicker(sel){
+  const box=document.getElementById("pplist"); if(!box) return;
+  let cur=findProducts("",sel.b.id);
+  const bindItems=()=>box.querySelectorAll(".pitem").forEach(b=>b.onclick=()=>{applyProduct(sel.b,cur[+b.dataset.i]); renderBar();});
+  bindItems();
+  document.getElementById("ppq").oninput=e=>{cur=findProducts(e.target.value,sel.b.id); box.innerHTML=prodListHtml(cur); bindItems();};
+  document.getElementById("pmok").onclick=()=>{
+    const n=document.getElementById("pmn").value.trim(), w=+document.getElementById("pmw").value, d=+document.getElementById("pmd").value, k=+document.getElementById("pmk").value;
+    if(!n||!w||!d){barMsg("제품명, 폭, 깊이를 모두 넣어 주세요.");return;}
+    const p={t:sel.b.id,n,k:n.toLowerCase(),w,d,kw:k||undefined}; saveMyProduct(p); applyProduct(sel.b,p); renderBar();
+  };
+}
 
 // ===== 바 설계 =====
 let LAST=null;           // 마지막 분석 결과
@@ -751,20 +839,21 @@ function renderBar(){
     svg+=`<rect x="${c.x}" y="${c.y}" width="${W}" height="${H}" fill="#fff" stroke="#3b3027" stroke-width="16"/>`;
     // under
     let u=0; c.under.forEach(b=>{ const L=b.w; const r=c.dir==="h"?[c.x+u,c.y+c.depth*0.55,L,c.depth*0.42]:[c.x+c.depth*0.03,c.y+u,c.depth*0.42,L];
-      svg+=`<rect x="${r[0]}" y="${r[1]}" width="${r[2]}" height="${r[3]}" fill="none" stroke="${colorOf(b)}" stroke-width="10" stroke-dasharray="40 25"/>`;
-      const tx=r[0]+r[2]/2, ty=r[1]+r[3]/2, ufs=Math.min(70,L/9); svg+=`<text x="${tx}" y="${ty}" font-size="${ufs}" fill="${colorOf(b)}" text-anchor="middle" dominant-baseline="middle" ${c.dir==="v"?`transform="rotate(90 ${tx} ${ty})"`:""}>아래: ${nameOf(b)} ${L}</text>`; u+=L; });
+      svg+=`<g class="ublk" data-uid="${b.uid}" style="cursor:pointer"><rect x="${r[0]}" y="${r[1]}" width="${r[2]}" height="${r[3]}" fill="${b.uid===selUid?"#00000010":"#ffffff01"}" stroke="${b.uid===selUid?"#111":colorOf(b)}" stroke-width="${b.uid===selUid?16:10}" stroke-dasharray="40 25"/></g>`;
+      const tx=r[0]+r[2]/2, ty=r[1]+r[3]/2, ufs=Math.min(70,L/11); svg+=`<text pointer-events="none" x="${tx}" y="${ty}" font-size="${ufs}" fill="${colorOf(b)}" text-anchor="middle" dominant-baseline="middle" ${c.dir==="v"?`transform="rotate(90 ${tx} ${ty})"`:""}>아래: ${b.model||nameOf(b)} ${L}${b.d?"×"+b.d:""}</text>`; u+=L; });
     let t=0;
     c.list.forEach(b=>{
       const L=b.id==="WORK"?flexW(c.list,c.len):b.w; if(L<=0){t+=0;return;}
       const pad=30;
-      const r=c.dir==="h"?[c.x+t,c.y+pad,L,c.depth*(c.under.length?0.5:1)-pad*2]:[c.x+pad+(c.under.length?c.depth*0.45:0),c.y+t,c.depth*(c.under.length?0.55:1)-pad*2,L];
-      const sel=b.uid===selUid, out=t+L>c.len;
+      const fr=b.d?Math.min(1,b.d/c.depth):(c.under.length?0.5:1), hh=(c.depth-pad*2)*fr;
+      const r=c.dir==="h"?[c.x+t,c.y+pad,L,hh]:[c.x+c.depth-pad-hh,c.y+t,hh,L];
+      const sel=b.uid===selUid, out=t+L>c.len||(b.d&&b.d>c.depth);
       const fill=b.id==="WORK"?"url(#hatch)":colorOf(b);
       svg+=`<g class="blk" data-uid="${b.uid}" data-c="${c.key}" style="cursor:grab"><rect x="${r[0]+6}" y="${r[1]}" width="${Math.max(0,r[2]-12)}" height="${r[3]}" rx="18" fill="${fill}" fill-opacity="${b.id==="WORK"?1:.9}" stroke="${out?"#c0392b":sel?"#111":"none"}" stroke-width="${out||sel?18:0}" ${out?'stroke-dasharray="40 20"':""}/>`;
       const tx=r[0]+r[2]/2, ty=r[1]+r[3]/2, fs=Math.min(78,Math.max(46,(c.dir==="h"?L:r[2])/6));
-      const nm=nameOf(b).replace(/[·].*/,""), tc=b.id==="WORK"?"#555":"#fff";
+      const nm=(b.model&&L>=450?(b.model.length>14?b.model.slice(0,13)+"…":b.model):(b.model?b.model.split(" ").slice(-1)[0]:nameOf(b).replace(/[·].*/,""))), tc=b.id==="WORK"?"#555":"#fff";
       svg+=`<text x="${tx}" y="${ty-20}" font-size="${fs}" font-weight="700" fill="${tc}" text-anchor="middle" dominant-baseline="middle" pointer-events="none" ${c.dir==="v"?`transform="rotate(90 ${tx} ${ty})"`:""}>${nm}</text>
-            <text x="${tx}" y="${ty+fs*0.75}" font-size="${fs*0.8}" fill="${tc}" fill-opacity=".85" text-anchor="middle" dominant-baseline="middle" pointer-events="none" ${c.dir==="v"?`transform="rotate(90 ${tx} ${ty})"`:""}>${L}</text></g>`;
+            <text x="${tx}" y="${ty+fs*0.75}" font-size="${fs*0.8}" fill="${tc}" fill-opacity=".85" text-anchor="middle" dominant-baseline="middle" pointer-events="none" ${c.dir==="v"?`transform="rotate(90 ${tx} ${ty})"`:""}>${L}${b.d?"×"+b.d:""}</text></g>`;
       pos[b.uid]={cx:tx,cy:ty,b,c:c.key};
       t+=L;
     });
@@ -801,7 +890,10 @@ function renderBarSide(counters,pos,o){
   }
   counters.forEach(c=>{const u=sumW(c.list,c.len); if(u>c.len) chk.push(["bad",`${c.name}: 장비 폭 ${u.toLocaleString()}mm가 카운터 ${c.len.toLocaleString()}mm보다 ${(u-c.len).toLocaleString()}mm 깁니다. 빨간 점선 장비를 다른 카운터로 옮기거나 카운터를 늘리세요.`]);
     else { const w=c.len-u; if(c.key==="front"&&w<800) chk.push(["warn",`프론트 작업 공간이 ${w}mm뿐이에요. 음료를 만들려면 800mm 이상 남기는 게 좋아요.`]); }
-    const ul=c.under.reduce((a,b)=>a+b.w,0); if(ul>c.len) chk.push(["warn",`${c.name} 아래 장비(${ul.toLocaleString()}mm)가 카운터보다 깁니다.`]); });
+    const ul=c.under.reduce((a,b)=>a+b.w,0); if(ul>c.len) chk.push(["warn",`${c.name} 아래 장비(${ul.toLocaleString()}mm)가 카운터보다 깁니다.`]);
+    c.list.filter(b=>b.d&&b.d>c.depth).forEach(b=>chk.push(["bad",`${b.model||nameOf(b)} 깊이 ${b.d}mm가 ${c.name} 깊이 ${c.depth}mm보다 깊어요. 카운터 깊이를 늘리거나 다른 카운터로 옮기세요.`]));
+    c.list.filter(b=>b.d&&b.d<=c.depth&&c.depth-b.d<100&&b.id==="espresso").forEach(b=>chk.push(["warn",`${b.model||nameOf(b)} 앞 여유가 ${c.depth-b.d}mm뿐이에요. 머신 앞에 피처·컵 놓을 자리를 생각하면 카운터 깊이를 조금 더 잡는 게 좋아요.`]));
+    c.under.filter(b=>b.d&&b.d>c.depth).forEach(b=>chk.push(["warn",`카운터 아래 ${b.model||nameOf(b)} 깊이 ${b.d}mm가 카운터 깊이 ${c.depth}mm보다 깊어 앞으로 튀어나와요.`])); });
   const es=P("espresso")[0], gr=P("grinder")[0], hw=P("hotwater")[0], bl=P("blender")[0], ic=P("ice")[0];
   if(es&&gr) chk.push(dist(es,gr)<=1300?["ok","그라인더가 에스프레소 머신 바로 옆에 있어요."]:["warn","그라인더를 에스프레소 머신 바로 옆으로 붙이세요. 떨어지면 추출 동선이 길어져요."]);
   if(es&&hw) chk.push(dist(es,hw)<=1800?["ok","온수기가 머신 가까이 있어 아메리카노 동선이 짧아요."]:["warn","온수기를 머신 가까이 두면 아메리카노가 빨라져요."]);
@@ -810,26 +902,30 @@ function renderBarSide(counters,pos,o){
   chk.push(["warn","에스프레소 머신·제빙기·식기세척기는 급수·배수와 전용 전기가 필요해요. 배관·콘센트 위치를 이 배치에 맞춰 시공 업체와 확인하세요."]);
   const sel=selUid?findBlock(selUid):null;
   document.getElementById("barside").innerHTML=`
-    ${sel?`<div class="panel selp"><h3>선택: ${nameOf(sel.b)}</h3><p class="desc">${sel.b.id==="WORK"?"남는 길이가 자동으로 작업대가 됩니다.":`폭 ${sel.b.w}mm`}</p>
-      <div class="selbtn"><button data-a="left">← 왼쪽</button><button data-a="right">오른쪽 →</button>${o.shape!=="line"?`<button data-a="swap">${sel.key==="front"?"백 카운터로":"프론트로"}</button>`:""}${sel.b.id!=="WORK"?`<button data-a="del">빼기</button>`:""}</div>
-      ${sel.b.id!=="WORK"?`<label class="wlab">폭(mm) <input type="number" id="selW" value="${sel.b.w}" step="50" min="100"></label>`:""}</div>`
+    ${sel?`<div class="panel selp"><h3>선택: ${nameOf(sel.b)}</h3><p class="desc">${sel.b.id==="WORK"?"남는 길이가 자동으로 작업대가 됩니다.":`${sel.b.model?`<b style="color:var(--ink)">${sel.b.model}</b><br>`:""}폭 ${sel.b.w}mm${sel.b.d?` × 깊이 ${sel.b.d}mm`:" (깊이 미지정)"}${sel.b.kw?` · ${sel.b.kw}kW`:""}${sel.b.src?` · <a href="${sel.b.src}" target="_blank" rel="noopener">사양 출처</a>`:""}`}</p>
+      <div class="selbtn"><button data-a="left">← 왼쪽</button><button data-a="right">오른쪽 →</button>${o.shape!=="line"?`<button data-a="swap">${{front:"백 카운터로",back:"프론트로",uf:"백 카운터 아래로",ub:"프론트 아래로"}[sel.key]}</button>`:""}${sel.b.id!=="WORK"?`<button data-a="del">빼기</button>`:""}</div>
+      ${sel.b.id!=="WORK"?`<label class="wlab">폭(mm) <input type="number" id="selW" value="${sel.b.w}" step="10" min="100"></label>`:""}
+      ${sel.b.id!=="WORK"&&sel.b.id!=="PICKUP"?prodPickerHtml(sel):""}</div>`
      :`<div class="panel"><p class="desc" style="margin:0">평면도의 장비를 <b>끌어서</b> 순서를 바꾸거나 다른 카운터로 옮길 수 있어요. 눌러서 선택하면 폭을 바꾸거나 뺄 수 있습니다.</p></div>`}
     <div class="panel"><h3>배치 점검</h3><div class="alerts">${chk.map(a=>`<div class="alert ${a[0]}"><span>${a[1]}</span></div>`).join("")}</div></div>
-    <div class="panel"><h3>배치 목록</h3>${counters.map(c=>`<b style="font-size:13px">${c.name}</b><ol class="blist">${c.list.map(b=>`<li>${nameOf(b)} <span>${b.id==="WORK"?flexW(c.list,c.len):b.w}mm</span></li>`).join("")}${c.under.map(b=>`<li class="u">아래: ${nameOf(b)} <span>${b.w}mm</span></li>`).join("")}</ol>`).join("")}</div>`;
+    <div class="panel"><h3>배치 목록</h3>${counters.map(c=>`<b style="font-size:13px">${c.name}</b><ol class="blist">${c.list.map(b=>`<li>${b.model?`<b>${b.model}</b>`:nameOf(b)} <span>${b.id==="WORK"?flexW(c.list,c.len):b.w}mm</span></li>`).join("")}${c.under.map(b=>`<li class="u" data-uid="${b.uid}" style="cursor:pointer">아래: ${b.model||nameOf(b)} <span>${b.w}${b.d?"×"+b.d:""}mm</span></li>`).join("")}</ol>`).join("")}</div>`;
   document.querySelectorAll(".selbtn button").forEach(b=>b.onclick=()=>actSel(b.dataset.a));
+  document.querySelectorAll(".blist li.u").forEach(li=>li.onclick=()=>{selUid=+li.dataset.uid; renderBar();});
   const sw=document.getElementById("selW"); if(sw) sw.onchange=()=>{const s=findBlock(selUid); if(s){s.b.w=Math.max(100,+sw.value||s.b.w); renderBar();}};
+  if(sel&&sel.b.id!=="WORK"&&sel.b.id!=="PICKUP") bindProdPicker(sel);
 }
-function listOf(key){return key==="front"?BAR.front:BAR.back;}
-function findBlock(uid){for(const key of ["front","back"]){const l=listOf(key),i=l.findIndex(b=>b.uid===uid); if(i>=0) return {key,i,b:l[i],list:l};} return null;}
+function listOf(key){return {front:BAR.front,back:BAR.back,uf:BAR.underF,ub:BAR.underB}[key];}
+function findBlock(uid){for(const key of ["front","back","uf","ub"]){const l=listOf(key),i=l.findIndex(b=>b.uid===uid); if(i>=0) return {key,i,b:l[i],list:l};} return null;}
 function actSel(a){
-  const s=findBlock(selUid); if(!s) return; const o=barOpts(); const flip=(o.pick==="left"&&s.key==="front");
+  const s=findBlock(selUid); if(!s) return; const o=barOpts(); const flip=(o.pick==="left"&&(s.key==="front"));
   if(a==="left"||a==="right"){ let dir=a==="left"?-1:1; if(flip) dir=-dir; const j=s.i+dir; if(j<0||j>=s.list.length) return; [s.list[s.i],s.list[j]]=[s.list[j],s.list[s.i]]; }
-  if(a==="swap"){ if(s.b.id==="WORK") return; s.list.splice(s.i,1); listOf(s.key==="front"?"back":"front").push(s.b); }
+  if(a==="swap"){ if(s.b.id==="WORK") return; s.list.splice(s.i,1); listOf({front:"back",back:"front",uf:"ub",ub:"uf"}[s.key]).push(s.b); }
   if(a==="del"){ s.list.splice(s.i,1); selUid=null; }
   renderBar();
 }
 function bindDrag(){
   const svg=document.getElementById("barsvg"); if(!svg) return;
+  svg.querySelectorAll(".ublk").forEach(g=>g.addEventListener("click",()=>{const u=+g.dataset.uid; selUid=selUid===u?null:u; renderBar();}));
   const pt=ev=>{const p=svg.createSVGPoint();p.x=ev.clientX;p.y=ev.clientY;return p.matrixTransform(svg.getScreenCTM().inverse());};
   svg.querySelectorAll(".blk").forEach(g=>{
     g.addEventListener("pointerdown",ev=>{
