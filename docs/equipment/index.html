@@ -861,6 +861,7 @@ function dropAt(uid,p){
 }
 function svgText(){const s=document.getElementById("barsvg"); return s?new XMLSerializer().serializeToString(s):"";}
 function barSavePng(){
+  if(!/github\.io$/.test(location.hostname)&&location.protocol!=="file:"){barMsg("이 화면에서는 파일 저장이 막혀 있어요. 원클리어 사이트(github.io) 주소에서 PNG 저장을 누르거나 화면을 캡처해 주세요.");return;}
   const txt=svgText(); if(!txt) return; const img=new Image();
   img.onload=()=>{const c=document.createElement("canvas"); const vb=document.getElementById("barsvg").viewBox.baseVal; const k=2400/vb.width; c.width=2400; c.height=Math.round(vb.height*k); c.getContext("2d").drawImage(img,0,0,c.width,c.height);
     c.toBlob(b=>{try{const a=document.createElement("a");a.href=URL.createObjectURL(b);a.download="바설계.png";document.body.appendChild(a);a.click();a.remove();barMsg("PNG를 저장했어요. 저장이 안 되면 화면을 캡처해 주세요.");}catch(e){barMsg("이 화면에서는 저장이 막혀 있어요. 화면을 캡처해 주세요.");}});};
