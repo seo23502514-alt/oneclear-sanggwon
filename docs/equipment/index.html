@@ -1118,7 +1118,17 @@ function prepSide(){ if(!BAR) return; const sh=barOpts().shape; if(BAR.side.some
 document.getElementById("bShape").addEventListener("change",()=>{prepSide();renderBar();});
 ["bFd","bBd","bAisle","bPick","bCh","bLh"].forEach(id=>document.getElementById(id).addEventListener("change",renderBar));
 document.getElementById("bSl").addEventListener("change",()=>{if(!BAR)return;BAR.slen=Math.max(500,+document.getElementById("bSl").value||1800);renderBar();});
-["bFl","bBl"].forEach(id=>document.getElementById(id).addEventListener("change",()=>{if(!BAR)return;BAR.flen=Math.max(500,+document.getElementById("bFl").value||BAR.flen);BAR.blen=Math.max(500,+document.getElementById("bBl").value||BAR.blen);renderBar();}));
+// 카운터 길이: 「운영·설비」 입력과 바 설계 입력을 서로 맞춤
+function syncCounterLen(src){
+  const g=id=>document.getElementById(id);
+  const fl=Math.max(500,+(src==="bar"?g("bFl"):g("front")).value||4000), bl=Math.max(500,+(src==="bar"?g("bBl"):g("back")).value||3500);
+  g("front").value=fl; g("back").value=bl; g("bFl").value=fl; g("bBl").value=bl;
+  if(LAST){LAST.front=fl; LAST.back=bl;}
+  if(typeof sums==="function") sums();
+  if(BAR){BAR.flen=fl; BAR.blen=bl; renderBar();}
+}
+["bFl","bBl"].forEach(id=>document.getElementById(id).addEventListener("input",()=>syncCounterLen("bar")));
+["front","back"].forEach(id=>document.getElementById(id).addEventListener("input",()=>syncCounterLen("form")));
 document.getElementById("bReset").onclick=buildBar;
 document.getElementById("bPng").onclick=barSavePng;
 document.getElementById("bPrint").onclick=()=>{try{window.print()}catch(e){barMsg("인쇄가 막혀 있어요. 브라우저 메뉴에서 인쇄해 주세요.")}};
