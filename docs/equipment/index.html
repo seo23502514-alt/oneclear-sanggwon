@@ -222,6 +222,7 @@ td a{color:var(--brand);font-weight:700;font-size:12.5px;white-space:nowrap}
         <label><input type="checkbox" value="cake">케이크 진열</label>
         <label><input type="checkbox" value="bottle">병음료 판매</label>
         <label><input type="checkbox" value="autosteam">오토스팀기 쓰기</label>
+        <label><input type="checkbox" value="autotamp">자동 템핑기 쓰기</label>
       </div></div></details>
     <details class="step" open><summary><span class="num">3</span>예상 판매량<span class="sum" id="sum3"></span></summary>
       <div class="fields">
@@ -305,6 +306,7 @@ const IC = {
   blender:S('<path d="M22 6h20l-3 30H25z"/><path d="M27 16h10"/><path d="M22 36h20l2 8H20z"/><rect x="18" y="44" width="28" height="12" rx="3"/><circle cx="32" cy="50" r="2"/>'),
   hotwater:S('<rect x="14" y="8" width="36" height="40" rx="4"/><path d="M24 48v4h16v-4"/><path d="M28 18c0 4 4 4 4 8M36 18c0 4 4 4 4 8"/><rect x="22" y="32" width="20" height="8" rx="2"/><path d="M12 56h40"/>'),
   dispenser:S('<path d="M18 6h28v12H18z"/><path d="M14 18h36v20H14z"/><path d="M26 38v6h12v-6"/><path d="M32 44v4"/><path d="M24 52h16v6H24z"/><path d="M20 26h6M38 26h6"/>'),
+  autotamp:S('<rect x="14" y="8" width="36" height="10" rx="3"/><path d="M18 18v34M46 18v34"/><path d="M32 18v12"/><path d="M24 30h16v6H24z"/><path d="M20 44h24"/><path d="M12 52h40"/>'),
   autosteam:S('<rect x="20" y="6" width="24" height="34" rx="4"/><path d="M32 40v6"/><path d="M24 46h16l2 10H22z"/><circle cx="32" cy="18" r="4"/><path d="M26 30h12"/>'),
   steamer:S('<path d="M24 22h16l4 30a4 4 0 0 1-4 4H24a4 4 0 0 1-4-4z"/><path d="M44 28h4a4 4 0 0 1 0 8h-3"/><path d="M28 8c0 4 4 4 4 8M36 8c0 4 4 4 4 8"/><path d="M22 32h20"/>'),
   dishwasher:S('<rect x="8" y="8" width="48" height="48" rx="4"/><path d="M8 18h48"/><circle cx="16" cy="13" r="1.5"/><circle cx="22" cy="13" r="1.5"/><circle cx="32" cy="38" r="12"/><path d="M26 36c2-3 6-3 8 0s6 3 8 0"/>'),
@@ -410,6 +412,10 @@ const E = [
   use:"원두 양·추출량을 재서 맛을 일정하게.",
   check:["0.1g 단위 표시","타이머 내장 여부","방수와 크기(드립 트레이에 올라가는지)"],
   tags:["계량","커피","추출","레시피"],kw:"커피 저울 타이머"},
+ {id:"autotamp",cat:"ext",name:"자동 템핑기",alias:"오토 탬퍼 · 자동 탬퍼 · 퍽프레스",must:false,zone:"프론트",
+  use:"포터필터를 끼우면 정해진 압력으로 자동 탬핑. 손목 부담이 줄고 추출이 일정해짐.",
+  check:["머신 바스켓 지름에 맞는 탬퍼 헤드(53~58.3mm)","압력 조절 범위와 단계","그라인더와 머신 사이에 놓을 자리 (폭 약 150mm)","전용 콘센트 — 소비전력은 작음(70W대)","바닥 없는(네이키드) 포터필터 사용 가능 여부"],
+  tags:["탬핑","추출","커피","자동","시니어","피크"],kw:"퍽프레스 Q2"},
  {id:"tamper",cat:"etc",name:"탬퍼·탬핑 매트",alias:"템퍼 · 디스트리뷰터",must:true,zone:"프론트",
   use:"포터필터에 담긴 커피 가루를 고르게 눌러 줌.",
   check:["머신 바스켓 지름에 맞는 크기(58mm 등)","일정 압력 탬퍼(초보에게 유리)"],
@@ -447,7 +453,8 @@ const SPEC = {
  scale:{kw:0,w:0,z:"none"},
  tamper:{kw:0,w:0,z:"none"},
  knock:{kw:0,w:150,z:"front"},
- autosteam:{kw:2.2,w:200,z:"front"}
+ autosteam:{kw:2.2,w:200,z:"front"},
+ autotamp:{kw:0.08,w:180,z:"front"}
 };
 const ICE_SIZES=[30,50,70,100,150,200];
 const val=id=>+document.getElementById(id).value;
@@ -492,6 +499,8 @@ function analyze(silent){
   if(has("bake")||has("smoothie")||iceDay>iceSize*0.85) add("freezer",1,"스탠드형 냉동고","냉동 과일·생지·여분 얼음 보관",false);
   // 음료
   if(has("espresso")){
+    if(has("autotamp")) add("autotamp",groups>=3?2:1,`퍽프레스 Q2급 ${groups>=3?2:1}대`,"자동 템핑기를 쓰기로 선택함 — 그라인더와 머신 사이에 배치");
+    else if(senior||peak>=40||staff<=1) add("autotamp",1,"퍽프레스 Q2급 1대",senior?"탬핑 힘·기술 차이 없이 추출이 일정해짐":staff<=1?"1인 운영이면 탬핑 시간을 줄여 줌":`피크 1시간 약 ${peak}잔 — 손목 부담과 추출 편차를 줄임`,false);
     if(has("autosteam")) add("autosteam",groups>=3||peak>=70?2:1,groups>=3||peak>=70?"스팀보스 S 2대 (그룹 수만큼 검토)":"스팀보스 S 1대","오토스팀기를 쓰기로 선택함 — 머신 스팀 바로 옆에 배치");
     else if(senior||peak>=40||staff<=1) add("autosteam",1,"스팀보스 S 1대",senior?"시니어·초보 직원도 우유 품질이 일정해짐":staff<=1?"1인 운영이면 스팀하는 동안 다른 일을 할 수 있음":`피크 1시간 약 ${peak}잔 — 스팀이 병목이 되기 쉬움`,false);
   }
@@ -644,7 +653,7 @@ document.getElementById("q").oninput=e=>{dq=e.target.value;renderDict();};
 // ===== 제품명 검색 =====
 const BRANDS = {
  espresso:["라심발리","la cimbali","cimbali","훼마","faema","시모넬리","simonelli","누오바 시모넬리","nuova simonelli","빅토리아 아르두이노","victoria arduino","라마르조꼬","라 마르조꼬","la marzocco","marzocco","베제라","bezzera","모다","moda","란실리오","rancilio","달라꼬르떼","dalla corte","아스토리아","astoria","가지아","gaggia","유니크","시네소","synesso","슬레이어","slayer","아피아","appia","오렐리아","aurelia","리네아","linea","gb5","m39","m100","에스프레소","커피머신","반자동"],
- grinder:["말코닉","mahlkonig","mahlkönig","ek43","e65","e80","메저","mazzer","슈퍼졸리","super jolly","안핌","anfim","유레카","eureka","피오렌조또","fiorenzato","콤판다트","compak","빅토리아 미토스","mythos","퓨마","puqpress","티몬","그라인더","분쇄기"],
+ grinder:["말코닉","mahlkonig","mahlkönig","ek43","e65","e80","메저","mazzer","슈퍼졸리","super jolly","안핌","anfim","유레카","eureka","피오렌조또","fiorenzato","콤판다트","compak","빅토리아 미토스","mythos","그라인더","분쇄기"],
  drip:["칼리타","kalita","하리오","hario","v60","케맥스","chemex","펠로우","fellow","부온","bunn","fetco","페트코","마키네스카","marco","드리퍼","드립포트","배치브루"],
  coldbrew:["콜드브루","더치","toddy","토디"],
  tablefridge:["테이블냉장고","테이블 냉장고","작업대냉장고","유니크대성","그랜드우성","우성","스타리온","라셀르","부성","에버젠","카이저","터보에어","turbo air"],
@@ -664,7 +673,8 @@ const BRANDS = {
  waffle:["와플","와플기","토스터","파니니","그릴"],
  pos:["포스","pos","키오스크","토스포스","토스 포스","배민포스","포스기","카드단말기"],
  scale:["저울","아카이아","acaia","타임모어","timemore","브루이스타","brewista"],
- tamper:["탬퍼","템퍼","디스트리뷰터","퓨크프레스","puqpress"],
+ tamper:["탬퍼","템퍼","디스트리뷰터"],
+ autotamp:["자동 템핑","자동템핑","자동 탬핑","자동탬핑","자동 탬퍼","자동탬퍼","자동 템퍼","오토탬퍼","오토 탬퍼","오토템퍼","퍽프레스","퍼크프레스","puqpress","puq press"],
  knock:["넉박스","노크박스","찌꺼기통"],
  autosteam:["스팀보스","steamboss","steam boss","오토스팀","오토 스팀","오토스티머","오토 스티머","자동 스티머","자동스티머","밀크 스티머","milk steamer","퍼펙트무스","퍼펙트 무스","perfect moose","우버밀크","ubermilk"]
 };
@@ -747,6 +757,7 @@ const PRODUCTS=[
  {t:"grinder",n:"메저 슈퍼졸리 일렉트로닉",k:"mazzer super jolly electronic 메저 슈퍼졸리",w:240,d:420,h:610,kw:0.35,src:"https://cafedumonde.co.uk/commercial-coffee-machines/coffee-grinder/mazzer-super-jolly-electronic"},
  {t:"grinder",n:"유레카 아톰 스페셜티 75",k:"eureka atom 75 specialty 유레카 아톰",w:180,d:227,h:570,src:"https://eureka.co.it/en/catalogo/prodotti/macinacaffè+on+demand/1/5.aspx"},
  {t:"ice",n:"호시자키 IM-65NE (일 최대 63kg)",k:"hoshizaki im-65ne im65 호시자키",w:633,d:506,h:840,kw:0.37,src:"https://hoshizaki-europe.com/?p=27597"},
+ {t:"autotamp",n:"퍽프레스 Q2",k:"puqpress q2 퍽프레스 퍼크프레스 자동템핑",w:141,d:195,h:286,kw:0.076,src:"https://wholesale.idrinkcoffee.com/products/puq-press-q2-black-1",def:true},
  {t:"autosteam",n:"스팀보스 S (자체 보일러형)",k:"steamboss s steam boss 스팀보스 S 스팀보스s 오토스팀",w:180,d:370,h:455,kw:2.2,src:"https://blkorea.co.kr/product/%EC%8A%A4%ED%8C%80%EB%B3%B4%EC%8A%A4s-%EC%B9%B4%ED%8E%98-%EC%97%85%EC%86%8C%EC%9A%A9-%EC%9A%B0%EC%9C%A0%EC%8A%A4%ED%8C%80%EA%B8%B0-%EC%9A%B0%EC%9C%A0%EA%B1%B0%ED%92%88%EA%B8%B0-steam-boss-s/2469",def:true},
  {t:"autosteam",n:"퍼펙트 무스 에픽 그렉 (머신 스팀 연결형)",k:"perfect moose epic greg 퍼펙트무스 그렉 오토스팀",w:120,d:350,h:620,kw:0.04,src:"https://alternativebrewing.com.au/products/perfect-moose-automatic-milk-steamer"},
  {t:"autosteam",n:"퍼펙트 무스 잭 (자체 보일러형)",k:"perfect moose jack 퍼펙트무스 잭 오토스팀",w:120,d:490,h:620,kw:2.44,src:"https://www.hospitalityhub.com.au/perfect-moose-auto-milk-steamer-greg-jack/p/229597"},
@@ -816,7 +827,7 @@ function bindProdPicker(sel){
 const MOUNT={espresso:["top",540],grinder:["top",600],drip:["top",450],coldbrew:["top",600],showcase:["top",700],
  ice:["floor",840],freezer:["floor",1850],blender:["top",450],hotwater:["top",450],dispenser:["top",600],
  sink:["sink",300],induction:["top",100],oven:["top",550],waffle:["top",250],sterilizer:["top",600],pos:["top",400],
- autosteam:["top",620],knock:["flush",0],PICKUP:["flush",0],WORK:["flush",0],tablefridge:["under",800],dishwasher:["under",720]};
+ autosteam:["top",620],autotamp:["top",286],knock:["flush",0],PICKUP:["flush",0],WORK:["flush",0],tablefridge:["under",800],dishwasher:["under",720]};
 function mountOf(b){const m=MOUNT[b.id]||["top",400]; return [m[0], b.h||m[1]];}
 function elevOpts(){return {ch:Math.max(0,+document.getElementById("bCh").value||0), lh:+document.getElementById("bLh").value||0};}
 function elevCounterItems(c){
@@ -898,7 +909,7 @@ function elevChecks(counters){
 // ===== 바 설계 =====
 let LAST=null;           // 마지막 분석 결과
 let BAR=null;            // {counters:{front:[...],back:[...]}, opts}
-const BAR_ORDER_FRONT=["pos","showcase","espresso","autosteam","knock","grinder","hotwater","WORK","blender","drip","PICKUP"];
+const BAR_ORDER_FRONT=["pos","showcase","espresso","autosteam","knock","autotamp","grinder","hotwater","WORK","blender","drip","PICKUP"];
 const BAR_ORDER_BACK=["sink","sterilizer","induction","oven","waffle","freezer","coldbrew","WORK","dispenser","ice"];
 let selUid=null, uidSeq=1;
 
