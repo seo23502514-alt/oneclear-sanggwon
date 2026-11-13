@@ -198,8 +198,8 @@ td a{color:var(--brand);font-weight:700;font-size:12.5px;white-space:nowrap}
     <details class="step" open><summary><span class="num">1</span>매장 기본<span class="sum" id="sum1"></span></summary>
       <div class="fields">
         <div class="row2">
-          <div class="f"><label>매장 면적 (평)</label><input type="number" id="area" value="20" min="5" max="200"></div>
-          <div class="f"><label>좌석 수</label><input type="number" id="seats" value="24" min="0" max="300"></div>
+          <div class="f"><label>매장 면적 (평)</label><input type="number" min="0" inputmode="numeric" id="area" value="20"></div>
+          <div class="f"><label>좌석 수</label><input type="number" min="0" inputmode="numeric" id="seats" value="24"></div>
         </div>
         <div class="f"><label>매장 형태</label>
           <select id="type"><option value="takeout">테이크아웃 중심</option><option value="hall" selected>홀 중심 카페</option><option value="dessert">디저트 카페</option><option value="senior">시니어 운영 카페</option></select></div>
@@ -226,12 +226,12 @@ td a{color:var(--brand);font-weight:700;font-size:12.5px;white-space:nowrap}
     <details class="step" open><summary><span class="num">4</span>운영·설비<span class="sum" id="sum4"></span></summary>
       <div class="fields">
         <div class="row2">
-          <div class="f"><label>근무 인원 (피크)</label><input type="number" id="staff" value="2" min="1" max="10"></div>
-          <div class="f"><label>계약 전력 (kW)</label><input type="number" id="power" value="20" min="3" max="200"></div>
+          <div class="f"><label>근무 인원 (피크)</label><input type="number" min="0" inputmode="numeric" id="staff" value="2"></div>
+          <div class="f"><label>계약 전력 (kW)</label><input type="number" min="0" inputmode="numeric" id="power" value="20"></div>
         </div>
         <div class="row2">
-          <div class="f"><label>프론트 카운터 길이 (mm)</label><input type="number" id="front" value="4000" step="100"></div>
-          <div class="f"><label>백 카운터 길이 (mm)</label><input type="number" id="back" value="3500" step="100"></div>
+          <div class="f"><label>프론트 카운터 길이 (mm)</label><input type="number" min="0" inputmode="numeric" id="front" value="4000" step="100"></div>
+          <div class="f"><label>백 카운터 길이 (mm)</label><input type="number" min="0" inputmode="numeric" id="back" value="3500" step="100"></div>
         </div>
       </div></details>
     <button class="go" id="go">분석하기</button>
@@ -248,14 +248,14 @@ td a{color:var(--brand);font-weight:700;font-size:12.5px;white-space:nowrap}
   <div class="bartools panel">
     <div class="f"><label>바 형태</label><select id="bShape"><option value="parallel">11자형 (프론트+백)</option><option value="U">ㄷ자형 (프론트+옆+백)</option><option value="island">아일랜드형 (섬 프론트+백)</option><option value="Lfront">ㄱ자 프론트+백 (손님 쪽 꺾임)</option><option value="L">ㄱ자형 (프론트+옆)</option><option value="line">일자형 (한 줄)</option></select></div>
     <div class="f"><label>픽업 위치</label><select id="bPick"><option value="right">오른쪽</option><option value="left">왼쪽</option></select></div>
-    <div class="f"><label>프론트 길이 (mm)</label><input type="number" id="bFl" value="4000" step="100"></div>
-    <div class="f"><label>백·옆 길이 (mm)</label><input type="number" id="bBl" value="3500" step="100"></div>
-    <div class="f"><label>꺾인 카운터 길이 (mm)</label><input type="number" id="bSl" value="1800" step="100"></div>
-    <div class="f"><label>프론트 깊이 (mm)</label><input type="number" id="bFd" value="700" step="50"></div>
-    <div class="f"><label>백 깊이 (mm)</label><input type="number" id="bBd" value="600" step="50"></div>
-    <div class="f"><label>통로 폭 (mm)</label><input type="number" id="bAisle" value="1000" step="50"></div>
-    <div class="f"><label>작업대 높이 (mm)</label><input type="number" id="bCh" value="850" step="10"></div>
-    <div class="f"><label>손님 쪽 상판 높이 (mm)</label><input type="number" id="bLh" value="1100" step="10"></div>
+    <div class="f"><label>프론트 길이 (mm)</label><input type="number" min="0" inputmode="numeric" id="bFl" value="4000" step="100"></div>
+    <div class="f"><label>백·옆 길이 (mm)</label><input type="number" min="0" inputmode="numeric" id="bBl" value="3500" step="100"></div>
+    <div class="f"><label>꺾인 카운터 길이 (mm)</label><input type="number" min="0" inputmode="numeric" id="bSl" value="1800" step="100"></div>
+    <div class="f"><label>프론트 깊이 (mm)</label><input type="number" min="0" inputmode="numeric" id="bFd" value="700" step="50"></div>
+    <div class="f"><label>백 깊이 (mm)</label><input type="number" min="0" inputmode="numeric" id="bBd" value="600" step="50"></div>
+    <div class="f"><label>통로 폭 (mm)</label><input type="number" min="0" inputmode="numeric" id="bAisle" value="1000" step="50"></div>
+    <div class="f"><label>작업대 높이 (mm)</label><input type="number" min="0" inputmode="numeric" id="bCh" value="850" step="10"></div>
+    <div class="f"><label>손님 쪽 상판 높이 (mm)</label><input type="number" min="0" inputmode="numeric" id="bLh" value="1100" step="10"></div>
     <div class="btns"><button id="bReset">조건대로 다시 배치</button><button id="bPng">PNG 저장</button><button id="bPrint">인쇄</button></div>
     <span id="barmsg" class="barmsg"></span>
   </div>
@@ -505,10 +505,10 @@ function analyze(silent){
   // 경고
   const al=[];
   if(simKw>power) al.push(["bad","전력 초과",`동시 사용 추정 ${simKw.toFixed(1)}kW가 계약 전력 ${power}kW보다 큽니다. 냉난방·조명은 별도라 실제 여유는 더 적어요. 한전 증설이나 장비 축소를 검토하세요.`]);
-  else if(simKw>power*0.75) al.push(["warn","전력 빠듯",`장비만으로 계약 전력의 ${Math.round(simKw/power*100)}%를 씁니다. 냉난방기를 더하면 차단기가 떨어질 수 있어요.`]);
+  else if(simKw>power*0.75) al.push(["warn","전력 빠듯",`장비만으로 계약 전력의 ${power>0?Math.round(simKw/power*100):"—"}%를 씁니다. 냉난방기를 더하면 차단기가 떨어질 수 있어요.`]);
   else al.push(["ok","전력 여유",`장비 동시 사용 추정 ${simKw.toFixed(1)}kW로 계약 전력 ${power}kW 안에 들어옵니다 (냉난방·조명 별도).`]);
   if(useFront>front) al.push(["bad","프론트 부족",`프론트에 올릴 장비 폭이 약 ${useFront.toLocaleString()}mm로 카운터(${front.toLocaleString()}mm)보다 깁니다. 작업 공간이 없어요.`]);
-  else if(useFront>front*0.7) al.push(["warn","프론트 빠듯",`프론트 카운터의 ${Math.round(useFront/front*100)}%를 장비가 차지합니다. 음료 만들 작업 공간이 30% 이상 남는지 확인하세요.`]);
+  else if(useFront>front*0.7) al.push(["warn","프론트 빠듯",`프론트 카운터의 ${front>0?Math.round(useFront/front*100):"—"}%를 장비가 차지합니다. 음료 만들 작업 공간이 30% 이상 남는지 확인하세요.`]);
   if(useBack>back) al.push(["bad","백 부족",`백 카운터에 놓을 장비 폭(${useBack.toLocaleString()}mm)이 카운터 길이(${back.toLocaleString()}mm)보다 깁니다. 제빙기·냉동고를 바닥 독립형으로 빼는 것을 검토하세요.`]);
   if(perStaff>45) al.push(["warn","인력 부족",`피크 1시간에 직원 1명당 약 ${Math.round(perStaff)}잔입니다. 한 명이 시간당 40잔을 넘기면 대기가 길어져요.`]);
   if(groups===3) al.push(["warn","3그룹 전력",`3그룹 머신은 단독으로 6kW 이상 쓰는 경우가 많습니다. 전용 회로가 필요해요.`]);
@@ -532,7 +532,7 @@ function renderReport(d){
   if(!d.silent){ BAR=null; buildBar(); }
   const R=document.getElementById("report");
   const must=d.rec.filter(r=>r.must).length;
-  const pr=d.simKw/d.power, fr=d.useFront/d.front, br=d.useBack/d.back;
+  const R0=(a,b)=>b>0?a/b:(a>0?9:0); const pr=R0(d.simKw,d.power), fr=R0(d.useFront,d.front), br=R0(d.useBack,d.back);
   const color={ok:"var(--ok)",warn:"var(--warn)",bad:"var(--bad)"};
   // category breakdown
   const catCount={}; d.rec.forEach(r=>{const c=E.find(e=>e.id===r.id).cat; catCount[c]=(catCount[c]||0)+r.qty;});
@@ -554,9 +554,9 @@ function renderReport(d){
   </div>
   <div class="kpis">
     <div class="kpi"><div class="l">추천 장비</div><div class="v">${d.rec.length}<small>종</small></div><div class="s">필수 ${must} · 선택 ${d.rec.length-must}</div></div>
-    <div class="kpi"><div class="l">장비 전력 (동시 사용 추정)</div><div class="v">${d.simKw.toFixed(1)}<small>kW</small></div><div class="s tone-${tone(pr)}">계약 ${d.power}kW의 ${Math.round(pr*100)}%</div></div>
+    <div class="kpi"><div class="l">장비 전력 (동시 사용 추정)</div><div class="v">${d.simKw.toFixed(1)}<small>kW</small></div><div class="s tone-${tone(pr)}">계약 ${d.power}kW의 ${d.power>0?Math.round(pr*100)+"%":"— (계약 전력 입력 필요)"}</div></div>
     <div class="kpi"><div class="l">하루 얼음 필요량</div><div class="v">${d.iceDay}<small>kg</small></div><div class="s">제빙기 ${d.iceSize}kg급 추천</div></div>
-    <div class="kpi"><div class="l">프론트 카운터 점유</div><div class="v">${Math.round(fr*100)}<small>%</small></div><div class="s tone-${tone(fr/0.95)}">${d.useFront.toLocaleString()} / ${d.front.toLocaleString()}mm</div></div>
+    <div class="kpi"><div class="l">프론트 카운터 점유</div><div class="v">${d.front>0?Math.round(fr*100):"—"}<small>%</small></div><div class="s tone-${tone(fr/0.95)}">${d.useFront.toLocaleString()} / ${d.front.toLocaleString()}mm</div></div>
   </div>
   <div class="panel" style="padding:12px 20px;font-size:13.5px;background:#e9f5ee;border-color:#cfe8d8">필수 장비 ${d.rec.filter(r=>r.must).length}종을 바 설계에 자동으로 배치했어요. 선택 장비는 목록의 「바에 배치 →」를 누르면 알맞은 자리에 들어가요.</div>
   <div class="panel"><h3>진단</h3><p class="desc">입력한 조건으로 본 주의할 점</p>
@@ -767,8 +767,8 @@ function prodPickerHtml(sel){
    <div id="pplist">${prodListHtml(list)}</div>
    <details class="pmanual"><summary>목록에 없으면 직접 입력</summary>
      <input id="pmn" placeholder="제품명·모델명" value="${sel.b.model?sel.b.model.replace(/"/g,"&quot;"):""}">
-     <div class="row2"><input id="pmw" type="number" placeholder="폭 mm" value="${sel.b.w||""}"><input id="pmd" type="number" placeholder="깊이 mm" value="${sel.b.d||""}"></div>
-     <div class="row2"><input id="pmh" type="number" placeholder="높이 mm" value="${sel.b.h||""}"><input id="pmk" type="number" step="0.1" placeholder="소비전력 kW (모르면 비움)"></div>
+     <div class="row2"><input id="pmw" type="number" min="0" inputmode="numeric" placeholder="폭 mm" value="${sel.b.w||""}"><input id="pmd" type="number" min="0" inputmode="numeric" placeholder="깊이 mm" value="${sel.b.d||""}"></div>
+     <div class="row2"><input id="pmh" type="number" min="0" inputmode="numeric" placeholder="높이 mm" value="${sel.b.h||""}"><input id="pmk" type="number" min="0" inputmode="numeric" step="0.1" placeholder="소비전력 kW (모르면 비움)"></div>
      <button id="pmok">이 크기로 적용</button>
      <p class="desc" style="margin:4px 0 0">사양서의 W(폭)×D(깊이)×H(높이)를 넣으세요. 입력한 제품은 이 브라우저에 저장돼 다음에도 목록에 나와요.</p>
    </details></div>`;
@@ -798,7 +798,7 @@ const MOUNT={espresso:["top",540],grinder:["top",600],drip:["top",450],coldbrew:
  sink:["sink",300],induction:["top",100],oven:["top",550],waffle:["top",250],sterilizer:["top",600],pos:["top",400],
  knock:["flush",0],PICKUP:["flush",0],WORK:["flush",0],tablefridge:["under",800],dishwasher:["under",720]};
 function mountOf(b){const m=MOUNT[b.id]||["top",400]; return [m[0], b.h||m[1]];}
-function elevOpts(){return {ch:+document.getElementById("bCh").value||850, lh:+document.getElementById("bLh").value||0};}
+function elevOpts(){return {ch:Math.max(0,+document.getElementById("bCh").value||0), lh:+document.getElementById("bLh").value||0};}
 function elevCounterItems(c){
   // 직원이 마주 보는 방향 기준 왼→오. 프론트(위가 손님)는 평면도와 같고, 아래쪽 백 카운터는 반대.
   const rev=c.key!=="front"&&c.dir==="h";
@@ -910,7 +910,7 @@ function buildBar(){
   if(!LAST) analyze(true);
   const d=LAST;
   BAR={front:[makeBlock("WORK",0,"제조 작업대"),makeBlock("PICKUP",500,"픽업대")],back:[makeBlock("WORK",0,"작업대")],side:[makeBlock("WORK",0,"작업대")],underF:[],underB:[],
-       flen:d.front,blen:d.back,slen:+document.getElementById("bSl").value||1800};
+       flen:d.front,blen:d.back,slen:Math.max(0,+document.getElementById("bSl").value||0)};
   d.rec.forEach((r,ri)=>{ if(r.must) placeRec(ri); });
   document.getElementById("bFl").value=d.front; document.getElementById("bBl").value=d.back;
   selUid=null; renderBar();
@@ -936,7 +936,7 @@ function colorOf(b){ if(b.id==="WORK") return "#d9dde3"; if(b.id==="PICKUP") ret
 function renderBar(){
   if(!BAR) return;
   const o=barOpts(), M=500;
-  const fl=BAR.flen, bl=BAR.blen, sl=BAR.slen||1800;
+  const fl=BAR.flen, bl=BAR.blen, sl=BAR.slen||0;
   // 픽업 위치에 따라 좌우 반전
   const F = o.pick==="left"?[...BAR.front].reverse():BAR.front;
   const sh=o.shape, right=o.pick!=="left", S=BAR.side;
@@ -1045,7 +1045,7 @@ function renderBarSide(counters,pos,o){
   document.getElementById("barside").innerHTML=`
     ${sel?`<div class="panel selp"><h3>선택: ${nameOf(sel.b)}</h3><p class="desc">${sel.b.id==="WORK"?"남는 길이가 자동으로 작업대가 됩니다.":`${sel.b.model?`<b style="color:var(--ink)">${sel.b.model}</b><br>`:""}폭 ${sel.b.w}mm${sel.b.d?` × 깊이 ${sel.b.d}mm`:" (깊이 미지정)"}${sel.b.h?` × 높이 ${sel.b.h}mm`:""}${sel.b.kw?` · ${sel.b.kw}kW`:""}${sel.b.src?` · <a href="${sel.b.src}" target="_blank" rel="noopener">사양 출처</a>`:""}`}</p>
       <div class="selbtn"><button data-a="left">← 왼쪽</button><button data-a="right">오른쪽 →</button>${o.shape!=="line"?`${["uf","ub"].includes(sel.key)?`<button data-a="swap">${sel.key==="uf"?"백 카운터 아래로":"프론트 아래로"}</button>`:counters.filter(c=>c.key!==sel.key&&!(o.shape==="line")).map(c=>`<button data-a="to:${c.key}">→ ${c.name.replace(/ \(.*\)/,"")}</button>`).join("")}`:""}${sel.b.id!=="WORK"?`<button data-a="del">빼기</button>`:""}</div>
-      ${sel.b.id!=="WORK"?`<label class="wlab">폭(mm) <input type="number" id="selW" value="${sel.b.w}" step="10" min="100"></label>`:""}
+      ${sel.b.id!=="WORK"?`<label class="wlab">폭(mm) <input type="number" min="0" inputmode="numeric" id="selW" value="${sel.b.w}" step="10"></label>`:""}
       ${sel.b.id!=="WORK"&&sel.b.id!=="PICKUP"?prodPickerHtml(sel):""}</div>`
      :`<div class="panel"><p class="desc" style="margin:0">평면도의 장비를 <b>끌어서</b> 순서를 바꾸거나 다른 카운터로 옮길 수 있어요. 눌러서 선택하면 폭을 바꾸거나 뺄 수 있습니다.</p></div>`}
     ${LAST&&LAST.rec.some(r=>!r.must)?`<div class="panel"><h3>선택 장비</h3><p class="desc">눌러서 바에 넣거나 뺄 수 있어요. 넣으면 알맞은 자리를 자동으로 잡아요.</p><div class="optlist">${LAST.rec.map((r,ri)=>r.must?"":(()=>{const e=E.find(x=>x.id===r.id), on=recPlaced(ri); return `<button class="optchip ${on?"on":""}" data-ri="${ri}"><b>${on?"✓ ":"+ "}${e?e.name:r.id}</b><small>${r.spec}${recFootprint(r)?"":" · 소도구"}</small></button>`;})()).join("")}</div></div>`:""}
@@ -1054,7 +1054,7 @@ function renderBarSide(counters,pos,o){
   document.querySelectorAll(".selbtn button").forEach(b=>b.onclick=()=>actSel(b.dataset.a));
   document.querySelectorAll(".optchip").forEach(b=>b.onclick=()=>toggleOptional(+b.dataset.ri,false));
   document.querySelectorAll(".blist li.u").forEach(li=>li.onclick=()=>{selUid=+li.dataset.uid; renderBar();});
-  const sw=document.getElementById("selW"); if(sw) sw.onchange=()=>{const s=findBlock(selUid); if(s){s.b.w=Math.max(100,+sw.value||s.b.w); renderBar();}};
+  const sw=document.getElementById("selW"); if(sw) sw.onchange=()=>{const s=findBlock(selUid); if(s){s.b.w=Math.max(0,+sw.value||0); renderBar();}};
   if(sel&&sel.b.id!=="WORK"&&sel.b.id!=="PICKUP") bindProdPicker(sel);
 }
 function listOf(key){return {front:BAR.front,back:BAR.back,side:BAR.side,uf:BAR.underF,ub:BAR.underB}[key];}
@@ -1116,13 +1116,15 @@ function prepSide(){ if(!BAR) return; const sh=barOpts().shape; if(BAR.side.some
   if(sh==="U") mv(BAR.back,["sterilizer"]);
   if(sh==="Lfront") mv(BAR.front,["showcase"]); }
 document.getElementById("bShape").addEventListener("change",()=>{prepSide();renderBar();});
-["bFd","bBd","bAisle","bPick","bCh","bLh"].forEach(id=>document.getElementById(id).addEventListener("change",renderBar));
-document.getElementById("bSl").addEventListener("change",()=>{if(!BAR)return;BAR.slen=Math.max(500,+document.getElementById("bSl").value||1800);renderBar();});
+["bFd","bBd","bAisle","bPick","bCh","bLh"].forEach(id=>{const el=document.getElementById(id); el.addEventListener("change",renderBar); if(el.tagName==="INPUT") el.addEventListener("input",renderBar);});
+document.getElementById("bSl").addEventListener("input",()=>{if(!BAR)return;BAR.slen=Math.max(0,+document.getElementById("bSl").value||0);renderBar();});
 // 카운터 길이: 「운영·설비」 입력과 바 설계 입력을 서로 맞춤
 function syncCounterLen(src){
   const g=id=>document.getElementById(id);
-  const fl=Math.max(500,+(src==="bar"?g("bFl"):g("front")).value||4000), bl=Math.max(500,+(src==="bar"?g("bBl"):g("back")).value||3500);
-  g("front").value=fl; g("back").value=bl; g("bFl").value=fl; g("bBl").value=bl;
+  const num=el=>Math.max(0,+el.value||0);
+  const fl=num(src==="bar"?g("bFl"):g("front")), bl=num(src==="bar"?g("bBl"):g("back"));
+  if(src==="bar"){ g("front").value=g("bFl").value; g("back").value=g("bBl").value; }
+  else { g("bFl").value=g("front").value; g("bBl").value=g("back").value; }
   if(LAST){LAST.front=fl; LAST.back=bl;}
   if(typeof sums==="function") sums();
   if(BAR){BAR.flen=fl; BAR.blen=bl; renderBar();}
