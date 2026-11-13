@@ -114,12 +114,30 @@ td a{color:var(--brand);font-weight:700;font-size:12.5px;white-space:nowrap}
 .modal .x{float:right;border:0;background:none;font-size:22px;cursor:pointer;color:var(--muted)}
 .buy a{display:inline-block;margin:6px 6px 0 0;font-size:14px;font-weight:700;text-decoration:none;padding:9px 14px;border-radius:10px;border:1.5px solid var(--ink);color:var(--ink)}
 .buy a:first-child{background:var(--ink);color:#fff}
+.psearch{margin-left:auto;display:flex;gap:6px;flex:1;max-width:460px}
+.psearch input{flex:1;min-width:0;font:inherit;font-size:14px;padding:8px 12px;border-radius:8px;border:0;background:rgba(255,255,255,.95)}
+.psearch button{font:inherit;font-size:14px;font-weight:700;padding:8px 14px;border-radius:8px;border:0;background:var(--accent);color:#fff;cursor:pointer;white-space:nowrap}
+@media(max-width:820px){.top .in{flex-wrap:wrap;height:auto;padding:10px 20px}.psearch{order:3;max-width:none;flex-basis:100%}nav{height:44px}}
+.pres h2{margin:0 0 2px;font-size:20px;word-break:break-all}
+.pres .det{display:flex;gap:12px;align-items:center;padding:12px;border-radius:12px;margin:14px 0;cursor:pointer}
+.pres .det .ic{width:56px;height:56px;border-radius:10px;background:#fff;display:flex;align-items:center;justify-content:center;flex:none}
+.pres .det .ic svg{width:40px;height:40px}
+.pres .det b{display:block;font-size:16px}
+.pres .det span{font-size:12.5px;color:var(--muted)}
+.pres h3{font-size:13px;color:var(--muted);margin:16px 0 6px}
+.links{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.links a{display:block;text-decoration:none;color:var(--ink);border:1.5px solid var(--line);border-radius:10px;padding:10px 12px;font-size:14px;font-weight:700}
+.links a small{display:block;font-weight:400;color:var(--muted);font-size:12px}
+.links a:hover{border-color:var(--ink)}
+.recent{display:flex;flex-wrap:wrap;gap:6px}
+.recent button{font:inherit;font-size:12.5px;padding:5px 10px;border-radius:8px;border:1px solid var(--line);background:#f6f7f9;cursor:pointer}
 </style>
 </head>
 <body>
 <div class="top"><div class="in">
   <div class="logo">장비찾기 <small>카페 장비 시각가이드</small></div>
   <nav><button class="on" data-v="analyze">장비 구성 분석</button><button data-v="dict">장비 사전</button></nav>
+  <form class="psearch" id="pform"><input id="pq" type="search" placeholder="제품명·모델명 검색 (예: 시모넬리 아피아, 호시자키 제빙기)" aria-label="제품명 검색"><button type="submit">검색</button></form>
 </div></div>
 
 <section class="view on" id="v-analyze">
@@ -175,7 +193,7 @@ td a{color:var(--brand);font-weight:700;font-size:12.5px;white-space:nowrap}
 </section>
 
 <section class="view" id="v-dict"><div class="dict">
-  <div class="dtools"><input id="q" type="search" placeholder="장비 이름이나 하고 싶은 일로 검색 (예: 얼음, 스팀, 세척)"></div>
+  <div class="dtools"><input id="q" type="search" placeholder="장비 이름·브랜드·하고 싶은 일로 검색 (예: 얼음, 메저, 세척)"></div>
   <div class="dtools" id="chips"></div>
   <div class="grid" id="grid"></div>
 </div></section>
@@ -520,11 +538,81 @@ function renderDict(){
   ch.innerHTML=[["all","전체"],...Object.entries(CATS).map(([k,v])=>[k,v.name])].map(([k,n])=>`<button class="chip ${dc===k?"on":""}" data-c="${k}">${n}</button>`).join("");
   ch.querySelectorAll(".chip").forEach(b=>b.onclick=()=>{dc=b.dataset.c;renderDict();});
   const q=dq.trim().toLowerCase();
-  const list=E.filter(e=>(dc==="all"||e.cat===dc)&&(!q||[e.name,e.alias,e.use,...e.tags].join(" ").toLowerCase().includes(q)));
+  const list=E.filter(e=>(dc==="all"||e.cat===dc)&&(!q||[e.name,e.alias,e.use,...e.tags,...(BRANDS[e.id]||[])].join(" ").toLowerCase().includes(q)));
   document.getElementById("grid").innerHTML=list.map(e=>{const c=CATS[e.cat];return `<div class="card" data-id="${e.id}"><div class="art" style="background:${c.bg};color:${c.color}">${IC[e.id]}</div><div class="cbody"><span class="c" style="color:${c.color}">${c.name} · ${e.must?"필수":"선택"}</span><h4>${e.name}</h4><p>${e.use}</p></div></div>`}).join("")||'<p style="color:var(--muted)">찾는 장비가 없어요.</p>';
   document.querySelectorAll(".card").forEach(el=>el.onclick=()=>openModal(el.dataset.id));
 }
 document.getElementById("q").oninput=e=>{dq=e.target.value;renderDict();};
+// ===== 제품명 검색 =====
+const BRANDS = {
+ espresso:["라심발리","la cimbali","cimbali","훼마","faema","시모넬리","simonelli","누오바 시모넬리","nuova simonelli","빅토리아 아르두이노","victoria arduino","라마르조꼬","라 마르조꼬","la marzocco","marzocco","베제라","bezzera","모다","moda","란실리오","rancilio","달라꼬르떼","dalla corte","아스토리아","astoria","가지아","gaggia","유니크","시네소","synesso","슬레이어","slayer","아피아","appia","오렐리아","aurelia","리네아","linea","gb5","m39","m100","에스프레소","커피머신","반자동"],
+ grinder:["말코닉","mahlkonig","mahlkönig","ek43","e65","e80","메저","mazzer","슈퍼졸리","super jolly","안핌","anfim","유레카","eureka","피오렌조또","fiorenzato","콤판다트","compak","빅토리아 미토스","mythos","퓨마","puqpress","티몬","그라인더","분쇄기"],
+ drip:["칼리타","kalita","하리오","hario","v60","케맥스","chemex","펠로우","fellow","부온","bunn","fetco","페트코","마키네스카","marco","드리퍼","드립포트","배치브루"],
+ coldbrew:["콜드브루","더치","toddy","토디"],
+ tablefridge:["테이블냉장고","테이블 냉장고","작업대냉장고","유니크대성","그랜드우성","우성","스타리온","라셀르","부성","에버젠","카이저","터보에어","turbo air"],
+ showcase:["쇼케이스","케이크쇼케이스","음료냉장고","오픈쇼케이스"],
+ ice:["호시자키","hoshizaki","스코츠만","scotsman","아이스트로","icetro","카이저 제빙","제빙기","im-","km-"],
+ freezer:["냉동고","스탠드냉동고"],
+ blender:["블렌텍","blendtec","바이타믹스","vitamix","콰이어트원","quiet one","테크니바","블렌더","믹서"],
+ hotwater:["온수기","핫워터","보온온수기","bunn 온수"],
+ dispenser:["디스펜서","주스디스펜서","음료디스펜서"],
+ pitcher:["스팀피처","밀크피처","피처","모타","motta","루돌프","rhinowares"],
+ dishwasher:["식기세척기","윈터할터","winterhalter","메이코","meiko","호바트","hobart","린나이 식기","세척기"],
+ sterilizer:["컵소독기","살균기","식기건조기"],
+ filter:["브리타","brita","에버퓨어","everpure","3m","정수필터","연수기","bwt"],
+ sink:["싱크대","린서","피처린서"],
+ induction:["인덕션","전기레인지","하이라이트"],
+ oven:["오븐","컨벡션","우녹스","unox","스메그","smeg","라쇼"],
+ waffle:["와플","와플기","토스터","파니니","그릴"],
+ pos:["포스","pos","키오스크","토스포스","토스 포스","배민포스","포스기","카드단말기"],
+ scale:["저울","아카이아","acaia","타임모어","timemore","브루이스타","brewista"],
+ tamper:["탬퍼","템퍼","디스트리뷰터","퓨크프레스","puqpress"],
+ knock:["넉박스","노크박스","찌꺼기통"]
+};
+function detect(q){
+  const t=q.toLowerCase().replace(/\s+/g," ");
+  let best=null,len=0;
+  for(const [id,arr] of Object.entries(BRANDS)) for(const b of arr){
+    if(t.includes(b.toLowerCase()) && b.length>len){best=id;len=b.length;}
+  }
+  if(!best){ // 장비 이름·별칭으로도
+    for(const e of E){ for(const w of [e.name,...e.alias.split("·")].map(x=>x.trim().replace(/\s/g,""))){ if(w && t.replace(/\s/g,"").includes(w) && w.length>len){best=e.id;len=w.length;} } }
+  }
+  return best;
+}
+function recentGet(){try{return JSON.parse(localStorage.getItem("eqRecent")||"[]")}catch(e){return []}}
+function recentAdd(q){try{const r=[q,...recentGet().filter(x=>x!==q)].slice(0,8);localStorage.setItem("eqRecent",JSON.stringify(r))}catch(e){}}
+function productSearch(q){
+  q=q.trim(); if(!q) return;
+  recentAdd(q);
+  const id=detect(q), e=id?E.find(x=>x.id===id):null, k=encodeURIComponent(q);
+  const L=(href,t,sub)=>`<a href="${href}" target="_blank" rel="noopener">${t}<small>${sub}</small></a>`;
+  const rec=recentGet().filter(x=>x!==q);
+  document.getElementById("modal").innerHTML=`<button class="x">×</button><div class="pres">
+    <span style="font-size:12px;color:var(--muted)">제품명 검색</span><h2>${q.replace(/</g,"&lt;")}</h2>
+    ${e?`<div class="det" id="detcard" style="background:${CATS[e.cat].bg}"><div class="ic" style="color:${CATS[e.cat].color}">${IC[e.id]}</div><div><span>${CATS[e.cat].name} · 이 제품은 아마도</span><b>${e.name}</b><span>눌러서 고를 때 확인할 점 보기 →</span></div></div>`
+      :`<p style="font-size:13.5px;color:var(--muted);margin:12px 0">어떤 장비인지 자동으로 알아보지 못했어요. 아래 링크로 바로 찾아보세요.</p>`}
+    <h3>가격·구매처</h3>
+    <div class="links">
+      ${L(`https://search.shopping.naver.com/search/all?query=${k}`,"네이버쇼핑","가격 비교·스토어")}
+      ${L(`https://search.danawa.com/dsearch.php?query=${k}`,"다나와","최저가 비교")}
+    </div>
+    <h3>사양·후기</h3>
+    <div class="links">
+      ${L(`https://www.google.com/search?q=${encodeURIComponent(q+" 사양 소비전력 크기")}`,"사양서 찾기","소비전력·크기·급배수")}
+      ${L(`https://search.naver.com/search.naver?query=${encodeURIComponent(q+" 후기")}`,"네이버 후기","블로그·카페 사용기")}
+      ${L(`https://www.youtube.com/results?search_query=${k}`,"유튜브","사용·세팅 영상")}
+      ${L(`https://www.google.com/search?q=${encodeURIComponent(q+" manual pdf")}`,"매뉴얼 PDF","제조사 설명서")}
+    </div>
+    ${rec.length?`<h3>최근 검색</h3><div class="recent">${rec.map(r=>`<button data-q="${r.replace(/"/g,"&quot;")}">${r.replace(/</g,"&lt;")}</button>`).join("")}</div>`:""}
+  </div>`;
+  document.getElementById("scrim").classList.add("open");
+  document.querySelector("#modal .x").onclick=()=>document.getElementById("scrim").classList.remove("open");
+  const dc=document.getElementById("detcard"); if(dc) dc.onclick=()=>openModal(id);
+  document.querySelectorAll(".recent button").forEach(b=>b.onclick=()=>{document.getElementById("pq").value=b.dataset.q;productSearch(b.dataset.q);});
+}
+document.getElementById("pform").onsubmit=ev=>{ev.preventDefault();productSearch(document.getElementById("pq").value);};
+
 renderDict();
 
 function openModal(id){
@@ -534,9 +622,11 @@ function openModal(id){
    <h2>${e.name}</h2><div style="color:var(--muted);font-size:13px">${e.alias}</div>
    <p>${e.use}</p><b style="font-size:13px;color:var(--muted)">고를 때 확인할 점</b>
    <ul>${e.check.map(x=>`<li>${x}</li>`).join("")}</ul>
+   <form id="mform" style="display:flex;gap:6px;margin:10px 0 4px"><input id="mq" placeholder="이 장비의 제품명·모델명 입력" style="flex:1;font:inherit;font-size:14px;padding:9px 11px;border:1.5px solid var(--line);border-radius:8px"><button style="font:inherit;font-weight:700;border:0;border-radius:8px;background:var(--accent);color:#fff;padding:0 14px;cursor:pointer">검색</button></form>
    <div class="buy"><a href="https://search.shopping.naver.com/search/all?query=${kw}" target="_blank" rel="noopener">네이버쇼핑 검색</a><a href="https://search.danawa.com/dsearch.php?query=${kw}" target="_blank" rel="noopener">다나와 가격비교</a></div>`;
   document.getElementById("scrim").classList.add("open");
   document.querySelector("#modal .x").onclick=()=>document.getElementById("scrim").classList.remove("open");
+  const mf=document.getElementById("mform"); if(mf) mf.onsubmit=ev=>{ev.preventDefault();productSearch(document.getElementById("mq").value);};
 }
 document.getElementById("scrim").onclick=ev=>{if(ev.target.id==="scrim")ev.target.classList.remove("open");};
 document.addEventListener("keydown",ev=>{if(ev.key==="Escape")document.getElementById("scrim").classList.remove("open");});
