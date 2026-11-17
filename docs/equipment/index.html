@@ -396,6 +396,9 @@ const IC = {
   tablefridge:S('<rect x="6" y="18" width="52" height="34" rx="3"/><path d="M32 18v34"/><path d="M26 30v10M38 30v10"/><path d="M6 14h52"/><path d="M12 52v4M52 52v4"/>'),
   showcase:S('<rect x="10" y="6" width="44" height="52" rx="3"/><rect x="15" y="11" width="34" height="34" rx="1"/><path d="M15 23h34M15 34h34"/><path d="M20 18v5M28 18v5M24 29v5M34 29v5M42 40v5"/><path d="M10 50h44"/>'),
   ice:S('<rect x="10" y="6" width="44" height="52" rx="4"/><path d="M10 24h44"/><rect x="18" y="32" width="10" height="10" rx="2"/><rect x="32" y="36" width="10" height="10" rx="2"/><rect x="24" y="44" width="9" height="9" rx="2"/><circle cx="46" cy="15" r="3"/>'),
+  tablefreezer:S('<rect x="6" y="18" width="52" height="34" rx="3"/><path d="M32 18v34"/><path d="M6 14h52"/><path d="M19 28v14M13 31l12 8M25 31l-12 8"/><path d="M45 28v14M39 31l12 8M51 31l-12 8"/><path d="M12 52v4M52 52v4"/>'),
+  fridge25:S('<rect x="18" y="4" width="28" height="56" rx="3"/><path d="M18 30h28"/><path d="M41 12v10M41 36v12"/><path d="M22 60v2M42 60v2"/>'),
+  fridge45:S('<rect x="8" y="4" width="48" height="56" rx="3"/><path d="M32 4v56M8 30h48"/><path d="M28 12v10M36 12v10M28 36v12M36 36v12"/><path d="M14 18l4 4M18 18l-4 4"/>'),
   freezer:S('<rect x="6" y="20" width="52" height="34" rx="3"/><path d="M6 28h52"/><path d="M26 24h12"/><path d="M32 34v14M26 37l12 8M38 37l-12 8"/>'),
   blender:S('<path d="M22 6h20l-3 30H25z"/><path d="M27 16h10"/><path d="M22 36h20l2 8H20z"/><rect x="18" y="44" width="28" height="12" rx="3"/><circle cx="32" cy="50" r="2"/>'),
   hotwater:S('<rect x="14" y="8" width="36" height="40" rx="4"/><path d="M24 48v4h16v-4"/><path d="M28 18c0 4 4 4 4 8M36 18c0 4 4 4 4 8"/><rect x="22" y="32" width="20" height="8" rx="2"/><path d="M12 56h40"/>'),
@@ -446,6 +449,18 @@ const E = [
   use:"아이스 음료용 얼음을 만드는 장비. 여름 매출과 직결.",
   check:["하루 생산량(kg)과 저장 용량을 성수기 기준으로","공랭식 / 수랭식, 설치 장소의 열·환기","급수·배수 연결 필수","얼음 모양(큐브·반달 등)이 음료에 맞는지","세척·필터 관리 주기"],
   tags:["얼음","아이스","여름","냉"],kw:"업소용 제빙기 50kg"},
+ {id:"tablefreezer",cat:"cold",name:"테이블 냉동고",alias:"작업대 냉동고 · 언더카운터 냉동고",must:false,zone:"백",
+  use:"작업대 아래에 두는 냉동고. 냉동 과일·생지·아이스크림을 손 닿는 곳에 보관.",
+  check:["폭: 1200·1500·1800mm 중 카운터 길이에 맞춤","깊이 700mm 전후 — 카운터 깊이와 맞는지","냉동 전용 / 냉동·냉장 겸용(칸 분리) 구분","문 여닫는 방향과 통로 폭","하부 통풍(기계실 위치)"],
+  tags:["냉동","과일","생지","아이스크림","보관","작업대"],kw:"테이블 냉동고 업소용"},
+ {id:"fridge25",cat:"cold",name:"25박스 냉장고",alias:"스탠드 냉장고 · 업소용 냉장고 25박스",must:false,zone:"백",
+  use:"우유·생크림·재고를 한꺼번에 보관하는 문 2개짜리 스탠드 냉장고 (약 폭 700 × 깊이 800 × 높이 1,900mm).",
+  check:["설치 자리: 폭 700mm, 깊이 800mm, 위로 1,900mm 이상","문 여는 방향과 통로 폭(문 열 때 약 600mm 필요)","직냉식 / 간냉식(성에 없음) 구분","전원 220V 단독 콘센트","뒤·위로 통풍 공간 10cm 이상"],
+  tags:["냉장","우유","재고","스탠드","25박스"],kw:"25박스 냉장고 업소용"},
+ {id:"fridge45",cat:"cold",name:"45박스 냉동냉장고",alias:"45박스 냉장고 · 업소용 냉동냉장고 4도어",must:false,zone:"백",
+  use:"냉장과 냉동을 한 대로 해결하는 문 4개짜리 스탠드 냉장고 (약 폭 1,260 × 깊이 800 × 높이 1,900mm).",
+  check:["설치 자리: 폭 1,260mm, 깊이 800mm, 위로 1,900mm 이상","냉동·냉장 칸 비율 (1/4 냉동, 1/2 냉동 등)","직냉식 / 간냉식 구분","문 여는 방향과 통로 폭","반입 경로: 출입문·엘리베이터 폭 확인"],
+  tags:["냉장","냉동","재고","스탠드","45박스","4도어"],kw:"45박스 냉동냉장고 업소용"},
  {id:"freezer",cat:"cold",name:"업소용 냉동고",alias:"스탠드 냉동고 · 냉동 쇼케이스",must:false,zone:"백",
   use:"냉동 디저트, 냉동 과일, 얼음 보관.",
   check:["스탠드형 / 다이렉트(눕힌) 형","용량과 칸 구성","제빙기 저장량으로 부족할 때 얼음 보관용 겸용"],
@@ -532,6 +547,9 @@ const SPEC = {
  showcase:{kw:0.6,w:900,z:"front"},
  ice:{kw:0.9,w:600,z:"back"},
  freezer:{kw:0.4,w:650,z:"back"},
+ tablefreezer:{kw:0.45,w:0,z:"under"},
+ fridge25:{kw:0.4,w:700,z:"back"},
+ fridge45:{kw:0.65,w:1260,z:"back"},
  blender:{kw:1.5,w:250,z:"front"},
  hotwater:{kw:3,w:300,z:"front"},
  dispenser:{kw:0.3,w:400,z:"back"},
@@ -553,7 +571,7 @@ const SPEC = {
 const ICE_SIZES=[30,50,70,100,150,200];
 const val=id=>+document.getElementById(id).value;
 
-const EXTRA_SPEC={espresso:"2그룹 반자동",grinder:"에스프레소용 1대",drip:"핸드드립 세트 2~3구",coldbrew:"더치 타워 또는 침출식",tablefridge:"테이블 냉장고 1500",showcase:"제과 쇼케이스 900",ice:"일 50kg급",freezer:"업소용 냉동고",blender:"업소용 블렌더",hotwater:"온수기 8~10L",dispenser:"음료 디스펜서 2구",pitcher:"스팀 피처 2개 이상",dishwasher:"언더카운터 도어형",sterilizer:"자외선 컵 소독기",filter:"정수 필터",sink:"싱크대 1조",induction:"인덕션 1구",oven:"컨벡션 오븐",waffle:"와플 기계",pos:"POS",scale:"0.1g 저울",tamper:"58mm 탬퍼",knock:"카운터 매립형",autosteam:"스팀보스 S",autotamp:"퍽프레스 Q2"};
+const EXTRA_SPEC={espresso:"2그룹 반자동",grinder:"에스프레소용 1대",drip:"핸드드립 세트 2~3구",coldbrew:"더치 타워 또는 침출식",tablefridge:"테이블 냉장고 1500",tablefreezer:"테이블 냉동고 1200",fridge25:"25박스 냉장고 (700×800×1900)",fridge45:"45박스 냉동냉장고 (1260×800×1900)",showcase:"제과 쇼케이스 900",ice:"일 50kg급",freezer:"업소용 냉동고",blender:"업소용 블렌더",hotwater:"온수기 8~10L",dispenser:"음료 디스펜서 2구",pitcher:"스팀 피처 2개 이상",dishwasher:"언더카운터 도어형",sterilizer:"자외선 컵 소독기",filter:"정수 필터",sink:"싱크대 1조",induction:"인덕션 1구",oven:"컨벡션 오븐",waffle:"와플 기계",pos:"POS",scale:"0.1g 저울",tamper:"58mm 탬퍼",knock:"카운터 매립형",autosteam:"스팀보스 S",autotamp:"퍽프레스 Q2"};
 function analyze(silent){
   const area=val("area"),seats=val("seats"),type=document.getElementById("type").value;
   const menus=[...document.querySelectorAll("#menus input:checked")].map(i=>i.value);
@@ -592,6 +610,9 @@ function analyze(silent){
   add("tablefridge",fridgeN,`${fridgeW}mm${fridgeN>1?" ×2 (프론트·백)":""}`,"우유·시럽·과일청을 손 닿는 곳에 보관");
   if(has("cake")||has("bottle")) add("showcase",1,has("cake")&&has("bottle")?"케이크용 + 병음료용 각 1대 검토":has("cake")?"케이크용 사각/곡면 유리":"병음료용 수직형","진열 판매 메뉴가 있음",true,undefined,has("cake")&&has("bottle")?1600:900);
   if(has("bake")||has("smoothie")||iceDay>iceSize*0.85) add("freezer",1,"스탠드형 냉동고","냉동 과일·생지·여분 얼음 보관",false);
+  if(has("smoothie")||has("bake")) add("tablefreezer",1,"1200mm","냉동 과일·생지를 작업대 아래 손 닿는 곳에 두면 스무디·베이킹 동선이 짧아짐",false);
+  if(cups>=250||(has("bake")&&cups>=150)) add("fridge45",1,"45박스 냉동냉장고 (1260×800×1900)",`하루 ${cups}잔이면 우유 박스·디저트·냉동 재고가 많아 냉장+냉동을 한 대로 두는 게 편함`,false);
+  else if(cups>=120) add("fridge25",1,"25박스 냉장고 (700×800×1900)",`하루 ${cups}잔이면 우유·생크림 재고가 테이블 냉장고만으로 모자랄 수 있음`,false);
   // 음료
   if(has("espresso")){
     if(has("autotamp")) add("autotamp",groups>=3?2:1,`퍽프레스 Q2급 ${groups>=3?2:1}대`,"자동 템핑기를 쓰기로 선택함 — 그라인더와 머신 사이에 배치");
@@ -760,6 +781,9 @@ const BRANDS = {
  showcase:["쇼케이스","케이크쇼케이스","음료냉장고","오픈쇼케이스"],
  ice:["호시자키","hoshizaki","스코츠만","scotsman","아이스트로","icetro","카이저 제빙","제빙기","im-","km-"],
  freezer:["냉동고","스탠드냉동고"],
+ tablefreezer:["테이블냉동고","테이블 냉동고","작업대냉동고"],
+ fridge25:["25박스","25박스냉장고","25박스 냉장고"],
+ fridge45:["45박스","45박스냉동냉장고","45박스 냉장고","냉동냉장고","4도어냉장고"],
  blender:["블렌텍","blendtec","바이타믹스","vitamix","콰이어트원","quiet one","테크니바","블렌더","믹서"],
  hotwater:["온수기","핫워터","보온온수기","bunn 온수"],
  dispenser:["디스펜서","주스디스펜서","음료디스펜서"],
@@ -866,7 +890,11 @@ const PRODUCTS=[
  {t:"dishwasher",n:"윈터할터 UC-M",k:"winterhalter uc-m 윈터할터",w:600,d:617,h:715,kw:4.2,src:"https://www.catering-appliance.com/winterhalter-uc-m-dw-500mm-18-plate-undercounter-dishwasher-with-drain-pump-hardwired"},
  {t:"tablefridge",n:"테이블 냉장고 1200 (일반 규격)",k:"테이블냉장고 1200",w:1200,d:700,h:800,generic:true},
  {t:"tablefridge",n:"테이블 냉장고 1500 (일반 규격)",k:"테이블냉장고 1500",w:1500,d:700,h:800,generic:true},
- {t:"tablefridge",n:"테이블 냉장고 1800 (일반 규격)",k:"테이블냉장고 1800",w:1800,d:700,h:800,generic:true}
+ {t:"tablefridge",n:"테이블 냉장고 1800 (일반 규격)",k:"테이블냉장고 1800",w:1800,d:700,h:800,generic:true},
+ {t:"tablefreezer",n:"테이블 냉동고 1200 (일반 규격)",k:"테이블냉동고 1200",w:1200,d:700,h:800,generic:true},
+ {t:"tablefreezer",n:"테이블 냉동고 1500 (일반 규격)",k:"테이블냉동고 1500",w:1500,d:700,h:800,generic:true},
+ {t:"fridge25",n:"25박스 냉장고 (일반 규격)",k:"25박스 냉장고",w:700,d:800,h:1900,generic:true},
+ {t:"fridge45",n:"45박스 냉동냉장고 (일반 규격)",k:"45박스 냉동냉장고",w:1260,d:800,h:1900,generic:true}
 ];
 function myProducts(){try{return JSON.parse(localStorage.getItem("eqMyProducts")||"[]")}catch(e){return []}}
 function saveMyProduct(p){try{const l=[p,...myProducts().filter(x=>x.n!==p.n)].slice(0,30);localStorage.setItem("eqMyProducts",JSON.stringify(l))}catch(e){}}
@@ -927,7 +955,7 @@ function bindProdPicker(sel){
 const MOUNT={espresso:["top",540],grinder:["top",600],drip:["top",450],coldbrew:["top",600],showcase:["top",700],
  ice:["floor",840],freezer:["floor",1850],blender:["top",450],hotwater:["top",450],dispenser:["top",600],
  sink:["sink",300],induction:["top",100],oven:["top",550],waffle:["top",250],sterilizer:["top",600],pos:["top",400],
- autosteam:["top",620],autotamp:["top",286],knock:["flush",0],PICKUP:["flush",0],WORK:["flush",0],tablefridge:["under",800],dishwasher:["under",720]};
+ autosteam:["top",620],autotamp:["top",286],knock:["flush",0],PICKUP:["flush",0],WORK:["flush",0],tablefridge:["under",800],tablefreezer:["under",800],dishwasher:["under",720],fridge25:["floor",1900],fridge45:["floor",1900]};
 function mountOf(b){const m=MOUNT[b.id]||["top",400]; return [m[0], b.h||m[1]];}
 function elevOpts(){return {ch:Math.max(0,+document.getElementById("bCh").value||0), lh:+document.getElementById("bLh").value||0};}
 function elevCounterItems(c){
@@ -1011,7 +1039,7 @@ function elevChecks(counters){
 let LAST=null;           // 마지막 분석 결과
 let BAR=null;            // {counters:{front:[...],back:[...]}, opts}
 const BAR_ORDER_FRONT=["pos","showcase","espresso","autosteam","knock","autotamp","grinder","hotwater","WORK","blender","drip","PICKUP"];
-const BAR_ORDER_BACK=["sink","sterilizer","induction","oven","waffle","freezer","coldbrew","WORK","dispenser","ice"];
+const BAR_ORDER_BACK=["sink","sterilizer","induction","oven","waffle","freezer","fridge25","fridge45","coldbrew","WORK","dispenser","ice"];
 let selUid=null, uidSeq=1;
 
 function barOpts(){
@@ -1028,6 +1056,7 @@ function placeRec(ri){
   const r=LAST.rec[ri], out=[]; if(!r) return out;
   const n=Math.max(1,r.qty);
   if(r.id==="tablefridge"){ const w=parseInt(r.spec)||1500; for(let i=0;i<n;i++){const b=makeBlock("tablefridge",w); b.rec=ri; (i===0?BAR.underF:BAR.underB).push(b); out.push(b);} return out; }
+  if(r.id==="tablefreezer"){ const w=parseInt(r.spec)||1200; for(let i=0;i<n;i++){ const b=makeBlock("tablefreezer",w); b.rec=ri; const uf=BAR.underF.reduce((a,x)=>a+x.w,0), ub=BAR.underB.reduce((a,x)=>a+x.w,0); (ub<=uf?BAR.underB:BAR.underF).push(b); out.push(b);} return out; }
   if(r.id==="dishwasher"){ const b=makeBlock("dishwasher",600); b.rec=ri; BAR.underB.push(b); out.push(b); return out; }
   const z=SPEC[r.id]?SPEC[r.id].z:"none"; if(r.w<=0||(z!=="front"&&z!=="back")) return out;
   const one=r.w/n;
@@ -1038,7 +1067,7 @@ function placeRec(ri){
 }
 function recPlaced(ri){ return ["front","back","side","uf","ub"].some(k=>listOf(k).some(b=>b.rec===ri)); }
 function removeRec(ri){ ["front","back","side","uf","ub"].forEach(k=>{const l=listOf(k); for(let i=l.length-1;i>=0;i--) if(l[i].rec===ri) l.splice(i,1);}); }
-function recFootprint(r){ return r.id==="tablefridge"||r.id==="dishwasher"||(r.w>0&&SPEC[r.id]&&["front","back"].includes(SPEC[r.id].z)); }
+function recFootprint(r){ return r.id==="tablefridge"||r.id==="tablefreezer"||r.id==="dishwasher"||(r.w>0&&SPEC[r.id]&&["front","back"].includes(SPEC[r.id].z)); }
 function buildBar(){
   if(!LAST) analyze(true);
   const d=LAST;
@@ -1166,7 +1195,8 @@ function renderBarSide(counters,pos,o){
   counters.forEach(c=>{const u=sumW(c.list,c.len); if(u>c.len) chk.push(["bad",`${c.name}: 장비 폭 ${u.toLocaleString()}mm가 카운터 ${c.len.toLocaleString()}mm보다 ${(u-c.len).toLocaleString()}mm 깁니다. 빨간 점선 장비를 다른 카운터로 옮기거나 카운터를 늘리세요.`]);
     else { const w=c.len-u; if(c.key==="front"&&w<800) chk.push(["warn",`프론트 작업 공간이 ${w}mm뿐이에요. 음료를 만들려면 800mm 이상 남기는 게 좋아요.`]); }
     const ul=c.under.reduce((a,b)=>a+b.w,0); if(ul>c.len) chk.push(["warn",`${c.name} 아래 장비(${ul.toLocaleString()}mm)가 카운터보다 깁니다.`]);
-    c.list.filter(b=>b.d&&b.d>c.depth).forEach(b=>chk.push(["bad",`${b.model||nameOf(b)} 깊이 ${b.d}mm가 ${c.name} 깊이 ${c.depth}mm보다 깊어요. 카운터 깊이를 늘리거나 다른 카운터로 옮기세요.`]));
+    c.list.filter(b=>b.d&&b.d>c.depth&&(MOUNT[b.id]||[])[0]==="floor").forEach(b=>chk.push(["warn",`${b.model||nameOf(b)}는 바닥에 서는 스탠드형이라 ${c.name} 라인보다 ${b.d-c.depth}mm 앞으로 나와요. 통로 폭과 문 여는 공간(약 600mm)을 확인하세요.`]));
+    c.list.filter(b=>b.d&&b.d>c.depth&&(MOUNT[b.id]||[])[0]!=="floor").forEach(b=>chk.push(["bad",`${b.model||nameOf(b)} 깊이 ${b.d}mm가 ${c.name} 깊이 ${c.depth}mm보다 깊어요. 카운터 깊이를 늘리거나 다른 카운터로 옮기세요.`]));
     c.list.filter(b=>b.d&&b.d<=c.depth&&c.depth-b.d<100&&b.id==="espresso").forEach(b=>chk.push(["warn",`${b.model||nameOf(b)} 앞 여유가 ${c.depth-b.d}mm뿐이에요. 머신 앞에 피처·컵 놓을 자리를 생각하면 카운터 깊이를 조금 더 잡는 게 좋아요.`]));
     c.under.filter(b=>b.d&&b.d>c.depth).forEach(b=>chk.push(["warn",`카운터 아래 ${b.model||nameOf(b)} 깊이 ${b.d}mm가 카운터 깊이 ${c.depth}mm보다 깊어 앞으로 튀어나와요.`])); });
   const es=P("espresso")[0], gr=P("grinder")[0], hw=P("hotwater")[0], bl=P("blender")[0], ic=P("ice")[0];
@@ -1518,9 +1548,9 @@ function sceneSvg(c){
   let items=[]; if(typeof BAR!=="undefined"&&BAR){ let t=0; BAR.front.forEach(b=>{const L=b.id==="WORK"?flexW(BAR.front,BAR.flen):b.w; items.push({b,x:t,w:L}); t+=L;}); }
   if(!items.length){ items=[["pos",450],["espresso",800],["autosteam",200],["knock",150],["grinder",250],["hotwater",300],["WORK",1100],["blender",250],["PICKUP",500]].map(([id,w],i,a)=>({b:{id,w},x:a.slice(0,i).reduce((s,z)=>s+z[1],0),w})); }
   const total=Math.max(1,items.reduce((s,i)=>Math.max(s,i.x+i.w),0)), cx0=180, cw=1240, sc=cw/total, topY=600, ch=150;
-  const HH=Object.assign({},EQ_HH,{ice:0,tablefridge:0,dishwasher:0});
+  const HH=Object.assign({},EQ_HH,{ice:0,tablefridge:0,tablefreezer:0,dishwasher:0});
   const machineDark=lum(mc)<0.35;
-  const drawEq=(items,sc,topY,cx0)=>items.map(it=>{ const nh=["WORK","PICKUP","knock","sink","ice","tablefridge","dishwasher"].includes(it.b.id); const h=(it.b.h&&!nh?it.b.h:(HH[it.b.id]!==undefined?HH[it.b.id]:(nh?0:300)))*sc*0.75; if(!h||it.w<=0) return ""; const x=cx0+it.x*sc, w=Math.max(18,it.w*sc*0.86), xx=x+(it.w*sc-w)/2, y=topY-h;
+  const drawEq=(items,sc,topY,cx0)=>items.map(it=>{ const nh=["WORK","PICKUP","knock","sink","ice","tablefridge","tablefreezer","dishwasher"].includes(it.b.id); const fl=["freezer","fridge25","fridge45"].includes(it.b.id); const h=Math.max(0,(it.b.h&&!nh?it.b.h:(HH[it.b.id]!==undefined?HH[it.b.id]:(nh?0:300)))-(fl?850:0))*sc*0.75; if(!h||it.w<=0) return ""; const x=cx0+it.x*sc, w=Math.max(18,it.w*sc*0.86), xx=x+(it.w*sc-w)/2, y=topY-h;
     const EQC={minimal:"#EDEBE7",botanical:"#EDEBE7",retro:"#EDEBE7",scandi:"#EDEBE7",gallery:"#EDEBE7",organic:"#EDEBE7",mediterranean:"#EDEBE7",terracotta:"#EDEBE7",wood:"#1D1D1F",dark:"#1D1D1F",bookcafe:"#1D1D1F",japandi:"#1D1D1F",korean:"#1D1D1F",midcentury:"#1D1D1F",bistro:"#1D1D1F",industrial:"#B7BBBF",tech:"#B7BBBF",brutal:"#B7BBBF"};
     const col=["espresso","grinder","autosteam","autotamp"].includes(it.b.id)?(EQC[c.id]||"#B7BBBF"):"#D9D9D9";
     let g=`<rect x="${xx+8}" y="${topY-6}" width="${w}" height="10" rx="5" fill="#000" opacity=".18" filter="url(#sh)"/>`;
@@ -1584,8 +1614,8 @@ function renderConceptList(){
     <span class="cg">${c.group}${LAST&&recommendConcept()===c.id?` · <em class="rec">분석 추천</em>`:""}</span><b>${c.name}</b><small>${c.en}</small><small class="cf">${c.fit}</small></button>`).join(""):`<p class="desc">맞는 콘셉트가 없어요.</p>`;
   document.querySelectorAll(".ccard").forEach(b=>b.onclick=()=>{const src=CONCEPTS.find(x=>x.id===b.dataset.id); CONCEPT=JSON.parse(JSON.stringify(src)); CONCEPT_APPLIED=false; renderConceptList(); renderConcept(); document.getElementById("cboard").scrollIntoView({behavior:"smooth",block:"start"});});
 }
-const EQ_HH={espresso:540,grinder:600,autosteam:455,autotamp:286,hotwater:450,blender:450,pos:400,drip:420,showcase:700,dispenser:600,coldbrew:600,induction:100,oven:550,waffle:250,sterilizer:600,ice:840,freezer:1850,tablefridge:800,dishwasher:720,knock:0,sink:0};
-const EQ_DD={espresso:560,grinder:320,autosteam:370,autotamp:200,hotwater:420,blender:230,pos:300,drip:350,showcase:600,dispenser:400,coldbrew:350,induction:450,oven:500,waffle:400,sterilizer:450,ice:600,freezer:650,tablefridge:700,dishwasher:600,knock:150,sink:500};
+const EQ_HH={tablefreezer:800,fridge25:1900,fridge45:1900,espresso:540,grinder:600,autosteam:455,autotamp:286,hotwater:450,blender:450,pos:400,drip:420,showcase:700,dispenser:600,coldbrew:600,induction:100,oven:550,waffle:250,sterilizer:600,ice:840,freezer:1850,tablefridge:800,dishwasher:720,knock:0,sink:0};
+const EQ_DD={tablefreezer:700,fridge25:800,fridge45:800,espresso:560,grinder:320,autosteam:370,autotamp:200,hotwater:420,blender:230,pos:300,drip:350,showcase:600,dispenser:400,coldbrew:350,induction:450,oven:500,waffle:400,sterilizer:450,ice:600,freezer:650,tablefridge:700,dishwasher:600,knock:150,sink:500};
 const EQ_FIN={minimal:"화이트",botanical:"화이트",retro:"크림",scandi:"화이트",gallery:"화이트",organic:"크림",mediterranean:"화이트",terracotta:"크림",wood:"블랙",dark:"블랙 + 황동",bookcafe:"블랙 + 황동",japandi:"무광 블랙",korean:"무광 블랙",midcentury:"블랙",bistro:"블랙 + 황동",industrial:"스테인리스",tech:"스테인리스",brutal:"스테인리스"};
 function recommendConcept(){ if(!LAST) return null; const menus=[...document.querySelectorAll("#menus input:checked")].map(i=>i.value);
   if(LAST.type==="senior") return "botanical"; if(menus.includes("cake")||menus.includes("bake")||LAST.type==="dessert") return "bistro"; if(LAST.type==="takeout") return "minimal"; if(menus.includes("drip")&&!menus.includes("smoothie")) return "japandi"; return "wood"; }
@@ -1863,9 +1893,9 @@ function matFor(kind,color,sx,sy,alt){
 // ---------- 장면 ----------
 let R=null;
 const EQC={minimal:"#EDEBE7",botanical:"#EDEBE7",retro:"#EDEBE7",scandi:"#EDEBE7",gallery:"#EDEBE7",organic:"#EDEBE7",mediterranean:"#EDEBE7",terracotta:"#EDEBE7",wood:"#1D1D1F",dark:"#1D1D1F",bookcafe:"#1D1D1F",japandi:"#1D1D1F",korean:"#1D1D1F",midcentury:"#1D1D1F",bistro:"#1D1D1F",industrial:"#B7BBBF",tech:"#B7BBBF",brutal:"#B7BBBF"};
-const HH={espresso:540,grinder:600,autosteam:455,autotamp:286,hotwater:450,blender:450,pos:400,drip:420,showcase:700,dispenser:600,coldbrew:600,induction:100,oven:550,waffle:250,sterilizer:600};
-const DD={espresso:560,grinder:320,autosteam:370,autotamp:200,hotwater:420,blender:230,pos:300,drip:350,showcase:600,dispenser:400,coldbrew:350,induction:450,oven:500,waffle:400,sterilizer:450,ice:600,freezer:650};
-const FLOOR_H={ice:840,freezer:1850};
+const HH={fridge25:1900,fridge45:1900,espresso:540,grinder:600,autosteam:455,autotamp:286,hotwater:450,blender:450,pos:400,drip:420,showcase:700,dispenser:600,coldbrew:600,induction:100,oven:550,waffle:250,sterilizer:600};
+const DD={fridge25:800,fridge45:800,espresso:560,grinder:320,autosteam:370,autotamp:200,hotwater:420,blender:230,pos:300,drip:350,showcase:600,dispenser:400,coldbrew:350,induction:450,oven:500,waffle:400,sterilizer:450,ice:600,freezer:650};
+const FLOOR_H={ice:840,freezer:1850,fridge25:1900,fridge45:1900};
 function kColor(k){ const t=k/100; let r,g,b; if(t<=66){r=255; g=99.47*Math.log(t)-161.12; b=t<=19?0:138.52*Math.log(t-10)-305.04;} else {r=329.7*Math.pow(t-60,-0.133); g=288.1*Math.pow(t-60,-0.0755); b=255;} return new THREE.Color(Math.min(255,Math.max(0,r))/255,Math.min(255,Math.max(0,g))/255,Math.min(255,Math.max(0,b))/255); }
 function lumHex(h){ const [r,g,b]=hexRGB(h); return (0.299*r+0.587*g+0.114*b)/255; }
 function signTex(text,color){ const cv=document.createElement("canvas"); cv.width=1024; cv.height=256; const g=cv.getContext("2d"); g.clearRect(0,0,1024,256); g.fillStyle=color; g.font='600 120px "Noto Sans KR", "Apple SD Gothic Neo", sans-serif'; g.textBaseline="middle"; g.fillText(text,20,128); const t=new THREE.CanvasTexture(cv); t.colorSpace=THREE.SRGBColorSpace; t.anisotropy=8; return t; }
@@ -1984,6 +2014,11 @@ function build(host,ar){
         box(L-0.02,hh,dp,iceBody,x,hh/2,zc,0.01); box(L-0.1,hh*0.42,0.01,icePanel,x,hh*0.68,fz); box(L-0.1,hh*0.22,0.008,iceVent,x,hh*0.2,fz);
         const lb=new THREE.Mesh(new THREE.PlaneGeometry(Math.min(0.3,L*0.6),0.075),new THREE.MeshBasicMaterial({map:signTex("ICE","#ffffff"),transparent:true})); lb.position.set(x+0.03,hh*0.72,fz+faceSign*0.008); if(faceSign<0) lb.rotation.y=Math.PI; scene.add(lb); return; }
       if(FLOOR_H[id]){ const hh=mm(b.h||FLOOR_H[id]); const zc=zc0+faceSign*0.035;
+        if(id==="fridge25"||id==="fridge45"){ const th=Math.min(hh,inH-0.2), dp=depthC-0.04, fz=zc+faceSign*(dp/2+0.004), cols=id==="fridge45"?2:1;
+          box(L-0.02,th,dp,steel,x,th/2,zc,0.01); box(L-0.04,0.12,0.01,plain("#2a2c2e",0.7),x,0.06,fz);
+          for(let ci=0;ci<cols;ci++) for(let ri=0;ri<2;ri++){ const dw=(L-0.04)/cols-0.012, dx=x-(L-0.04)/2+(L-0.04)*(ci+0.5)/cols, dh=(th-0.16)/2-0.012, dy=0.13+dh/2+ri*(dh+0.012);
+            box(dw,dh,0.012,steel,dx,dy,fz,0.004); const hx2=dx+(cols===2?(ci?-1:1):1)*(dw/2-0.05); box(0.018,Math.min(0.32,dh*0.5),0.03,plain("#cfd2d5",0.2,1),hx2,dy,fz+faceSign*0.02,0.006); }
+          const lbl=new THREE.Mesh(new THREE.PlaneGeometry(Math.min(0.24,L*0.35),0.06),new THREE.MeshBasicMaterial({map:signTex(id==="fridge45"?"45BOX":"25BOX","#3a3d40"),transparent:true})); lbl.position.set(x,th-0.05,fz+faceSign*0.01); if(faceSign<0) lbl.rotation.y=Math.PI; scene.add(lbl); return; }
         if(hh>ch+0.1){ const th=Math.min(hh,inH-0.25); box(L-0.02,th,depthC-0.04,steel,x,th/2,zc,0.01); box(L-0.12,th*0.62,0.01,glass,x,th*0.55,zc+faceSign*((depthC-0.04)/2+0.004)); box(0.02,th*0.4,0.03,steel,x+(L/2-0.1),th*0.55,zc+faceSign*((depthC-0.04)/2+0.02)); return; }
         box(L-0.02,Math.min(hh,ch-0.02),depthC-0.04,steel,x,Math.min(hh,ch-0.02)/2,zc,0.01); box(L-0.08,0.02,0.02,plain("#202224",0.8),x,Math.min(hh,ch-0.02)-0.06,zc+faceSign*((depthC-0.04)/2+0.01)); return; }
       if(id==="espresso"){ box(w,hgt*0.78,dep,bodyMat,x,y+hgt*0.39+0.06,zc,0.03); box(w,0.06,dep*0.95,blackMat,x,y+0.03,zc,0.01); box(w*0.92,0.02,dep*0.8,steel,x,y+hgt*0.78+0.07,zc);
