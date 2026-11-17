@@ -1701,6 +1701,9 @@ const EQ_DD={tablefreezer:700,fridge25:800,fridge45:800,espresso:560,grinder:320
 const EQ_FIN={minimal:"화이트",botanical:"화이트",retro:"크림",scandi:"화이트",gallery:"화이트",organic:"크림",mediterranean:"화이트",terracotta:"크림",wood:"블랙",dark:"블랙 + 황동",bookcafe:"블랙 + 황동",japandi:"무광 블랙",korean:"무광 블랙",midcentury:"블랙",bistro:"블랙 + 황동",industrial:"스테인리스",tech:"스테인리스",brutal:"스테인리스"};
 function recommendConcept(){ if(!LAST) return null; const menus=[...document.querySelectorAll("#menus input:checked")].map(i=>i.value);
   if(LAST.type==="senior") return "botanical"; if(menus.includes("cake")||menus.includes("bake")||LAST.type==="dessert") return "bistro"; if(LAST.type==="takeout") return "minimal"; if(menus.includes("drip")&&!menus.includes("smoothie")) return "japandi"; return "wood"; }
+function eqColName(hx){ const f=EQ_COLORS.find(x=>x[0]===hx); return f?f[1]:colorName(hx); }
+// 바 설계에서 색을 지정한 장비: 색별로 묶음
+function eqColorGroups(){ if(!BAR) return []; const g=new Map(); ["front","back","side","uf","ub"].forEach(k=>listOf(k).forEach(b=>{ if(!b.color||b.id==="WORK") return; const x=g.get(b.color)||{hx:b.color,items:new Map()}; const nm=b.model||nameOf(b); x.items.set(nm,(x.items.get(nm)||0)+1); g.set(b.color,x); })); return [...g.values()]; }
 function equipSchedule(c){
   if(!BAR) return null; const rows=[]; let n=0;
   const where={front:"프론트",back:"백",side:"옆",uf:"프론트 하부",ub:"백 하부"};
@@ -1708,7 +1711,7 @@ function equipSchedule(c){
     const e=E.find(x=>x.id===b.id), r=b.rec!==undefined&&LAST?LAST.rec[b.rec]:null;
     const main=["espresso","grinder","autosteam","autotamp"].includes(b.id);
     const kw=blockKw(b);
-    rows.push({code:`E-${String(n).padStart(2,"0")}`,name:e?e.name:b.id,model:b.model||"",where:where[k],w:Math.round(b.w),d:b.d||EQ_DD[b.id]||"",h:b.h||EQ_HH[b.id]||"",kw:kw,must:r?r.must:null,fin:main?(EQ_FIN[c.id]||"스테인리스"):(["ice","freezer","dishwasher","tablefridge","sink"].includes(b.id)?"스테인리스":"—")});
+    rows.push({code:`E-${String(n).padStart(2,"0")}`,name:e?e.name:b.id,model:b.model||"",where:where[k],w:Math.round(b.w),d:b.d||EQ_DD[b.id]||"",h:b.h||EQ_HH[b.id]||"",kw:kw,must:r?r.must:null,color:b.color||"",fin:main?(EQ_FIN[c.id]||"스테인리스"):(["ice","freezer","dishwasher","tablefridge","sink"].includes(b.id)?"스테인리스":"—")});
   }));
   return rows;
 }
@@ -1753,15 +1756,16 @@ function renderConcept(){
    ${(()=>{const rows=equipSchedule(c); if(!rows) return `<div class="sec"><span class="lbl">EQUIPMENT SCHEDULE <em>장비 일람표</em></span><p class="desc">장비 구성 분석이나 바 설계를 하면 장비 목록·도면·3D 렌더가 이 보드에 자동으로 들어가요. <a href="#" id="gobar">바 설계 하러 가기 →</a></p></div>`;
       const tk=rows.reduce((a,r)=>a+(+r.kw||0),0);
       return `<div class="sec"><span class="lbl">EQUIPMENT SCHEDULE <em>장비 일람표 · 바 설계 연동</em></span>
-      <table class="spec fs"><thead><tr><th>코드</th><th>장비</th><th>모델</th><th>위치</th><th>W×D×H (mm)</th><th>전력</th><th>권장 마감</th><th>구분</th></tr></thead><tbody>${rows.map(r=>`<tr><td><b>${r.code}</b></td><td>${r.name}</td><td>${r.model||"<span style='color:#aaa'>미정</span>"}</td><td>${r.where}</td><td>${r.w}×${r.d||"—"}×${r.h||"—"}</td><td>${r.kw?(+r.kw).toFixed(r.kw<0.1?2:1)+"kW":"—"}</td><td>${r.fin}</td><td>${r.must===null?"—":r.must?"필수":"선택"}</td></tr>`).join("")}</tbody></table>
+      <table class="spec fs"><thead><tr><th>코드</th><th>장비</th><th>모델</th><th>위치</th><th>W×D×H (mm)</th><th>전력</th><th>색 · 마감</th><th>구분</th></tr></thead><tbody>${rows.map(r=>`<tr><td><b>${r.code}</b></td><td>${r.name}</td><td>${r.model||"<span style='color:#aaa'>미정</span>"}</td><td>${r.where}</td><td>${r.w}×${r.d||"—"}×${r.h||"—"}</td><td>${r.kw?(+r.kw).toFixed(r.kw<0.1?2:1)+"kW":"—"}</td><td>${r.color?`<i class="kdot" style="background:${r.color};border-radius:2px"></i>${eqColName(r.color)} <small style="color:#999">${r.color.toUpperCase()}</small>`:r.fin}</td><td>${r.must===null?"—":r.must?"필수":"선택"}</td></tr>`).join("")}</tbody></table>
       <p class="desc" style="margin-top:8px">장비 ${rows.length}종 · 장비 전력 합계 ${tk.toFixed(1)}kW (동시 사용 70% 기준 약 ${(tk*0.7).toFixed(1)}kW) · 바 형태 ${document.getElementById("bShape").selectedOptions[0].textContent} · 프론트 ${BAR.flen.toLocaleString()} / 백 ${BAR.blen.toLocaleString()}mm</p></div>
       <div class="sec"><span class="lbl">DRAWINGS <em>바 설계 평면도 · 입면도</em></span>${drawingsHtml()}</div>`;})()}
    <div class="brow3">
      <div class="sec"><span class="lbl">COLOR PALETTE <em>칩을 눌러 색 변경</em></span>
-       <div class="chips">${c.colors.map(x=>{const hx=c.pal[x[1]], [r,g,b]=rgbOf(hx); return `<label class="chip2"><input type="color" data-k="${x[1]}" value="${hx}"><span class="cc" style="background:${hx}"></span><b>${x[0]}</b><small class="hx">${hx.toUpperCase()} · RGB ${r} ${g} ${b} · LRV ${lrv(hx)}</small><small>${x[3]} · ${x[2]}%</small></label>`;}).join("")}</div></div>
+       <div class="chips">${c.colors.map(x=>{const hx=c.pal[x[1]], [r,g,b]=rgbOf(hx); return `<label class="chip2"><input type="color" data-k="${x[1]}" value="${hx}"><span class="cc" style="background:${hx}"></span><b>${x[0]}</b><small class="hx">${hx.toUpperCase()} · RGB ${r} ${g} ${b} · LRV ${lrv(hx)}</small><small>${x[3]} · ${x[2]}%</small></label>`;}).join("")}</div>
+       ${eqColorGroups().length?`<span class="lbl" style="margin-top:14px">EQUIPMENT COLOR <em>바 설계에서 지정 · 바 설계에서 바꿀 수 있어요</em></span><div class="chips">${eqColorGroups().map(g=>{const [r,gg,b]=rgbOf(g.hx); return `<div class="chip2"><span class="cc" style="background:${g.hx}"></span><b>${eqColName(g.hx)}</b><small class="hx">${g.hx.toUpperCase()} · RGB ${r} ${gg} ${b} · LRV ${lrv(g.hx)}</small><small>${[...g.items].map(([n,q])=>n+(q>1?" ×"+q:"")).join(" · ")}</small></div>`;}).join("")}</div>`:""}</div>
      <div class="sec"><span class="lbl">LIGHTING</span>
        <table class="spec"><thead><tr><th>구역</th><th>색온도</th><th>연색성</th><th>조도</th><th>기구</th></tr></thead><tbody>${c.light.map(l=>`<tr><td>${l[0]}</td><td><i class="kdot" style="background:${kelvinColor(+l[1].replace(/\D/g,"")||3000)}"></i>${l[1]}</td><td>${l[2]}</td><td>${l[3]}</td><td>${l[4]}</td></tr>`).join("")}</tbody></table>
-       <span class="lbl" style="margin-top:14px">EQUIPMENT FINISH</span><ul class="eq">${c.equip.map(e=>`<li>${e}</li>`).join("")}</ul>
+       <span class="lbl" style="margin-top:14px">EQUIPMENT FINISH${eqColorGroups().length?` <em>바 설계에서 지정한 색 포함</em>`:""}</span><ul class="eq">${eqColorGroups().map(g=>`<li class="eqc"><i class="kdot" style="background:${g.hx};border-radius:2px"></i><b>${eqColName(g.hx)}</b> ${g.hx.toUpperCase()} — ${[...g.items].map(([n,q])=>n+(q>1?" ×"+q:"")).join(", ")}</li>`).join("")}${c.equip.map(e=>`<li>${e}</li>`).join("")}</ul>
        <span class="lbl" style="margin-top:14px">FF&amp;E <em>가구 · 조명 · 소품</em></span><ul class="eq">${c.ff.map(e=>`<li>${e}</li>`).join("")}</ul>
        <span class="lbl" style="margin-top:14px">NOTE</span><ul class="eq warnl">${conceptChecks(c).map(e=>`<li class="${e[0]}">${e[1]}</li>`).join("")}${c.tips.filter(t=>{ const LR=role=>{const m=c.mats.find(z=>z[1]===role); return m?lrv(matColor(c,m)):100;}; if(/흰 상판|화이트 상판/.test(t)&&LR("상판")<65) return false; if(/흰 벽|화이트 벽/.test(t)&&LR("벽")<65) return false; if(/어두운 상판|블랙 상판/.test(t)&&LR("상판")>40) return false; return true; }).map(e=>`<li>${e}</li>`).join("")}</ul></div>
    </div>
