@@ -1521,7 +1521,7 @@ function sceneSvg(c){
   // 백(뒤쪽) 카운터: 앞 카운터 뒤로 살짝 높게 보이게
   let backSvg="";
   if(typeof BAR!=="undefined"&&BAR){ const bl=[...BAR.back,...(BAR.side||[]).filter(b=>b.id!=="WORK")]; let t=0; const bit=bl.map(b=>{const L=b.id==="WORK"?flexW(BAR.back,BAR.blen):b.w; const o={b,x:t,w:L}; t+=L; return o;});
-    if(bit.some(i=>!["WORK","PICKUP"].includes(i.b.id))){ const bw=cw-60, bsc=Math.min(bw/Math.max(1,t),sc)*0.82, bx0=cx0+30+(bw-t*bsc)/2, by=topY-78;
+    if(bit.some(i=>!["WORK","PICKUP"].includes(i.b.id))){ const bw=cw-60, bsc=Math.min(bw/Math.max(1,t),sc)*0.8, bx0=cx0+30+(bw-t*bsc)/2, by=topY-150;
       backSvg=`<rect x="${cx0+20}" y="${by}" width="${cw-40}" height="14" fill="url(#s-top)"/><rect x="${cx0+20}" y="${by+14}" width="${cw-40}" height="${topY-by-14}" fill="${shade(P.wall,lum(P.wall)<0.3?18:-22)}"/><rect x="${cx0+20}" y="${by+14}" width="${cw-40}" height="${topY-by-14}" fill="url(#topshade)"/>`+drawEq(bit,bsc,by,bx0).replace(/<rect /g,'<rect opacity=".92" '); } }
   const sel=(id)=>items.find(i=>i.b.id===id);
   const lampsX=[cx0+cw*0.2,cx0+cw*0.5,cx0+cw*0.8];
@@ -1550,7 +1550,7 @@ function sceneSvg(c){
    <rect y="${topY+ch+30}" width="${W}" height="${H-topY-ch-30}" fill="url(#s-floor)"/><rect y="${topY+ch+30}" width="${W}" height="${H-topY-ch-30}" fill="url(#topshade)" opacity=".5"/>
    ${backSvg}
    ${equip}
-   ${plant?`<g><rect x="${cx0+cw-130}" y="${topY-70}" width="60" height="70" rx="6" fill="${c.id==="botanical"?"#B07D5B":"#6B4B35"}"/><path d="M${cx0+cw-100} ${topY-70} C${cx0+cw-140} ${topY-130} ${cx0+cw-130} ${topY-170} ${cx0+cw-110} ${topY-190} M${cx0+cw-100} ${topY-70} C${cx0+cw-80} ${topY-140} ${cx0+cw-50} ${topY-150} ${cx0+cw-40} ${topY-180} M${cx0+cw-100} ${topY-70} C${cx0+cw-105} ${topY-120} ${cx0+cw-90} ${topY-160} ${cx0+cw-85} ${topY-200}" stroke="#4F7A4F" stroke-width="7" fill="none" stroke-linecap="round"/><ellipse cx="${cx0+cw-110}" cy="${topY-190}" rx="18" ry="9" fill="#5E8C61"/><ellipse cx="${cx0+cw-40}" cy="${topY-180}" rx="18" ry="9" fill="#5E8C61"/><ellipse cx="${cx0+cw-85}" cy="${topY-200}" rx="16" ry="8" fill="#6B9A6B"/></g>`:""}
+   ${false&&plant?`<g><rect x="${cx0+cw-130}" y="${topY-70}" width="60" height="70" rx="6" fill="${c.id==="botanical"?"#B07D5B":"#6B4B35"}"/><path d="M${cx0+cw-100} ${topY-70} C${cx0+cw-140} ${topY-130} ${cx0+cw-130} ${topY-170} ${cx0+cw-110} ${topY-190} M${cx0+cw-100} ${topY-70} C${cx0+cw-80} ${topY-140} ${cx0+cw-50} ${topY-150} ${cx0+cw-40} ${topY-180} M${cx0+cw-100} ${topY-70} C${cx0+cw-105} ${topY-120} ${cx0+cw-90} ${topY-160} ${cx0+cw-85} ${topY-200}" stroke="#4F7A4F" stroke-width="7" fill="none" stroke-linecap="round"/><ellipse cx="${cx0+cw-110}" cy="${topY-190}" rx="18" ry="9" fill="#5E8C61"/><ellipse cx="${cx0+cw-40}" cy="${topY-180}" rx="18" ry="9" fill="#5E8C61"/><ellipse cx="${cx0+cw-85}" cy="${topY-200}" rx="16" ry="8" fill="#6B9A6B"/></g>`:""}
    <!-- 카운터 -->
    <rect x="${cx0-10}" y="${topY}" width="${cw+20}" height="30" fill="url(#s-top)"/><rect x="${cx0-10}" y="${topY}" width="${cw+20}" height="4" fill="#fff" opacity=".35"/>
    <rect x="${cx0}" y="${topY+30}" width="${cw}" height="${ch}" fill="url(#s-front)"/><rect x="${cx0}" y="${topY+30}" width="${cw}" height="${ch}" fill="url(#topshade)"/>
@@ -1909,7 +1909,9 @@ function build(host){
     const tot=list.reduce((a,b)=>a+rawL(b),0), kf=tot>len?len/tot:1;   // 카운터보다 길면 비율로 줄여서 모두 올림
     list.forEach(b=>{ const L=rawL(b)*kf; const x=-len/2+t+L/2; t+=L; if(L<=0) return;
       const id=b.id, hgt=mm(b.h||HH[id]||0), dep=Math.min(depthC-0.06,mm(b.d||DD[id]||400)), w=Math.max(0.08,L*0.9), y=ch;
-      if(FLOOR_H[id]){ const hh=mm(b.h||FLOOR_H[id]); box(L-0.02,Math.min(hh,ch-0.02),depthC-0.04,steel,x,Math.min(hh,ch-0.02)/2,zc,0.01); return; }
+      if(FLOOR_H[id]){ const hh=mm(b.h||FLOOR_H[id]);
+        if(hh>ch+0.1){ const th=Math.min(hh,inH-0.25); box(L-0.02,th,depthC-0.04,steel,x,th/2,zc,0.01); box(L-0.12,th*0.62,0.01,glass,x,th*0.55,zc+faceSign*((depthC-0.04)/2+0.004)); box(0.02,th*0.4,0.03,steel,x+(L/2-0.1),th*0.55,zc+faceSign*((depthC-0.04)/2+0.02)); return; }
+        box(L-0.02,Math.min(hh,ch-0.02),depthC-0.04,steel,x,Math.min(hh,ch-0.02)/2,zc,0.01); box(L-0.08,0.02,0.02,plain("#202224",0.8),x,Math.min(hh,ch-0.02)-0.06,zc+faceSign*((depthC-0.04)/2+0.01)); return; }
       if(id==="espresso"){ box(w,hgt*0.78,dep,bodyMat,x,y+hgt*0.39+0.06,zc,0.03); box(w,0.06,dep*0.95,blackMat,x,y+0.03,zc,0.01); box(w*0.92,0.02,dep*0.8,steel,x,y+hgt*0.78+0.07,zc);
         const n=Math.max(1,Math.round(L/0.3)); for(let i=0;i<n;i++){ const gx=x-w/2+w*(i+0.5)/n; const gh=new THREE.Mesh(new THREE.CylinderGeometry(0.035,0.04,0.08,24),steel); gh.position.set(gx,y+hgt*0.42,zc+faceSign*(dep/2+0.03)); add(gh); const h=new THREE.Mesh(new THREE.CylinderGeometry(0.012,0.012,0.16,12),blackMat); h.rotation.x=Math.PI/2; h.position.set(gx,y+hgt*0.36,zc+faceSign*(dep/2+0.11)); add(h);
           const wand=new THREE.Mesh(new THREE.CylinderGeometry(0.006,0.006,0.22,8),steel); wand.position.set(x+(i?1:-1)*(w/2-0.04),y+hgt*0.4,zc+faceSign*(dep/2+0.04)); add(wand); }
@@ -1964,7 +1966,6 @@ function build(host){
   box(flen-0.02,0.02,fd-0.02,plain("#000",1),cx0+rr/2-0.01,ch-0.05,cz).material.transparent=false;
   if(bar){ placeRow(bar.front,flen,cz-0.02,fd,-1); placeUnder(bar.underF,straight,zCounterF-fd,-1); }
   // 소품: 식물, 컵 스택, 메뉴 스탠드
-  plantAt(-flen/2+0.2,ch,cz+0.05,0.9); plantAt(flen/2-rr*0.6,ch,cz,0.75);
   for(let i=0;i<3;i++){ for(let j=0;j<5;j++){ const pc=new THREE.Mesh(new THREE.CylinderGeometry(0.042,0.033,0.11,20,1,true),plain(i===1?"#cfa97a":"#e9dcc6",0.8)); pc.material.side=THREE.DoubleSide; pc.position.set(-flen/2+0.5+i*0.11,ch+0.055+j*0.035,cz+0.15); add(pc);} }
   const menu=box(0.16,0.22,0.01,plain("#f3ece0",0.8),flen/2-rr-0.55,ch+0.12,cz+0.18); menu.rotation.x=-0.25; box(0.18,0.24,0.008,plain("#8a6a50",0.6),flen/2-rr-0.55,ch+0.12,cz+0.172).rotation.x=-0.25;
 
@@ -1983,9 +1984,9 @@ function build(host){
   // 카메라
   const cam=new THREE.PerspectiveCamera(46,W/H,0.05,60);
   const dist=Math.max(5.2,openW*1.25);
-  cam.position.set(openW*0.04,1.55,zCounterF+dist); const tgt=new THREE.Vector3(0,1.45,zFacade-0.4);
+  cam.position.set(openW*0.04,2.62,zCounterF+Math.max(3.4,dist*0.62)); const tgt=new THREE.Vector3(0,0.95,bd*0.55);
   const ctl=new OrbitControls(cam,renderer.domElement); ctl.target.copy(tgt); ctl.enableDamping=false; ctl.minDistance=0.05; ctl.maxDistance=dist*2; ctl.maxPolarAngle=Math.PI*0.9; ctl.minPolarAngle=0.05; ctl.screenSpacePanning=true; ctl.zoomToCursor=true; ctl.update();
-  const VIEWS={front:[[openW*0.04,1.55,zCounterF+dist],[0,1.45,zFacade-0.4]],
+  const VIEWS={front:[[openW*0.04,2.62,zCounterF+Math.max(3.4,dist*0.62)],[0,0.95,bd*0.55]],
     inside:[[0.35,1.65,zCounterF+1.1],[0,1.2,0.2]],
     barista:[[-openW*0.2,1.66,bd+aisle*0.35],[openW*0.08,0.95,zFacade+0.25]],
     back:[[0,1.6,bd+aisle*0.95],[0,1.3,0]],
