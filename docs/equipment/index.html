@@ -178,7 +178,9 @@ td a{color:var(--brand);font-weight:700;font-size:12.5px;white-space:nowrap}
 .bartools .f select{min-width:230px}
 .elevsvg{width:100%;height:auto;display:block;margin-top:12px;border:1px solid var(--line);border-radius:10px}
 .optbtn{font:inherit;font-size:11.5px;font-weight:700;margin-top:4px;padding:3px 8px;border-radius:6px;border:1.5px solid var(--accent);background:#fff;color:var(--accent);cursor:pointer}
-.optlist{display:grid;gap:6px}
+.optlist{display:grid;gap:6px}.optrow{display:flex;gap:6px;align-items:stretch}.optrow .optchip{flex:1;min-width:0}
+.qstep,.qtyrow{display:flex;align-items:center;gap:4px}.qstep button,.qtyrow button{font:inherit;font-size:16px;font-weight:700;width:30px;height:30px;border:1.5px solid var(--ink);background:#fff;border-radius:8px;cursor:pointer;line-height:1}.qstep b,.qtyrow b{min-width:22px;text-align:center;font-size:14px}
+.qtyrow{margin:8px 0;flex-wrap:wrap}.qtyrow>span{font-size:13px;font-weight:700;margin-right:4px}.qtyrow small{color:var(--muted);font-size:12px;margin-left:6px}
 .optchip{font:inherit;text-align:left;border:1.5px dashed #c9bdae;background:#fbf8f3;border-radius:10px;padding:8px 10px;cursor:pointer}
 .optchip b{display:block;font-size:13.5px}.optchip small{color:var(--muted);font-size:12px}
 .optchip.on{border-style:solid;border-color:var(--ok);background:#e9f5ee}
@@ -257,6 +259,17 @@ ul.warnl li.ok::marker{color:var(--ok)}
 .board .desc{font-size:12.5px;color:var(--muted);margin:0}.board .desc a{color:var(--accent);font-weight:700}.dcap{display:block;font-size:10.5px;letter-spacing:.16em;color:#8a8580;margin-bottom:6px}
 @media(max-width:900px){.draw{grid-template-columns:minmax(0,1fr)}}
 .r3dwrap{position:relative}.r3dviews{position:absolute;top:8px;right:8px;display:flex;gap:4px;flex-wrap:wrap;justify-content:flex-end}.r3dviews button{font:inherit;font-size:11.5px;padding:5px 9px;border:0;border-radius:2px;background:#000a;color:#fff;cursor:pointer}.r3dviews button.on,.r3dviews button:hover{background:#c8742f}
+.phdrop{display:flex;flex-direction:column;gap:8px;align-items:center;justify-content:center;text-align:center;aspect-ratio:4/3;border:2px dashed #b9ab98;background:#f7f3ec;border-radius:2px;padding:28px;cursor:pointer;color:#555;font-size:13px;line-height:1.6}.phdrop b{font-size:17px;color:var(--ink)}.phdrop em{font-style:normal;font-size:11.5px;color:#999}.phdrop input,.pth.add input{display:none}
+.phstage{position:relative;cursor:crosshair;user-select:none;touch-action:none;background:#111;border-radius:2px;overflow:hidden}.phstage img{display:block;width:100%;height:auto;pointer-events:none}
+.phcap{position:absolute;left:10px;bottom:8px;font-size:10px;letter-spacing:.14em;color:#fff;background:#0008;padding:3px 8px;border-radius:2px;cursor:default}
+.pin{position:absolute;width:0;height:0;z-index:2}.pin i{position:absolute;left:-8px;top:-8px;width:16px;height:16px;border-radius:50%;background:#fff;border:3px solid #111;box-shadow:0 1px 5px #0007;cursor:move;box-sizing:border-box}.pin.sel i{background:#c8742f}
+.pin .pl{position:absolute;left:44px;top:-15px;background:#fff;color:#111;padding:6px 10px 6px 9px;font-size:12px;line-height:18px;white-space:nowrap;box-shadow:0 2px 8px #0005;border-left:4px solid #c8742f;pointer-events:none}.pin .pl em{font-style:normal;font-weight:800;margin-right:7px;letter-spacing:.04em}
+.pin .pl::before{content:"";position:absolute;left:-44px;top:14px;width:40px;height:2px;background:#111}
+.pin.lft .pl{left:auto;right:44px;border-left:0;border-right:4px solid #c8742f}.pin.lft .pl::before{left:auto;right:-44px}
+.phbar{margin-top:10px;display:grid;gap:10px}.phthumbs{display:flex;gap:6px;flex-wrap:wrap}.pth{width:64px;height:48px;border:2px solid transparent;border-radius:2px;background:#eee center/cover;cursor:pointer;padding:0}.pth.on{border-color:var(--ink)}.pth.add{display:flex;align-items:center;justify-content:center;font-size:22px;border:2px dashed #b9ab98;color:#777;box-sizing:border-box}
+.pined{display:flex;gap:6px;flex-wrap:wrap;align-items:center;font-size:13px}.pined select,.pined input{font:inherit;font-size:13px;padding:6px 8px;border:1px solid var(--line);border-radius:2px;min-width:0;flex:1 1 180px}.pined button,.phact button,#phapply{font:inherit;font-size:12.5px;padding:6px 11px;border:1px solid var(--ink);background:#fff;border-radius:2px;cursor:pointer}#phapply{background:var(--ink);color:#fff;margin-top:8px}
+.phhint{margin:0;font-size:12.5px;color:var(--muted)}.phact{display:flex;gap:6px;flex-wrap:wrap}.phcol .ratio{height:22px}.phsw{display:flex;flex-wrap:wrap;gap:10px;margin-top:8px;font-size:12px}.phsw span{display:flex;align-items:center;gap:5px}.phsw i{width:16px;height:16px;border-radius:2px;border:1px solid #0002}.phsw small{color:var(--muted)}.phnote{display:block;color:var(--muted);font-size:11.5px;margin-top:6px}
+@media print{.phbar{display:none}.phcap{display:none}}
 </style>
 <script type="importmap">{"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.165.0/build/three.module.js","three/addons/":"https://cdn.jsdelivr.net/npm/three@0.165.0/examples/jsm/"}}</script>
 </head>
@@ -1157,18 +1170,36 @@ function renderBarSide(counters,pos,o){
   document.getElementById("barside").innerHTML=`
     ${sel?`<div class="panel selp"><h3>선택: ${nameOf(sel.b)}</h3><p class="desc">${sel.b.id==="WORK"?"남는 길이가 자동으로 작업대가 됩니다.":`${sel.b.model?`<b style="color:var(--ink)">${sel.b.model}</b><br>`:""}폭 ${sel.b.w}mm${sel.b.d?` × 깊이 ${sel.b.d}mm`:" (깊이 미지정)"}${sel.b.h?` × 높이 ${sel.b.h}mm`:""}${sel.b.kw?` · ${sel.b.kw}kW`:""}${sel.b.src?` · <a href="${sel.b.src}" target="_blank" rel="noopener">사양 출처</a>`:""}`}</p>
       <div class="selbtn"><button data-a="left">← 왼쪽</button><button data-a="right">오른쪽 →</button>${o.shape!=="line"?`${["uf","ub"].includes(sel.key)?`<button data-a="swap">${sel.key==="uf"?"백 카운터 아래로":"프론트 아래로"}</button>`:counters.filter(c=>c.key!==sel.key&&!(o.shape==="line")).map(c=>`<button data-a="to:${c.key}">→ ${c.name.replace(/ \(.*\)/,"")}</button>`).join("")}`:""}${sel.b.id!=="WORK"?`<button data-a="del">빼기</button>`:""}</div>
+      ${sel.b.id!=="WORK"?(()=>{const n=sameGroup(sel.b).length;return `<div class="qtyrow"><span>수량</span><button data-q="-1" aria-label="한 대 빼기">−</button><b>${n}</b><button data-q="1" aria-label="한 대 더">+</button><small>${n>1?`같은 장비 ${n}대 배치됨`:"+를 누르면 바로 옆에 한 대 더 놓아요"}</small></div>`;})():""}
       ${sel.b.id!=="WORK"?`<label class="wlab">폭(mm) <input type="number" min="0" inputmode="numeric" id="selW" value="${sel.b.w}" step="10"></label>`:""}
       ${sel.b.id!=="WORK"&&sel.b.id!=="PICKUP"?prodPickerHtml(sel):""}</div>`
      :`<div class="panel"><p class="desc" style="margin:0">평면도의 장비를 <b>끌어서</b> 순서를 바꾸거나 다른 카운터로 옮길 수 있어요. 눌러서 선택하면 폭을 바꾸거나 뺄 수 있습니다.</p></div>`}
     ${LAST?`<div class="panel"><h3>장비 넣고 빼기</h3><p class="desc">눌러서 바에 넣거나 뺄 수 있어요. 넣으면 작업 흐름에 맞는 자리를 자동으로 잡아요.</p>
-      ${[["필수 장비",true],["선택 장비",false]].map(([t,m])=>{const rows=LAST.rec.map((r,ri)=>({r,ri})).filter(x=>!!x.r.must===m).sort((x,y)=>recFootprint(y.r)-recFootprint(x.r)); if(!rows.length) return ""; return `<div class="optgrp"><b class="optttl ${m?"must":"opt"}">${t} <small>${rows.filter(x=>recPlaced(x.ri)).length}/${rows.length} 배치</small></b><div class="optlist">${rows.map(({r,ri})=>{const e=E.find(x=>x.id===r.id), on=recPlaced(ri), fp=recFootprint(r); return `<button class="optchip ${m?"must":""} ${on?"on":""} ${fp?"":"tool"}" data-ri="${ri}"><b>${fp?(on?"✓ ":"+ "):"· "}${e?e.name:r.id}${r.qty>1?" ×"+r.qty:""}</b><small>${r.spec}${fp?(on?" · 배치됨 (누르면 빼기)":" · 빠져 있음 (누르면 넣기)"):" · 소도구, 평면도에 안 그림"}</small></button>`;}).join("")}</div></div>`;}).join("")}</div>`:""}
+      ${[["필수 장비",true],["선택 장비",false]].map(([t,m])=>{const rows=LAST.rec.map((r,ri)=>({r,ri})).filter(x=>!!x.r.must===m).sort((x,y)=>recFootprint(y.r)-recFootprint(x.r)); if(!rows.length) return ""; return `<div class="optgrp"><b class="optttl ${m?"must":"opt"}">${t} <small>${rows.filter(x=>recPlaced(x.ri)).length}/${rows.length} 배치</small></b><div class="optlist">${rows.map(({r,ri})=>{const e=E.find(x=>x.id===r.id), on=recPlaced(ri), fp=recFootprint(r); const cnt=recCount(ri); return `<div class="optrow"><button class="optchip ${m?"must":""} ${on?"on":""} ${fp?"":"tool"}" data-ri="${ri}"><b>${fp?(on?"✓ ":"+ "):"· "}${e?e.name:r.id}${on&&cnt>1?" ×"+cnt:(!on&&r.qty>1?" ×"+r.qty:"")}</b><small>${r.spec}${fp?(on?" · 배치됨 (누르면 모두 빼기)":" · 빠져 있음 (누르면 넣기)"):" · 소도구, 평면도에 안 그림"}</small></button>${fp?`<span class="qstep" data-ri="${ri}"><button data-q="-1" aria-label="한 대 빼기">−</button><b>${cnt}</b><button data-q="1" aria-label="한 대 더">+</button></span>`:""}</div>`;}).join("")}</div></div>`;}).join("")}</div>`:""}
     <div class="panel"><h3>배치 점검</h3><div class="alerts">${chk.map(a=>`<div class="alert ${a[0]}"><span>${a[1]}</span></div>`).join("")}</div></div>
     <div class="panel"><h3>배치 목록</h3>${counters.map(c=>`<b style="font-size:13px">${c.name}</b><ol class="blist">${c.list.map(b=>`<li>${b.model?`<b>${b.model}</b>`:nameOf(b)}${b.rec!==undefined&&LAST&&LAST.rec[b.rec]?(LAST.rec[b.rec].must?" <em class=\"tg must\">필수</em>":" <em class=\"tg opt\">선택</em>"):""} <span>${b.id==="WORK"?flexW(c.list,c.len):b.w}mm</span></li>`).join("")}${c.under.map(b=>`<li class="u" data-uid="${b.uid}" style="cursor:pointer">아래: ${b.model||nameOf(b)} <span>${b.w}${b.d?"×"+b.d:""}mm</span></li>`).join("")}</ol>`).join("")}</div>`;
   document.querySelectorAll(".selbtn button").forEach(b=>b.onclick=()=>actSel(b.dataset.a));
   document.querySelectorAll(".optchip").forEach(b=>b.onclick=()=>toggleOptional(+b.dataset.ri,false));
+  document.querySelectorAll(".qstep button").forEach(b=>b.onclick=()=>recQty(+b.parentNode.dataset.ri,+b.dataset.q));
+  document.querySelectorAll(".qtyrow button").forEach(b=>b.onclick=()=>changeQty(+b.dataset.q));
   document.querySelectorAll(".blist li.u").forEach(li=>li.onclick=()=>{selUid=+li.dataset.uid; renderBar();});
   const sw=document.getElementById("selW"); if(sw) sw.onchange=()=>{const s=findBlock(selUid); if(s){s.b.w=Math.max(0,+sw.value||0); renderBar();}};
   if(sel&&sel.b.id!=="WORK"&&sel.b.id!=="PICKUP") bindProdPicker(sel);
+}
+function sameGroup(b){ const out=[]; ["front","back","side","uf","ub"].forEach(k=>{const l=listOf(k); l.forEach(x=>{ if(x.id===b.id&&(x.model||"")===(b.model||"")&&(x.id!=="PICKUP"||b.id==="PICKUP")) out.push({key:k,b:x,list:l}); });}); return out; }
+function cloneAfter(list,b){ const nb=Object.assign({},b,{uid:uidSeq++}); list.splice(list.indexOf(b)+1,0,nb); return nb; }
+function changeQty(d){
+  const s=findBlock(selUid); if(!s) return; const nm=s.b.model||nameOf(s.b);
+  if(d>0){ cloneAfter(s.list,s.b); renderBar(); barMsg(`${nm} 한 대를 바로 옆에 더 놓았어요. 지금 ${sameGroup(s.b).length}대예요.`); return; }
+  const g=sameGroup(s.b); if(g.length<=1){ actSel("del"); barMsg(`${josa(nm,"을","를")} 뺐어요.`); return; }
+  const t=g.filter(x=>x.b.uid!==s.b.uid).pop(); t.list.splice(t.list.indexOf(t.b),1); renderBar(); barMsg(`${nm} 한 대를 뺐어요. 지금 ${g.length-1}대예요.`);
+}
+function recBlocks(ri){ const out=[]; ["front","back","side","uf","ub"].forEach(k=>{const l=listOf(k); l.forEach(x=>{ if(x.rec===ri) out.push({b:x,list:l}); });}); return out; }
+function recCount(ri){ return BAR?recBlocks(ri).length:0; }
+function recQty(ri,d){
+  if(!BAR) buildBar(); const bl=recBlocks(ri), r=LAST.rec[ri], e=E.find(x=>x.id===r.id), nm=e?e.name:r.id;
+  if(d>0){ if(!bl.length){ toggleOptional(ri,false); return; } const last=bl[bl.length-1]; const nb=cloneAfter(last.list,last.b); selUid=nb.uid; renderBar(); barMsg(`${nm} 한 대를 더 놓았어요. 지금 ${bl.length+1}대예요.`); return; }
+  if(!bl.length) return; const last=bl[bl.length-1]; last.list.splice(last.list.indexOf(last.b),1); if(selUid===last.b.uid) selUid=null; renderBar(); barMsg(bl.length>1?`${nm} 한 대를 뺐어요. 지금 ${bl.length-1}대예요.`:`${josa(nm,"을","를")} 바 설계에서 뺐어요.`);
 }
 function listOf(key){return {front:BAR.front,back:BAR.back,side:BAR.side,uf:BAR.underF,ub:BAR.underB}[key];}
 function findBlock(uid){for(const key of ["front","back","side","uf","ub"]){const l=listOf(key),i=l.findIndex(b=>b.uid===uid); if(i>=0) return {key,i,b:l[i],list:l};} return null;}
@@ -1436,6 +1467,8 @@ const CGROUPS=["전체","미니멀","내추럴","인더스트리얼·모던","�
 let CFILT="전체", CQ="";
 function lrv(hex){ return Math.round(rgbOf(hex).map(v=>{v/=255; return v<=0.04045?v/12.92:Math.pow((v+0.055)/1.055,2.4);}).reduce((a,v,i)=>a+v*[0.2126,0.7152,0.0722][i],0)*100); }
 let CONCEPT=null, CONCEPT_APPLIED=false, CPROJ="", HV="3d";
+let MYPH=[], PHI=0, PINSEL=-1, PHCOL=null;
+try{ MYPH=JSON.parse(localStorage.getItem("cb_myphotos")||"[]")||[]; }catch(e){ MYPH=[]; }
 window.CONCEPT_REF=()=>CONCEPT; window.BAR_REF=()=>(typeof BAR!=="undefined"?BAR:null); window.ELEV_REF=()=>elevOpts(); window.BAROPTS_REF=()=>barOpts(); window.FLEXW_REF=(l,len)=>flexW(l,len); window.CPROJ_REF=()=>CPROJ;
 function kelvinColor(k){ return k<=2700?"#FFC27A":k<=3000?"#FFD196":k<=3500?"#FFE2B8":"#FFF4DE"; }
 function shade(hex,amt){ const n=parseInt(hex.slice(1),16); let r=(n>>16)+amt,g=((n>>8)&255)+amt,b=(n&255)+amt; r=Math.max(0,Math.min(255,r));g=Math.max(0,Math.min(255,g));b=Math.max(0,Math.min(255,b)); return "#"+((1<<24)+(r<<16)+(g<<8)+b).toString(16).slice(1); }
@@ -1565,9 +1598,9 @@ function renderConcept(){
    <div class="bhead"><div><span class="eyebrow">CONCEPT BOARD</span><input id="cproj" class="projname" placeholder="프로젝트명 입력 (예: 산수원카페)" value="${CPROJ.replace(/"/g,"&quot;")}"></div>
      <div class="btitle"><span class="en">${c.en}${c.recommended?" · 분석 결과 추천":""}</span><b>${c.name}</b></div></div>
    <div class="brow1">
-     <div class="hero"><div class="hviewbtns"><button data-hv="3d" class="${HV==="3d"?"on":""}">실사 3D 렌더</button><button data-hv="il" class="${HV==="il"?"on":""}">일러스트 · 지시선</button></div>
-       <div class="r3dwrap" style="${HV==="3d"?"":"display:none"}"><div id="r3d" class="r3d"><div class="r3dload">3D 렌더 준비 중…</div></div><div class="r3dviews">${[["front","정면"],["inside","안쪽"],["barista","바리스타 시점"],["side","사선"],["top","위에서"]].map(([k,t])=>`<button data-v3="${k}">${t}</button>`).join("")}</div></div><div id="ill" style="${HV==="il"?"":"display:none"}">${sceneSvg(c)}</div>
-       <span class="cap">${HV==="3d"?"3D · 끌기: 회전 · 우클릭/두 손가락 끌기: 이동 · 스크롤: 확대 · 아래 버튼으로 시점 바꾸기":"BAR ELEVATION"} · ${typeof BAR!=="undefined"&&BAR?"바 설계 치수 반영":"기본 배치 예시"}</span></div>
+     <div class="hero"><div class="hviewbtns"><button data-hv="3d" class="${HV==="3d"?"on":""}">실사 3D 렌더</button><button data-hv="il" class="${HV==="il"?"on":""}">일러스트 · 지시선</button><button data-hv="ph" class="${HV==="ph"?"on":""}">내 매장 사진${MYPH.length?` (${MYPH.length})`:""}</button></div>
+       <div class="r3dwrap" style="${HV==="3d"?"":"display:none"}"><div id="r3d" class="r3d"><div class="r3dload">3D 렌더 준비 중…</div></div><div class="r3dviews">${[["front","정면"],["inside","안쪽"],["barista","바리스타 시점"],["side","사선"],["top","위에서"]].map(([k,t])=>`<button data-v3="${k}">${t}</button>`).join("")}</div></div><div id="ill" style="${HV==="il"?"":"display:none"}">${sceneSvg(c)}</div><div id="phwrap" style="${HV==="ph"?"":"display:none"}">${HV==="ph"?phHtml(c):""}</div>
+       <span class="cap" style="${HV==="ph"?"display:none":""}">${HV==="3d"?"3D · 끌기: 회전 · 우클릭/두 손가락 끌기: 이동 · 스크롤: 확대 · 아래 버튼으로 시점 바꾸기":"BAR ELEVATION"} · ${typeof BAR!=="undefined"&&BAR?"바 설계 치수 반영":"기본 배치 예시"}</span></div>
      <div class="stmt"><span class="lbl">CONCEPT</span><p>${c.statement}</p>
        <span class="lbl">KEYWORDS</span><div class="kws">${c.kw.map(k=>`<span>${k}</span>`).join("")}</div>
        <span class="lbl">맞는 매장</span><p class="fit">${c.fit}</p>
@@ -1599,6 +1632,7 @@ function renderConcept(){
   <div class="panel cact"><button id="capply" class="${CONCEPT_APPLIED?"on":""}">${CONCEPT_APPLIED?"✓ 바 설계에 적용됨 — 바 설계 보기 →":"이 콘셉트를 바 설계에 적용 →"}</button><button id="cpng">PNG 저장</button><button id="cprint">인쇄 (A3 가로)</button><span id="cmsg" class="barmsg"></span></div>`;
   el.querySelectorAll(".hviewbtns button").forEach(b=>b.onclick=()=>{HV=b.dataset.hv; renderConcept();});
   el.querySelectorAll(".r3dviews button").forEach(b=>b.onclick=()=>{ el.querySelectorAll(".r3dviews button").forEach(x=>x.classList.toggle("on",x===b)); window.r3dView&&window.r3dView(b.dataset.v3); });
+  if(HV==="ph") bindPh(c);
   if(HV==="3d"){ const go=()=>window.render3D(document.getElementById("r3d")); if(window.render3D) setTimeout(go,30); else window.addEventListener("r3d-ready",go,{once:true}); }
   el.querySelectorAll(".chip2 input").forEach(inp=>inp.addEventListener("change",()=>{c.pal[inp.dataset.k]=inp.value; renderConcept(); if(CONCEPT_APPLIED&&BAR) renderBar();}));
   document.getElementById("cproj").oninput=e=>{CPROJ=e.target.value; const t=document.querySelector(".tblock span"); if(t) t.innerHTML=`<em>PROJECT</em>${CPROJ.replace(/</g,"&lt;")||"—"}`;};
@@ -1617,8 +1651,82 @@ function conceptChecks(c){
 }
 function saveBoardPng(){
   if(!/github\.io$/.test(location.hostname)&&location.protocol!=="file:"){cMsg("이 화면에서는 파일 저장이 막혀 있어요. github.io 주소에서 저장하거나 화면을 캡처해 주세요.");return;}
+  if(HV==="ph"&&MYPH.length){ savePhPng(); return; }
   if(HV==="3d"&&window.render3DPng){ const u=window.render3DPng(); if(u){ try{const a=document.createElement("a");a.href=u;a.download=`컨셉보드_${CONCEPT.name}_3D.png`;document.body.appendChild(a);a.click();a.remove();cMsg("지금 보이는 3D 렌더를 PNG로 저장했어요.");}catch(e){cMsg("저장이 막혀 있어요. 화면을 캡처해 주세요.");} return; } }
   const sv=document.getElementById("conceptsvg"), img=new Image(); img.onload=()=>{const cv=document.createElement("canvas"); cv.width=1600; cv.height=900; cv.getContext("2d").drawImage(img,0,0); cv.toBlob(b=>{try{const a=document.createElement("a");a.href=URL.createObjectURL(b);a.download=`컨셉보드_${CONCEPT.name}.png`;document.body.appendChild(a);a.click();a.remove();cMsg("바 정면 이미지를 PNG로 저장했어요. 보드 전체는 인쇄(PDF 저장)를 이용하세요.");}catch(e){cMsg("저장이 막혀 있어요. 화면을 캡처해 주세요.");}});}; img.src="data:image/svg+xml;charset=utf-8,"+encodeURIComponent(new XMLSerializer().serializeToString(sv));
+}
+// ---------- 내 매장 사진: 지시선 · 색 추출 ----------
+function phSave(){ try{ localStorage.setItem("cb_myphotos",JSON.stringify(MYPH)); return true; }catch(e){ return false; } }
+function pinItems(c){
+  const a=c.mats.map(m=>[m[0],`${m[1]} · ${m[2]}`]);
+  (equipSchedule(c)||[]).forEach(r=>a.push([r.code,`${r.name}${r.model?" · "+r.model:""}`]));
+  c.light.forEach((l,i)=>a.push([`L-0${i+1}`,`조명 · ${l[0]} ${l[1]}`]));
+  return a;
+}
+const escH=t=>String(t).replace(/[&<>"]/g,ch=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[ch]));
+function phHtml(c){
+  if(!MYPH.length) return `<label class="phdrop"><input type="file" accept="image/*" multiple id="phin"><b>실제 매장 사진 올리기</b><span>공사 전 현장, 완공 사진, 참고하고 싶은 매장 사진 모두 좋아요. 여러 장 올릴 수 있어요.</span><span>올린 사진 위를 누르면 이 콘셉트의 마감재 코드(M-01…)·장비 코드(E-01…)·조명 지시선을 붙일 수 있고, 사진에서 색을 뽑아 팔레트에 넣을 수도 있어요.</span><em>사진은 이 브라우저 안에만 저장돼요. 서버로 올라가지 않아요.</em></label>`;
+  if(PHI>=MYPH.length) PHI=0; const ph=MYPH[PHI], items=pinItems(c), P=ph.pins||(ph.pins=[]);
+  const pin=PINSEL>=0?P[PINSEL]:null;
+  return `<div class="phstage" id="phstage"><img src="${ph.src}" alt="내 매장 사진" draggable="false">${P.map((p,i)=>`<div class="pin ${i===PINSEL?"sel":""} ${p.x>62?"lft":""}" data-i="${i}" style="left:${p.x}%;top:${p.y}%"><i></i><span class="pl"><em>${escH(p.code)}</em>${escH(p.label)}</span></div>`).join("")}<span class="phcap">MY STORE · ${PHI+1}/${MYPH.length} · 사진을 눌러 지시선 추가 · 점을 끌어 이동</span></div>
+  <div class="phbar">
+    <div class="phthumbs">${MYPH.map((x,i)=>`<button class="pth ${i===PHI?"on":""}" data-p="${i}" style="background-image:url('${x.src}')" aria-label="사진 ${i+1}"></button>`).join("")}<label class="pth add" title="사진 추가">+<input type="file" accept="image/*" multiple id="phin"></label></div>
+    ${pin?`<div class="pined"><b>지시선 ${PINSEL+1}</b><select id="pinsel">${items.map(([k,t])=>`<option value="${escH(k)}" ${k===pin.code?"selected":""}>${escH(k)} · ${escH(t)}</option>`).join("")}<option value="_" ${items.some(x=>x[0]===pin.code)?"":"selected"}>직접 입력</option></select><input id="pintxt" value="${escH(pin.label)}" placeholder="설명 (예: 기존 타일 철거)"><button id="pindel">지시선 삭제</button><button id="pinok">완료</button></div>`
+      :`<p class="phhint">사진 위 원하는 곳을 누르면 지시선이 생겨요. 마감재(M)·장비(E)·조명(L) 코드를 고르면 아래 일람표와 연결돼요.</p>`}
+    <div class="phact"><button id="phcol">사진에서 색 뽑기</button><button id="phclr">지시선 모두 지우기</button><button id="phdel">이 사진 삭제</button></div>
+    ${PHCOL?`<div class="phcol"><span class="lbl" style="margin:0 0 6px">사진에서 뽑은 색 <em>비율 순</em></span><div class="ratio">${PHCOL.map(x=>`<i style="background:${x[0]};flex:${x[1]}" title="${x[0]} ${x[1]}%"></i>`).join("")}</div><div class="phsw">${PHCOL.map(x=>`<span><i style="background:${x[0]}"></i>${x[0].toUpperCase()}<small>${x[1]}% · LRV ${lrv(x[0])}</small></span>`).join("")}</div><button id="phapply">이 색을 콘셉트 팔레트에 넣기 →</button><small class="phnote">넓은 면적 색부터 콘셉트의 주 색(${c.colors.map(x=>x[0]).join(" · ")}) 순서로 들어가요. 바 설계·3D 렌더 색도 같이 바뀌어요.</small></div>`:""}
+  </div>`;
+}
+function phRefresh(c){ const w=document.getElementById("phwrap"); if(!w) return; w.innerHTML=phHtml(c); bindPh(c); const hb=document.querySelector('.hviewbtns button[data-hv="ph"]'); if(hb) hb.textContent=`내 매장 사진${MYPH.length?` (${MYPH.length})`:""}`; }
+function readPhotos(files,c){
+  const fs=[...files].filter(f=>/^image\//.test(f.type)); if(!fs.length) return; let left=fs.length;
+  fs.forEach(f=>{ const fr=new FileReader(); fr.onload=()=>{ const im=new Image(); im.onload=()=>{ const M=1600, sc=Math.min(1,M/Math.max(im.width,im.height)); const cv=document.createElement("canvas"); cv.width=Math.round(im.width*sc); cv.height=Math.round(im.height*sc); cv.getContext("2d").drawImage(im,0,0,cv.width,cv.height);
+      MYPH.push({src:cv.toDataURL("image/jpeg",0.86),name:f.name,pins:[]}); if(--left===0){ PHI=MYPH.length-1; PINSEL=-1; PHCOL=null; const ok=phSave(); phRefresh(c); if(!ok) cMsg("사진이 커서 브라우저에 다 저장되지 않았어요. 새로고침하면 사라질 수 있어요."); } };
+    im.onerror=()=>{ if(--left===0) phRefresh(c); }; im.src=fr.result; }; fr.readAsDataURL(f); });
+}
+function bindPh(c){
+  const inp=document.getElementById("phin"); if(inp) inp.onchange=()=>readPhotos(inp.files,c);
+  const st=document.getElementById("phstage"); if(!st) return; const ph=MYPH[PHI];
+  const rel=ev=>{ const r=st.getBoundingClientRect(); return [Math.max(0,Math.min(100,(ev.clientX-r.left)/r.width*100)),Math.max(0,Math.min(100,(ev.clientY-r.top)/r.height*100))]; };
+  let drag=null;
+  st.addEventListener("pointerdown",ev=>{ const pn=ev.target.closest(".pin"); if(pn){ drag={i:+pn.dataset.i,el:pn,moved:false}; st.setPointerCapture(ev.pointerId); ev.preventDefault(); } });
+  st.addEventListener("pointermove",ev=>{ if(!drag) return; const [x,y]=rel(ev); const p=ph.pins[drag.i]; p.x=+x.toFixed(2); p.y=+y.toFixed(2); drag.moved=true; drag.el.style.left=p.x+"%"; drag.el.style.top=p.y+"%"; drag.el.classList.toggle("lft",p.x>62); });
+  st.addEventListener("pointerup",ev=>{ if(drag){ const d=drag; drag=null; phSave(); if(!d.moved){ PINSEL=PINSEL===d.i?-1:d.i; phRefresh(c); } return; }
+    if(ev.target.closest(".phcap")) return; const [x,y]=rel(ev); const items=pinItems(c), used=new Set(ph.pins.map(p=>p.code)); const it=items.find(t=>!used.has(t[0]))||items[0]||["NOTE","메모"];
+    ph.pins.push({x:+x.toFixed(2),y:+y.toFixed(2),code:it[0],label:it[1]}); PINSEL=ph.pins.length-1; phSave(); phRefresh(c); });
+  document.querySelectorAll(".pth[data-p]").forEach(b=>b.onclick=()=>{ PHI=+b.dataset.p; PINSEL=-1; PHCOL=null; phRefresh(c); });
+  const ps=document.getElementById("pinsel"), pt=document.getElementById("pintxt");
+  if(ps) ps.onchange=()=>{ const p=ph.pins[PINSEL]; if(ps.value==="_"){ p.code="NOTE"; p.label=pt.value||"메모"; } else { const it=pinItems(c).find(x=>x[0]===ps.value); p.code=it[0]; p.label=it[1]; } phSave(); phRefresh(c); };
+  if(pt) pt.oninput=()=>{ const p=ph.pins[PINSEL]; p.label=pt.value; const el=st.querySelector(`.pin[data-i="${PINSEL}"] .pl`); if(el) el.innerHTML=`<em>${escH(p.code)}</em>${escH(p.label)}`; phSave(); };
+  const g=id=>document.getElementById(id);
+  if(g("pindel")) g("pindel").onclick=()=>{ ph.pins.splice(PINSEL,1); PINSEL=-1; phSave(); phRefresh(c); };
+  if(g("pinok")) g("pinok").onclick=()=>{ PINSEL=-1; phRefresh(c); };
+  g("phclr").onclick=()=>{ ph.pins=[]; PINSEL=-1; phSave(); phRefresh(c); };
+  g("phdel").onclick=()=>{ MYPH.splice(PHI,1); PHI=Math.max(0,PHI-1); PINSEL=-1; PHCOL=null; phSave(); phRefresh(c); };
+  g("phcol").onclick=()=>{ PHCOL=extractColors(st.querySelector("img"),c.colors.length); phRefresh(c); };
+  if(g("phapply")) g("phapply").onclick=()=>{ const order=c.colors.slice().sort((a,b)=>b[2]-a[2]); order.forEach((x,i)=>{ if(PHCOL[i]) c.pal[x[1]]=PHCOL[i][0]; }); renderConcept(); if(CONCEPT_APPLIED&&BAR) renderBar(); cMsg("사진에서 뽑은 색을 팔레트에 넣었어요. 칩을 눌러 하나씩 고칠 수 있어요."); };
+}
+// 사진 대표색: 축소 → k-means
+function extractColors(img,k){
+  k=Math.max(3,Math.min(6,k||5)); const N=72, cv=document.createElement("canvas"), sc=N/Math.max(img.naturalWidth,img.naturalHeight);
+  cv.width=Math.max(1,Math.round(img.naturalWidth*sc)); cv.height=Math.max(1,Math.round(img.naturalHeight*sc)); const g=cv.getContext("2d"); g.drawImage(img,0,0,cv.width,cv.height);
+  const d=g.getImageData(0,0,cv.width,cv.height).data, px=[]; for(let i=0;i<d.length;i+=4) px.push([d[i],d[i+1],d[i+2]]);
+  const lum=p=>p[0]*0.3+p[1]*0.59+p[2]*0.11; const sorted=px.slice().sort((a,b)=>lum(a)-lum(b));
+  let C=Array.from({length:k},(_,i)=>sorted[Math.floor((i+0.5)/k*sorted.length)].slice());
+  let lab=new Array(px.length).fill(0);
+  for(let it=0;it<12;it++){ const S=C.map(()=>[0,0,0,0]); px.forEach((p,j)=>{ let bi=0,bd=1e9; C.forEach((q,ci)=>{ const dd=(p[0]-q[0])**2+(p[1]-q[1])**2+(p[2]-q[2])**2; if(dd<bd){bd=dd;bi=ci;} }); lab[j]=bi; const s=S[bi]; s[0]+=p[0]; s[1]+=p[1]; s[2]+=p[2]; s[3]++; }); C=C.map((q,ci)=>S[ci][3]?[S[ci][0]/S[ci][3],S[ci][1]/S[ci][3],S[ci][2]/S[ci][3]]:q); }
+  const cnt=C.map(()=>0); lab.forEach(l=>cnt[l]++); const hx=q=>"#"+q.map(v=>Math.round(v).toString(16).padStart(2,"0")).join("");
+  return C.map((q,i)=>[hx(q),Math.round(cnt[i]/px.length*100)]).filter(x=>x[1]>0).sort((a,b)=>b[1]-a[1]);
+}
+function savePhPng(){
+  const ph=MYPH[PHI], img=new Image(); img.onload=()=>{ const cv=document.createElement("canvas"); cv.width=img.width; cv.height=img.height; const g=cv.getContext("2d"); g.drawImage(img,0,0);
+    const f=Math.max(13,Math.round(img.width/70)); g.font=`600 ${f}px "Noto Sans KR",sans-serif`; g.textBaseline="middle";
+    (ph.pins||[]).forEach(p=>{ const x=p.x/100*img.width, y=p.y/100*img.height, L=f*2.6, lft=p.x>62; const t=`${p.code}  ${p.label}`, tw=g.measureText(t).width, bx=lft?x-L-tw-f*1.2:x+L, by=y-f*1.1;
+      g.strokeStyle="#111"; g.lineWidth=Math.max(2,f/7); g.beginPath(); g.moveTo(x,y); g.lineTo(lft?x-L:x+L,y); g.stroke();
+      g.fillStyle="#fff"; g.fillRect(bx,by,tw+f*1.2,f*2.2); g.fillStyle=(CONCEPT&&CONCEPT.pal.accent)||"#c8742f"; g.fillRect(lft?bx+tw+f*1.2-f/4:bx,by,f/4,f*2.2); g.fillStyle="#111"; g.fillText(t,bx+f*0.6,y);
+      g.beginPath(); g.arc(x,y,f*0.55,0,Math.PI*2); g.fillStyle="#fff"; g.fill(); g.lineWidth=f/4; g.stroke(); });
+    cv.toBlob(b=>{ try{ const a=document.createElement("a"); a.href=URL.createObjectURL(b); a.download=`컨셉보드_${CONCEPT.name}_매장사진.png`; document.body.appendChild(a); a.click(); a.remove(); cMsg("지시선을 붙인 매장 사진을 PNG로 저장했어요."); }catch(e){ cMsg("저장이 막혀 있어요. 화면을 캡처해 주세요."); } },"image/png"); };
+  img.src=ph.src;
 }
 function cMsg(t){const m=document.getElementById("cmsg"); if(!m) return; m.textContent=t; setTimeout(()=>{if(m) m.textContent="";},5000);}
 // 바 설계 색 (콘셉트 적용 시)
