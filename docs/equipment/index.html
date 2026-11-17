@@ -270,6 +270,12 @@ ul.warnl li.ok::marker{color:var(--ok)}
 .pined{display:flex;gap:6px;flex-wrap:wrap;align-items:center;font-size:13px}.pined select,.pined input{font:inherit;font-size:13px;padding:6px 8px;border:1px solid var(--line);border-radius:2px;min-width:0;flex:1 1 180px}.pined button,.phact button,#phapply{font:inherit;font-size:12.5px;padding:6px 11px;border:1px solid var(--ink);background:#fff;border-radius:2px;cursor:pointer}#phapply{background:var(--ink);color:#fff;margin-top:8px}
 .phhint{margin:0;font-size:12.5px;color:var(--muted)}.phact{display:flex;gap:6px;flex-wrap:wrap}.phcol .ratio{height:22px}.phsw{display:flex;flex-wrap:wrap;gap:10px;margin-top:8px;font-size:12px}.phsw span{display:flex;align-items:center;gap:5px}.phsw i{width:16px;height:16px;border-radius:2px;border:1px solid #0002}.phsw small{color:var(--muted)}.phnote{display:block;color:var(--muted);font-size:11.5px;margin-top:6px}
 @media print{.phbar{display:none}.phcap{display:none}}
+.arlayer{position:absolute;inset:0;pointer-events:none}.arlayer canvas{display:block;width:100%!important;height:100%!important}
+.arsvg{position:absolute;inset:0;width:100%;height:100%;pointer-events:none}
+.arh{position:absolute;width:24px;height:24px;margin:-12px 0 0 -12px;border-radius:50%;background:#c8742f;color:#fff;font-size:12px;font-weight:800;display:flex;align-items:center;justify-content:center;border:2px solid #fff;box-shadow:0 1px 6px #0008;cursor:move;z-index:3;touch-action:none}
+.artip{position:absolute;left:10px;right:10px;top:10px;background:#111d;color:#fff;padding:10px 14px;border-radius:2px;font-size:12.5px;line-height:1.55;display:grid;gap:2px;pointer-events:none}.artip b{font-size:13.5px}.artip span{color:#f3c79c;font-weight:700}.artip small{color:#ccc}
+.phstage.calib{cursor:copy}.arbar{align-items:center}.arbar small{color:var(--muted);font-size:12px}.phact button.pri{background:var(--ink);color:#fff}.arop{display:flex;align-items:center;gap:6px;font-size:12.5px}
+@media print{.arh,.arsvg,.artip{display:none}}
 </style>
 <script type="importmap">{"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.165.0/build/three.module.js","three/addons/":"https://cdn.jsdelivr.net/npm/three@0.165.0/examples/jsm/"}}</script>
 </head>
@@ -1472,7 +1478,7 @@ const CGROUPS=["전체","미니멀","내추럴","인더스트리얼·모던","�
 let CFILT="전체", CQ="";
 function lrv(hex){ return Math.round(rgbOf(hex).map(v=>{v/=255; return v<=0.04045?v/12.92:Math.pow((v+0.055)/1.055,2.4);}).reduce((a,v,i)=>a+v*[0.2126,0.7152,0.0722][i],0)*100); }
 let CONCEPT=null, CONCEPT_APPLIED=false, CPROJ="", HV="3d";
-let MYPH=[], PHI=0, PINSEL=-1, PHCOL=null;
+let MYPH=[], PHI=0, PINSEL=-1, PHCOL=null, ARDRAG=null;
 try{ MYPH=JSON.parse(localStorage.getItem("cb_myphotos")||"[]")||[]; }catch(e){ MYPH=[]; }
 window.CONCEPT_REF=()=>CONCEPT; window.BAR_REF=()=>(typeof BAR!=="undefined"?BAR:null); window.ELEV_REF=()=>elevOpts(); window.BAROPTS_REF=()=>barOpts(); window.FLEXW_REF=(l,len)=>flexW(l,len); window.CPROJ_REF=()=>CPROJ;
 function kelvinColor(k){ return k<=2700?"#FFC27A":k<=3000?"#FFD196":k<=3500?"#FFE2B8":"#FFF4DE"; }
@@ -1644,7 +1650,7 @@ function renderConcept(){
   <div class="panel cact"><button id="capply" class="${CONCEPT_APPLIED?"on":""}">${CONCEPT_APPLIED?"✓ 바 설계에 적용됨 — 바 설계 보기 →":"이 콘셉트를 바 설계에 적용 →"}</button><button id="cpng">PNG 저장</button><button id="cprint">인쇄 (A3 가로)</button><span id="cmsg" class="barmsg"></span></div>`;
   el.querySelectorAll(".hviewbtns button").forEach(b=>b.onclick=()=>{HV=b.dataset.hv; renderConcept();});
   el.querySelectorAll(".r3dviews button").forEach(b=>b.onclick=()=>{ el.querySelectorAll(".r3dviews button").forEach(x=>x.classList.toggle("on",x===b)); window.r3dView&&window.r3dView(b.dataset.v3); });
-  if(HV==="ph") bindPh(c);
+  if(HV==="ph") bindPh(c); else arDispose();
   if(HV==="3d"){ const go=()=>window.render3D(document.getElementById("r3d")); if(window.render3D) setTimeout(go,30); else window.addEventListener("r3d-ready",go,{once:true}); }
   el.querySelectorAll(".chip2 input").forEach(inp=>inp.addEventListener("change",()=>{c.pal[inp.dataset.k]=inp.value; renderConcept(); if(CONCEPT_APPLIED&&BAR) renderBar();}));
   document.getElementById("cproj").oninput=e=>{CPROJ=e.target.value; const t=document.querySelector(".tblock span"); if(t) t.innerHTML=`<em>PROJECT</em>${CPROJ.replace(/</g,"&lt;")||"—"}`;};
@@ -1680,11 +1686,17 @@ function phHtml(c){
   if(!MYPH.length) return `<label class="phdrop"><input type="file" accept="image/*" multiple id="phin"><b>실제 매장 사진 올리기</b><span>공사 전 현장, 완공 사진, 참고하고 싶은 매장 사진 모두 좋아요. 여러 장 올릴 수 있어요.</span><span>올린 사진 위를 누르면 이 콘셉트의 마감재 코드(M-01…)·장비 코드(E-01…)·조명 지시선을 붙일 수 있고, 사진에서 색을 뽑아 팔레트에 넣을 수도 있어요.</span><em>사진은 이 브라우저 안에만 저장돼요. 서버로 올라가지 않아요.</em></label>`;
   if(PHI>=MYPH.length) PHI=0; const ph=MYPH[PHI], items=pinItems(c), P=ph.pins||(ph.pins=[]);
   const pin=PINSEL>=0?P[PINSEL]:null;
-  return `<div class="phstage" id="phstage"><img src="${ph.src}" alt="내 매장 사진" draggable="false">${P.map((p,i)=>`<div class="pin ${i===PINSEL?"sel":""} ${p.x>62?"lft":""}" data-i="${i}" style="left:${p.x}%;top:${p.y}%"><i></i><span class="pl"><em>${escH(p.code)}</em>${escH(p.label)}</span></div>`).join("")}<span class="phcap">MY STORE · ${PHI+1}/${MYPH.length} · 사진을 눌러 지시선 추가 · 점을 끌어 이동</span></div>
+  const A=ph.ar, AP=A?A.pts:[];
+  const CORNER=["① 앞 카운터 왼쪽 끝 (손님 쪽 바닥)","② 앞 카운터 오른쪽 끝 (손님 쪽 바닥)","③ 뒷벽 오른쪽 끝 (백 카운터 뒤 바닥)","④ 뒷벽 왼쪽 끝 (백 카운터 뒤 바닥)"];
+  const arSvg=A?`<svg class="arsvg" viewBox="0 0 100 100" preserveAspectRatio="none">${AP.length>1?`<polyline points="${AP.concat(AP.length===4?[AP[0]]:[]).map(p=>p.join(",")).join(" ")}" fill="${AP.length===4?"rgba(200,116,47,.10)":"none"}" stroke="#c8742f" stroke-width="0.35" stroke-dasharray="1.2 .8" vector-effect="non-scaling-stroke"/>`:""}</svg>${AP.map((p,i)=>`<div class="arh" data-k="${i}" style="left:${p[0]}%;top:${p[1]}%">${i+1}</div>`).join("")}`:"";
+  const arTip=A&&AP.length<4?`<div class="artip"><b>바닥에서 바가 들어갈 자리의 모서리를 순서대로 누르세요 (${AP.length}/4)</b><span>다음: ${CORNER[AP.length]}</span><small>바 전체 크기: 폭 ${(arDims().Wq*1000).toLocaleString()}mm × 깊이 ${(arDims().D*1000).toLocaleString()}mm (바 설계 기준). 바닥 타일 줄이나 벽 모서리를 기준으로 찍으면 정확해요.</small></div>`:"";
+  return `<div class="phstage ${A&&AP.length<4?"calib":""}" id="phstage"><img src="${ph.src}" alt="내 매장 사진" draggable="false"><div class="arlayer" id="arlayer" style="${A&&A.show!==false?"":"display:none"};opacity:${A?(A.op??100)/100:1}"></div>${arSvg}${arTip}${P.map((p,i)=>`<div class="pin ${i===PINSEL?"sel":""} ${p.x>62?"lft":""}" data-i="${i}" style="left:${p.x}%;top:${p.y}%"><i></i><span class="pl"><em>${escH(p.code)}</em>${escH(p.label)}</span></div>`).join("")}<span class="phcap">MY STORE · ${PHI+1}/${MYPH.length} · 사진을 눌러 지시선 추가 · 점을 끌어 이동</span></div>
   <div class="phbar">
     <div class="phthumbs">${MYPH.map((x,i)=>`<button class="pth ${i===PHI?"on":""}" data-p="${i}" style="background-image:url('${x.src}')" aria-label="사진 ${i+1}"></button>`).join("")}<label class="pth add" title="사진 추가">+<input type="file" accept="image/*" multiple id="phin"></label></div>
     ${pin?`<div class="pined"><b>지시선 ${PINSEL+1}</b><select id="pinsel">${items.map(([k,t])=>`<option value="${escH(k)}" ${k===pin.code?"selected":""}>${escH(k)} · ${escH(t)}</option>`).join("")}<option value="_" ${items.some(x=>x[0]===pin.code)?"":"selected"}>직접 입력</option></select><input id="pintxt" value="${escH(pin.label)}" placeholder="설명 (예: 기존 타일 철거)"><button id="pindel">지시선 삭제</button><button id="pinok">완료</button></div>`
       :`<p class="phhint">사진 위 원하는 곳을 누르면 지시선이 생겨요. 마감재(M)·장비(E)·조명(L) 코드를 고르면 아래 일람표와 연결돼요.</p>`}
+    <div class="phact arbar">${!A?`<button id="arstart" class="pri">이 사진 안에 바 설계 넣기</button><small>사진 바닥의 네 모서리만 찍으면 지금 바 설계(카운터·장비)를 사진 속 원근에 맞춰 3D로 세워요.</small>`
+      :`<button id="arre">모서리 다시 찍기</button>${AP.length===4?`<button id="arshow">${A.show===false?"바 보이기":"바 숨기기"}</button><label class="arop">투명도 <input type="range" id="arop" min="30" max="100" value="${A.op??100}"></label><button id="arflip">좌우 뒤집기</button>`:""}<button id="aroff">바 설계 빼기</button>${AP.length===4?`<small>번호 점을 끌면 위치·원근이 바로 바뀌어요. 바 설계 탭에서 장비를 바꾸면 여기에도 반영돼요.</small>`:""}`}</div>
     <div class="phact"><button id="phcol">사진에서 색 뽑기</button><button id="phclr">지시선 모두 지우기</button><button id="phdel">이 사진 삭제</button></div>
     ${PHCOL?`<div class="phcol"><span class="lbl" style="margin:0 0 6px">사진에서 뽑은 색 <em>비율 순</em></span><div class="ratio">${PHCOL.map(x=>`<i style="background:${x[0]};flex:${x[1]}" title="${x[0]} ${x[1]}%"></i>`).join("")}</div><div class="phsw">${PHCOL.map(x=>`<span><i style="background:${x[0]}"></i>${x[0].toUpperCase()}<small>${x[1]}% · LRV ${lrv(x[0])}</small></span>`).join("")}</div><button id="phapply">이 색을 콘셉트 팔레트에 넣기 →</button><small class="phnote">넓은 면적 색부터 콘셉트의 주 색(${c.colors.map(x=>x[0]).join(" · ")}) 순서로 들어가요. 바 설계·3D 렌더 색도 같이 바뀌어요.</small></div>`:""}
   </div>`;
@@ -1701,9 +1713,11 @@ function bindPh(c){
   const st=document.getElementById("phstage"); if(!st) return; const ph=MYPH[PHI];
   const rel=ev=>{ const r=st.getBoundingClientRect(); return [Math.max(0,Math.min(100,(ev.clientX-r.left)/r.width*100)),Math.max(0,Math.min(100,(ev.clientY-r.top)/r.height*100))]; };
   let drag=null;
-  st.addEventListener("pointerdown",ev=>{ const pn=ev.target.closest(".pin"); if(pn){ drag={i:+pn.dataset.i,el:pn,moved:false}; st.setPointerCapture(ev.pointerId); ev.preventDefault(); } });
-  st.addEventListener("pointermove",ev=>{ if(!drag) return; const [x,y]=rel(ev); const p=ph.pins[drag.i]; p.x=+x.toFixed(2); p.y=+y.toFixed(2); drag.moved=true; drag.el.style.left=p.x+"%"; drag.el.style.top=p.y+"%"; drag.el.classList.toggle("lft",p.x>62); });
-  st.addEventListener("pointerup",ev=>{ if(drag){ const d=drag; drag=null; phSave(); if(!d.moved){ PINSEL=PINSEL===d.i?-1:d.i; phRefresh(c); } return; }
+  st.addEventListener("pointerdown",ev=>{ const ah=ev.target.closest(".arh"); if(ah){ ARDRAG={k:+ah.dataset.k,el:ah,moved:false}; st.setPointerCapture(ev.pointerId); ev.preventDefault(); return; } const pn=ev.target.closest(".pin"); if(pn){ drag={i:+pn.dataset.i,el:pn,moved:false}; st.setPointerCapture(ev.pointerId); ev.preventDefault(); } });
+  st.addEventListener("pointermove",ev=>{ if(ARDRAG){ const [x,y]=rel(ev); ph.ar.pts[ARDRAG.k]=[+x.toFixed(2),+y.toFixed(2)]; ARDRAG.moved=true; ARDRAG.el.style.left=x+"%"; ARDRAG.el.style.top=y+"%"; const pl=st.querySelector(".arsvg polyline"); if(pl){ const P=ph.ar.pts; pl.setAttribute("points",P.concat(P.length===4?[P[0]]:[]).map(p=>p.join(",")).join(" ")); } if(ph.ar.pts.length===4) arUpdate(ph); return; } if(!drag) return; const [x,y]=rel(ev); const p=ph.pins[drag.i]; p.x=+x.toFixed(2); p.y=+y.toFixed(2); drag.moved=true; drag.el.style.left=p.x+"%"; drag.el.style.top=p.y+"%"; drag.el.classList.toggle("lft",p.x>62); });
+  st.addEventListener("pointerup",ev=>{ if(ARDRAG){ ARDRAG=null; phSave(); return; }
+    if(ph.ar&&ph.ar.pts.length<4){ if(ev.target.closest(".phcap")) return; const [x,y]=rel(ev); ph.ar.pts.push([+x.toFixed(2),+y.toFixed(2)]); phSave(); phRefresh(c); return; }
+    if(drag){ const d=drag; drag=null; phSave(); if(!d.moved){ PINSEL=PINSEL===d.i?-1:d.i; phRefresh(c); } return; }
     if(ev.target.closest(".phcap")) return; const [x,y]=rel(ev); const items=pinItems(c), used=new Set(ph.pins.map(p=>p.code)); const it=items.find(t=>!used.has(t[0]))||items[0]||["NOTE","메모"];
     ph.pins.push({x:+x.toFixed(2),y:+y.toFixed(2),code:it[0],label:it[1]}); PINSEL=ph.pins.length-1; phSave(); phRefresh(c); });
   document.querySelectorAll(".pth[data-p]").forEach(b=>b.onclick=()=>{ PHI=+b.dataset.p; PINSEL=-1; PHCOL=null; phRefresh(c); });
@@ -1715,9 +1729,56 @@ function bindPh(c){
   if(g("pinok")) g("pinok").onclick=()=>{ PINSEL=-1; phRefresh(c); };
   g("phclr").onclick=()=>{ ph.pins=[]; PINSEL=-1; phSave(); phRefresh(c); };
   g("phdel").onclick=()=>{ MYPH.splice(PHI,1); PHI=Math.max(0,PHI-1); PINSEL=-1; PHCOL=null; phSave(); phRefresh(c); };
+  if(g("arstart")) g("arstart").onclick=()=>{ if(!BAR){ try{ buildBar(); }catch(e){} } ph.ar={pts:[],show:true,op:100}; PINSEL=-1; phSave(); phRefresh(c); };
+  if(g("arre")) g("arre").onclick=()=>{ ph.ar.pts=[]; phSave(); phRefresh(c); };
+  if(g("aroff")) g("aroff").onclick=()=>{ delete ph.ar; arDispose(); phSave(); phRefresh(c); };
+  if(g("arshow")) g("arshow").onclick=()=>{ ph.ar.show=ph.ar.show===false; phSave(); phRefresh(c); };
+  if(g("arflip")) g("arflip").onclick=()=>{ const P=ph.ar.pts; ph.ar.pts=[P[1],P[0],P[3],P[2]]; phSave(); phRefresh(c); };
+  if(g("arop")) g("arop").oninput=e=>{ ph.ar.op=+e.target.value; const l=document.getElementById("arlayer"); if(l) l.style.opacity=ph.ar.op/100; phSave(); };
+  arMount(ph);
   g("phcol").onclick=()=>{ PHCOL=extractColors(st.querySelector("img"),c.colors.length); phRefresh(c); };
   if(g("phapply")) g("phapply").onclick=()=>{ const order=c.colors.slice().sort((a,b)=>b[2]-a[2]); order.forEach((x,i)=>{ if(PHCOL[i]) c.pal[x[1]]=PHCOL[i][0]; }); renderConcept(); if(CONCEPT_APPLIED&&BAR) renderBar(); cMsg("사진에서 뽑은 색을 팔레트에 넣었어요. 칩을 눌러 하나씩 고칠 수 있어요."); };
 }
+// ---------- 사진 안 바 설계 (4점 → 호모그래피 → 카메라 추정) ----------
+let ARR=null;
+function arDispose(){ if(ARR){ try{ARR.dispose();}catch(e){} ARR=null; } }
+function arDims(){ const o=barOpts(), fl=Math.max(1.5,(BAR?BAR.flen:4000)/1000||4), bl=Math.max(1.5,(BAR?BAR.blen:3500)/1000||3.5);
+  const fd=Math.max(0.45,(o.fd||700)/1000), bd=Math.max(0.45,(o.bd||600)/1000), ai=Math.max(0.7,(o.aisle||1000)/1000); return {Wq:+Math.max(fl,bl).toFixed(3), D:+(bd+ai+fd).toFixed(3)}; }
+function solve8(A,b){ const n=8, M=A.map((r,i)=>[...r,b[i]]);
+  for(let i=0;i<n;i++){ let p=i; for(let r=i+1;r<n;r++) if(Math.abs(M[r][i])>Math.abs(M[p][i])) p=r; [M[i],M[p]]=[M[p],M[i]]; const d=M[i][i]; if(Math.abs(d)<1e-12) return null;
+    for(let r=0;r<n;r++){ if(r===i) continue; const f=M[r][i]/d; for(let k=i;k<=n;k++) M[r][k]-=f*M[i][k]; } }
+  return M.map((r,i)=>r[n]/r[i]); }
+function arParams(ph,img){
+  const A=ph.ar; if(!A||A.pts.length<4||!img||!img.naturalWidth) return null;
+  const W=img.naturalWidth, H=img.naturalHeight, {Wq,D}=arDims();
+  const src=[[-Wq/2,D],[Wq/2,D],[Wq/2,0],[-Wq/2,0]], dst=A.pts.map(p=>[p[0]/100*W-W/2,p[1]/100*H-H/2]);
+  const Am=[],bv=[]; src.forEach(([x,y],i)=>{ const [u,v]=dst[i]; Am.push([x,y,1,0,0,0,-u*x,-u*y]); bv.push(u); Am.push([0,0,0,x,y,1,-v*x,-v*y]); bv.push(v); });
+  const h=solve8(Am,bv); if(!h) return null;
+  const h1=[h[0],h[3],h[6]], h2=[h[1],h[4],h[7]], h3=[h[2],h[5],1], mx=Math.max(W,H);
+  let f2=-(h1[0]*h2[0]+h1[1]*h2[1])/(h1[2]*h2[2]);
+  if(!(f2>0)||!isFinite(f2)) f2=((h1[0]**2+h1[1]**2)-(h2[0]**2+h2[1]**2))/(h2[2]**2-h1[2]**2);
+  let f=Math.sqrt(f2); if(!isFinite(f)||!(f>0)) f=mx*0.85; f=Math.min(mx*4,Math.max(mx*0.35,f));
+  const ki=v=>[v[0]/f,v[1]/f,v[2]], nrm=v=>Math.hypot(...v), sc=(v,k)=>v.map(x=>x*k), dot=(a,b)=>a[0]*b[0]+a[1]*b[1]+a[2]*b[2], cross=(a,b)=>[a[1]*b[2]-a[2]*b[1],a[2]*b[0]-a[0]*b[2],a[0]*b[1]-a[1]*b[0]];
+  let a1=ki(h1), a2=ki(h2), a3=ki(h3); const l1=1/nrm(a1), l2=1/nrm(a2); let lam=(l1+l2)/2;
+  let t=sc(a3,lam); if(t[2]<0){ lam=-lam; t=sc(t,-1); }
+  let r1=sc(a1,Math.sign(lam)*l1), r2=sc(a2,Math.sign(lam)*l2);
+  r2=sc(r2.map((x,i)=>x-dot(r1,r2)*r1[i]),1); r2=sc(r2,1/nrm(r2));
+  let up=cross(r1,r2); if(dot(up,sc(t,-1))<0) up=sc(up,-1);
+  // 오른손 좌표 유지 (X × 위 = Z). 찍은 순서가 뒤집히면 X를 뒤집음
+  if(dot(cross(r1,up),r2)<0) r1=sc(r1,-1);
+  const m=[ r1[0], up[0], r2[0], t[0],
+           -r1[1],-up[1],-r2[1],-t[1],
+           -r1[2],-up[2],-r2[2],-t[2],
+            0,0,0,1 ];
+  return {fov:2*Math.atan(H/2/f)*180/Math.PI, aspect:W/H, m};
+}
+function arMount(ph){
+  arDispose(); const host=document.getElementById("arlayer"); if(!host||!ph.ar||ph.ar.pts.length<4||ph.ar.show===false) return;
+  const img=document.querySelector("#phstage img"); const go=()=>{ const p=arParams(ph,img); if(!p||!window.render3DAR) return; ARR=window.render3DAR(host,p); };
+  const ready=()=>{ if(window.render3DAR) setTimeout(go,20); else window.addEventListener("r3d-ready",go,{once:true}); };
+  if(img.complete&&img.naturalWidth) ready(); else img.onload=ready;
+}
+function arUpdate(ph){ if(!ARR){ arMount(ph); return; } const p=arParams(ph,document.querySelector("#phstage img")); if(p&&ARR.set) ARR.set(p); }
 // 사진 대표색: 축소 → k-means
 function extractColors(img,k){
   k=Math.max(3,Math.min(6,k||5)); const N=72, cv=document.createElement("canvas"), sc=N/Math.max(img.naturalWidth,img.naturalHeight);
@@ -1732,6 +1793,7 @@ function extractColors(img,k){
 }
 function savePhPng(){
   const ph=MYPH[PHI], img=new Image(); img.onload=()=>{ const cv=document.createElement("canvas"); cv.width=img.width; cv.height=img.height; const g=cv.getContext("2d"); g.drawImage(img,0,0);
+    if(ARR&&ARR.renderer&&ph.ar&&ph.ar.show!==false){ g.globalAlpha=(ph.ar.op??100)/100; g.drawImage(ARR.renderer.domElement,0,0,img.width,img.height); g.globalAlpha=1; }
     const f=Math.max(13,Math.round(img.width/70)); g.font=`600 ${f}px "Noto Sans KR",sans-serif`; g.textBaseline="middle";
     (ph.pins||[]).forEach(p=>{ const x=p.x/100*img.width, y=p.y/100*img.height, L=f*2.6, lft=p.x>62; const t=`${p.code}  ${p.label}`, tw=g.measureText(t).width, bx=lft?x-L-tw-f*1.2:x+L, by=y-f*1.1;
       g.strokeStyle="#111"; g.lineWidth=Math.max(2,f/7); g.beginPath(); g.moveTo(x,y); g.lineTo(lft?x-L:x+L,y); g.stroke();
@@ -1808,7 +1870,7 @@ function kColor(k){ const t=k/100; let r,g,b; if(t<=66){r=255; g=99.47*Math.log(
 function lumHex(h){ const [r,g,b]=hexRGB(h); return (0.299*r+0.587*g+0.114*b)/255; }
 function signTex(text,color){ const cv=document.createElement("canvas"); cv.width=1024; cv.height=256; const g=cv.getContext("2d"); g.clearRect(0,0,1024,256); g.fillStyle=color; g.font='600 120px "Noto Sans KR", "Apple SD Gothic Neo", sans-serif'; g.textBaseline="middle"; g.fillText(text,20,128); const t=new THREE.CanvasTexture(cv); t.colorSpace=THREE.SRGBColorSpace; t.anisotropy=8; return t; }
 
-function build(host){
+function build(host,ar){
   if(R){ R.dispose(); R=null; }
   const c=window.CONCEPT_REF&&window.CONCEPT_REF(); if(!c||!host) return;
   const bar=window.BAR_REF&&window.BAR_REF();
@@ -1816,14 +1878,14 @@ function build(host){
   const proj=(window.CPROJ_REF&&window.CPROJ_REF())||"";
   const mm=v=>v/1000;
   const flen=Math.max(1.5,mm(bar?bar.flen:4000)||4), blen=Math.max(1.5,mm(bar?bar.blen:3500)||3.5), fd=Math.max(0.45,mm(o.fd||700)), bd=Math.max(0.45,mm(o.bd||600)), aisle=Math.max(0.7,mm(o.aisle||1000)), ch=Math.max(0.7,mm(eo.ch||850));
-  const W=host.clientWidth||900, H=Math.round(W*3/4);
-  const renderer=new THREE.WebGLRenderer({antialias:true,preserveDrawingBuffer:true});
+  const W=host.clientWidth||900, H=ar?(host.clientHeight||Math.round(W*3/4)):Math.round(W*3/4);
+  const renderer=new THREE.WebGLRenderer({antialias:true,preserveDrawingBuffer:true,alpha:!!ar}); if(ar) renderer.setClearColor(0x000000,0);
   renderer.setPixelRatio(Math.min(2,window.devicePixelRatio||1)); renderer.setSize(W,H);
   renderer.toneMapping=THREE.ACESFilmicToneMapping; renderer.outputColorSpace=THREE.SRGBColorSpace; renderer.toneMappingExposure=1.05;
   renderer.shadowMap.enabled=true; renderer.shadowMap.type=THREE.PCFSoftShadowMap;
   host.innerHTML=""; host.appendChild(renderer.domElement);
   RectAreaLightUniformsLib.init();
-  const scene=new THREE.Scene(); scene.background=new THREE.Color(0x202124);
+  const scene=new THREE.Scene(); if(!ar) scene.background=new THREE.Color(0x202124);
   const pm=new THREE.PMREMGenerator(renderer); scene.environment=pm.fromScene(new RoomEnvironment(),0.04).texture; scene.environmentIntensity=0.5;
   const mats=c.mats, role=r=>mats.find(m=>m[1]===r), col=m=>c.pal[m[4]]||m[4];
   const topM=role("상판")||mats[0], frontM=role("카운터 전면")||mats[1], floorM=role("바닥")||mats[3], wallM=role("벽")||["","","","paint","wall"];
@@ -1880,6 +1942,7 @@ function build(host){
   box(0.84,0.04,0.84,plain("#f5f5f5",0.6),openW*0.15,inH-0.02,bd+aisle*0.5);
   for(let i=0;i<6;i++) box(0.5,0.004,0.012,plain("#b8b8b8",0.6),openW*0.15,inH-0.042,bd+aisle*0.5-0.15+i*0.06);
 
+  const envObjs=scene.children.slice();   // 매장 외장·천장·조명 (사진 합성 때 뺌)
   // 뒷벽: 하부장 + 상판 + 백스플래시 + 상부장 + 오픈 선반
   const cabHex=lumHex(c.pal.wall)>0.6?new THREE.Color(c.pal.wall).lerp(new THREE.Color("#b9b2a6"),0.25):new THREE.Color("#3a3a3c");
   const cabMat=new THREE.MeshStandardMaterial({color:cabHex,roughness:0.6});
@@ -1888,6 +1951,7 @@ function build(host){
   box(bw,0.1,bd-0.1,plain("#2a2a2a",0.9),0,0.05,bd/2-0.02);
   const nd=Math.max(2,Math.round(bw/0.6)); for(let i=1;i<nd;i++) box(0.006,ch-0.16,0.005,plain("#000",1),-bw/2+bw*i/nd,0.1+(ch-0.12)/2,bd+0.003);
   const topMatB=matFor(topM[3],col(topM),bw,bd); box(bw+0.02,0.04,bd+0.02,topMatB,0,ch-0.02,bd/2);
+  const mWall0=scene.children.length;
   const splashM=mats.find(m=>["tile","brick"].includes(m[3])&&m[1]!=="바닥");
   const splHex="#"+new THREE.Color(c.pal.wall).lerp(new THREE.Color("#e8e2d8"),0.5).getHexString(); const spl=new THREE.Mesh(new THREE.PlaneGeometry(bw,0.6),splashM?matFor(splashM[3],col(splashM),bw,0.6):matFor("concrete",splHex,bw,0.6)); spl.position.set(0,ch+0.3,0.005); spl.receiveShadow=true; scene.add(spl);
   const upW=bw*0.74, upY=ch+0.62, upH=Math.min(0.85,inH-upY-0.15);
@@ -1903,6 +1967,7 @@ function build(host){
   for(let i=0;i<3;i++){ const cup=new THREE.Mesh(new THREE.CylinderGeometry(0.045,0.04,0.09,24),plain("#fafafa",0.2)); cup.position.set(nx-nW/3+i*nW/3,upY+0.0575,0.18); add(cup); }
   plantAt(nx,upY+upH*0.5+0.0125,0.16,0.55);
 
+  const wallObjs=scene.children.slice(mWall0);   // 백스플래시·상부장·선반 (사진 합성 때 뺌)
   // 장비
   const eqColor=new THREE.Color(EQC[c.id]||"#B7BBBF"), eqMetal=(EQC[c.id]||"#B7BBBF")==="#B7BBBF";
   const bodyMat=new THREE.MeshStandardMaterial({color:eqColor,roughness:eqMetal?0.28:0.35,metalness:eqMetal?0.9:0.15});
@@ -1989,6 +2054,21 @@ function build(host){
   }
   // 조명 보조
   scene.add(new THREE.HemisphereLight(0xffffff,new THREE.Color(c.pal.floor),0.45));
+  if(ar){
+    [...envObjs,...wallObjs].forEach(o=>scene.remove(o)); scene.remove(menu);
+    scene.environmentIntensity=0.8; renderer.toneMappingExposure=1.15;
+    const sun=new THREE.DirectionalLight(0xffffff,1.8); sun.position.set(1.5,6,depth+3); sun.target.position.set(0,0,depth/2); sun.castShadow=true; sun.shadow.mapSize.set(2048,2048); const sc2=sun.shadow.camera; sc2.left=-6; sc2.right=6; sc2.top=6; sc2.bottom=-6; sc2.near=0.5; sc2.far=20; sun.shadow.bias=-0.0005; sun.shadow.radius=4; scene.add(sun,sun.target);
+    const fl2=new THREE.DirectionalLight(0xffffff,0.5); fl2.position.set(-3,3,depth+5); scene.add(fl2);
+    const catcher=new THREE.Mesh(new THREE.PlaneGeometry(40,40),new THREE.ShadowMaterial({opacity:0.32})); catcher.rotation.x=-Math.PI/2; catcher.position.y=0.001; catcher.receiveShadow=true; scene.add(catcher);
+    const cam=new THREE.PerspectiveCamera(45,W/H,0.05,200); cam.matrixAutoUpdate=false; cam.matrixWorldAutoUpdate=false;
+    let alive=true;
+    const set=(p)=>{ if(!alive||!p) return; cam.fov=p.fov; cam.aspect=p.aspect; cam.updateProjectionMatrix(); cam.matrixWorldInverse.set(...p.m); cam.matrixWorld.copy(cam.matrixWorldInverse).invert(); renderer.render(scene,cam); };
+    const resize=()=>{ const w=host.clientWidth, h=host.clientHeight; if(w&&h){ renderer.setSize(w,h); if(last) set(last); } };
+    let last=ar; set(ar);
+    const ro=new ResizeObserver(resize); ro.observe(host);
+    R={ dispose(){ alive=false; ro.disconnect(); scene.traverse(o=>{ if(o.geometry) o.geometry.dispose(); }); renderer.dispose(); renderer.forceContextLoss&&renderer.forceContextLoss(); }, renderer, set(p){ last=p; set(p); }, ar:true };
+    return R;
+  }
   const fill=new THREE.DirectionalLight(0xffffff,0.35); fill.position.set(-3,5,zFacade+6); scene.add(fill);
   // 카메라
   const cam=new THREE.PerspectiveCamera(46,W/H,0.05,60);
@@ -2009,6 +2089,7 @@ function build(host){
 }
 window.render3D=(host)=>{ try{ build(host); return true; }catch(e){ console.error(e); if(host) host.innerHTML=`<div class="r3dfail">3D 렌더를 불러오지 못했어요. 일러스트 보기를 이용하세요.</div>`; return false; } };
 window.render3DPng=()=>R?R.renderer.domElement.toDataURL("image/png"):null;
+window.render3DAR=(host,p)=>{ try{ return build(host,p); }catch(e){ console.error(e); return null; } };
 window.dispatchEvent(new Event("r3d-ready"));
 </script>
 
