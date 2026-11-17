@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>카페 장비 시각가이드 · 장비찾기</title>
-<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;900&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;900&family=Noto+Serif+KR:wght@500;700;900&display=swap" rel="stylesheet">
 <style>
 :root{--bg:#f4f5f7;--card:#fff;--ink:#1c1f24;--muted:#6b7280;--line:#e3e6ea;--brand:#6b4226;--brand2:#8a5634;--accent:#c8742f;--ok:#2e8b57;--warn:#d9822b;--bad:#c0392b;
 --c-ext:#7a4a2a;--c-cold:#2f6f8f;--c-bev:#8a5a9a;--c-wash:#3f8a6a;--c-heat:#c0532f;--c-etc:#5f6670}
@@ -204,6 +204,42 @@ td a{color:var(--brand);font-weight:700;font-size:12.5px;white-space:nowrap}
 .cact button{font:inherit;font-size:14px;font-weight:700;padding:10px 14px;border-radius:10px;border:1.5px solid var(--ink);background:#fff;cursor:pointer}
 .cact button:first-child{background:var(--accent);border-color:var(--accent);color:#fff}.cact button.on{background:var(--ok);border-color:var(--ok)}
 @media print{.view:not(#v-concept):not(#v-bar){display:none!important}}
+.board{background:#fff;border:1px solid var(--line);border-radius:6px;padding:28px 30px 20px;box-shadow:0 1px 3px rgba(0,0,0,.04)}
+.bhead{display:flex;justify-content:space-between;align-items:flex-end;gap:20px;border-bottom:2px solid var(--ink);padding-bottom:14px;margin-bottom:20px;flex-wrap:wrap}
+.eyebrow,.lbl{display:block;font-size:11px;letter-spacing:.22em;font-weight:700;color:#8a8580;margin-bottom:6px}
+.lbl em{font-style:normal;letter-spacing:0;font-weight:400;margin-left:6px;color:#aaa}
+.projname{font:inherit;font-family:"Noto Serif KR",serif;font-size:22px;font-weight:700;border:0;border-bottom:1px dashed #ccc;padding:2px 0;min-width:280px;background:transparent}
+.projname:focus{outline:none;border-bottom-color:var(--accent)}
+.btitle{text-align:right}.btitle .en{display:block;font-size:12px;letter-spacing:.3em;text-transform:uppercase;color:#8a8580}
+.btitle b{font-family:"Noto Serif KR",serif;font-size:34px;font-weight:900;letter-spacing:-.5px}
+.brow1{display:grid;grid-template-columns:minmax(0,2.1fr) minmax(0,1fr);gap:24px}
+@media(max-width:1100px){.brow1,.brow3{grid-template-columns:minmax(0,1fr)!important}}
+.hero{position:relative}.hero svg{width:100%;height:auto;display:block;border-radius:2px}
+.hero .cap{position:absolute;left:10px;bottom:8px;font-size:10px;letter-spacing:.18em;color:#fff;background:#0007;padding:3px 8px;border-radius:2px}
+.stmt p{font-family:"Noto Serif KR",serif;font-size:15.5px;line-height:1.75;margin:0 0 18px;color:#2b2b2b}
+.stmt p.fit{font-family:inherit;font-size:13.5px;color:#555}
+.kws{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:18px}.kws span{font-size:12px;letter-spacing:.08em;border:1px solid #cfcac3;padding:4px 10px;border-radius:999px}
+.ratio{display:flex;height:16px;border-radius:2px;overflow:hidden;border:1px solid #0000001a}.ratio i{display:block}
+.ratiolbl{display:flex;font-size:11px;color:#888;margin-top:4px}.ratiolbl span{flex:1}
+.sec{margin-top:24px}
+.mats{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:14px}
+@media(max-width:900px){.mats{grid-template-columns:repeat(3,minmax(0,1fr))}}
+.mat .mimg svg{width:100%;aspect-ratio:1;display:block;border-radius:2px;box-shadow:0 2px 6px rgba(0,0,0,.12)}
+.mat .code{display:block;font-size:10.5px;letter-spacing:.12em;color:#8a8580;margin-top:8px}
+.mat b{display:block;font-size:13.5px;margin:2px 0}.mat small{font-size:11.5px;color:#777;line-height:1.4;display:block}
+.brow3{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.25fr);gap:28px}
+.chips{display:grid;gap:8px}
+.chip2{display:grid;grid-template-columns:54px 1fr;grid-template-rows:auto auto auto;column-gap:12px;position:relative;cursor:pointer;align-items:center}
+.chip2 input{position:absolute;opacity:0;width:54px;height:54px;cursor:pointer}
+.chip2 .cc{grid-row:1/4;width:54px;height:54px;border-radius:2px;border:1px solid #0000001a}
+.chip2 b{font-size:13.5px}.chip2 small{font-size:11.5px;color:#777}.chip2 .hx{font-family:ui-monospace,Menlo,monospace;color:#555}
+table.spec{font-size:12.5px}table.spec th{font-size:11px;letter-spacing:.06em}table.spec td{padding:7px 8px}
+.kdot{display:inline-block;width:10px;height:10px;border-radius:50%;margin-right:6px;vertical-align:-1px;border:1px solid #0002}
+ul.eq{margin:0;padding-left:16px;font-size:13px;line-height:1.7}ul.warnl li::marker{color:var(--warn)}
+.tblock{display:flex;flex-wrap:wrap;border-top:2px solid var(--ink);margin-top:24px;padding-top:10px;gap:0}
+.tblock span{flex:1;min-width:120px;font-size:12.5px;padding:2px 12px 2px 0;border-right:1px solid var(--line);margin-right:12px}.tblock span:last-child{border-right:0}
+.tblock em{display:block;font-style:normal;font-size:10px;letter-spacing:.18em;color:#8a8580}
+@media print{@page{size:A3 landscape;margin:10mm}.top,.clistp,.cact{display:none!important}.cwrap{display:block;padding:0}.board{border:0;box-shadow:none;padding:0}body{background:#fff}}
 </style>
 </head>
 <body>
@@ -657,6 +693,7 @@ document.querySelectorAll("nav button").forEach(b=>b.onclick=()=>{
   document.querySelectorAll("nav button").forEach(x=>x.classList.toggle("on",x===b));
   document.querySelectorAll(".view").forEach(v=>v.classList.toggle("on",v.id==="v-"+b.dataset.v));
   if(b.dataset.v==="bar"&&!BAR) buildBar();
+  if(b.dataset.v==="concept"&&CONCEPT) renderConcept();
 });
 
 // 장비 사전
@@ -1194,122 +1231,196 @@ document.getElementById("bPng").onclick=barSavePng;
 document.getElementById("bPrint").onclick=()=>{try{window.print()}catch(e){barMsg("인쇄가 막혀 있어요. 브라우저 메뉴에서 인쇄해 주세요.")}};
 function openBar(){ document.querySelector('nav button[data-v="bar"]').click(); if(!BAR) buildBar(); }
 
-// ===== 컨셉보드 =====
+
+// ===== 컨셉보드 (전문 보드) =====
+// 색 키: wall 벽, front 카운터 전면, top 상판, accent 포인트, floor 바닥, metal 금속
 const CONCEPTS=[
- {id:"minimal",name:"미니멀 화이트",kw:["깔끔함","밝음","여백","테이크아웃"],desc:"흰 벽과 밝은 상판으로 넓어 보이고, 커피와 사람이 주인공이 되는 콘셉트.",
-  pal:{wall:"#F4F2EE",front:"#FFFFFF",top:"#E6E3DE",accent:"#C8A27A",floor:"#D9D5CF"},pattern:"flat",
-  mat:{top:"인조대리석(화이트) 또는 칼라강판",front:"무광 화이트 도장 · 화이트 타일",floor:"밝은 회색 데코타일",wall:"화이트 도장"},
-  light:{k:4000,txt:"4000K 주광색 다운라이트 + 작업대 위 라인 조명"},machine:{c:"#F5F5F3",txt:"화이트·스테인리스 머신 (리네아 PB 화이트, 아피아 화이트 등)"},
-  tips:["흰 상판은 커피 얼룩이 잘 보여요 — 인조대리석은 얼룩에 강한 무광으로","장비·전선이 그대로 드러나니 배선 정리함을 같이 계획하세요"]},
- {id:"wood",name:"웜 우드",kw:["따뜻함","편안함","동네 카페","홀 중심"],desc:"원목 톤과 전구색 조명으로 오래 머물고 싶은 분위기를 만드는 콘셉트.",
-  pal:{wall:"#EFE6DA",front:"#A9764B",top:"#C89C6D",accent:"#4F6B4A",floor:"#8B6A4E"},pattern:"wood",
-  mat:{top:"원목 집성목(오일 마감) 또는 우드 패턴 HPL",front:"원목 루버·템바보드",floor:"우드 패턴 데코타일",wall:"베이지 도장 · 라임 페인트"},
-  light:{k:2700,txt:"2700~3000K 전구색 펜던트 + 간접 조명"},machine:{c:"#2B2B2B",txt:"블랙·우드 핸들 머신, 스테인리스도 잘 어울려요"},
-  tips:["원목 상판은 물에 약해요 — 머신·싱크 주변은 스테인리스나 HPL로 바꾸세요","조명이 노래서 메뉴 사진은 따로 보정이 필요해요"]},
- {id:"industrial",name:"인더스트리얼",kw:["노출 천장","콘크리트","스페셜티","로스터리"],desc:"콘크리트·철재·노출 배관으로 날것의 느낌을 살리는 로스터리형 콘셉트.",
-  pal:{wall:"#B9B6B1",front:"#5E5C59",top:"#8F8C88",accent:"#C0532F",floor:"#7A7773"},pattern:"concrete",
-  mat:{top:"스테인리스 · 콘크리트 질감 세라믹",front:"노출 콘크리트 · 철판 흑피",floor:"에폭시 · 폴리싱 콘크리트",wall:"노출 콘크리트 · 벽돌"},
-  light:{k:3000,txt:"3000K 에디슨 전구 펜던트 + 레일 스포트"},machine:{c:"#8C9196",txt:"스테인리스·메탈 머신, 대형 그라인더가 잘 보이게"},
-  tips:["딱딱한 마감이 많아 소리가 울려요 — 천장 흡음재를 고려하세요","노출 배관은 급배수·전기 위치를 미리 정해야 깔끔해요"]},
- {id:"retro",name:"빈티지 레트로",kw:["추억","컬러 타일","뉴트로","디저트"],desc:"컬러 타일과 둥근 형태로 사진 찍기 좋은 뉴트로 콘셉트.",
-  pal:{wall:"#F3E3C3",front:"#2F6F6A",top:"#F7F1E6",accent:"#D9822B",floor:"#B5563A"},pattern:"tile",
-  mat:{top:"테라조 · 화이트 인조대리석",front:"컬러 서브웨이 타일 · 라운드 몰딩",floor:"체커보드 타일",wall:"크림색 도장 · 우드 웨인스코팅"},
-  light:{k:3000,txt:"3000K 유리갓 펜던트 + 네온 사인 포인트"},machine:{c:"#E9DCC3",txt:"크림·파스텔 컬러 머신, 레트로 디자인 그라인더"},
-  tips:["타일 줄눈은 오염되기 쉬워요 — 에폭시 줄눈을 쓰세요","컬러가 많으면 산만해요 — 포인트 색은 2가지까지"]},
- {id:"botanical",name:"내추럴 그린",kw:["식물","자연광","편안함","시니어"],desc:"식물과 밝은 우드, 연한 그린으로 편안하고 건강한 느낌을 주는 콘셉트.",
-  pal:{wall:"#EEF1EA",front:"#DCCDB5",top:"#F2EEE6",accent:"#5E8C61",floor:"#C9BBA3"},pattern:"fluted",
-  mat:{top:"밝은 인조대리석 · 화이트 오크 HPL",front:"플루티드(골) 패널 · 라탄",floor:"내추럴 우드 데코타일",wall:"연그린 도장 · 화분 선반"},
-  light:{k:3500,txt:"3500K 온백색 + 자연광 최대한 활용"},machine:{c:"#F2EFE8",txt:"화이트·민트 머신, 우드 액세서리"},
-  tips:["실내 식물은 물 주기·통풍을 계획하세요 — 조화와 섞어도 좋아요","밝은 패널은 손때가 타니 아랫부분은 진한 색으로"]},
- {id:"dark",name:"모던 다크",kw:["시크함","야간 영업","바·디저트","고급"],desc:"짙은 색과 황동 포인트로 저녁에 더 멋진 고급스러운 콘셉트.",
-  pal:{wall:"#2E2F33",front:"#1E1F22",top:"#3B3C40",accent:"#C9A45C",floor:"#3A3634"},pattern:"fluted",
-  mat:{top:"블랙 세라믹 · 블랙 스테인리스",front:"다크 플루티드 패널 · 황동 몰딩",floor:"다크 그레이 타일",wall:"다크 도장 · 템바보드"},
-  light:{k:2700,txt:"2700K 저조도 스포트 + 카운터 하부 간접 조명"},machine:{c:"#141414",txt:"블랙 머신 + 황동·구리 포인트"},
-  tips:["어두우면 작업대가 안 보여요 — 작업면은 따로 밝게(500lx 이상)","먼지·지문이 잘 보이니 무광 마감을 고르세요"]}
+ {id:"minimal",name:"미니멀 화이트",en:"Minimal White",kw:["Light","Clean","Matte","Calm"],
+  statement:"빛과 여백으로 완성하는 미니멀 바. 흰 면과 매트한 질감을 겹쳐 커피와 사람이 돋보이게 하고, 작은 매장도 넓어 보이게 합니다.",
+  fit:"테이크아웃 중심 · 소형 매장 · 스페셜티",
+  pal:{wall:"#F4F2EE",front:"#FAFAF8",top:"#ECEAE6",accent:"#C8A27A",floor:"#D4D1CC",metal:"#C9CCCF"},
+  colors:[["Warm White","wall",60,"벽 · 천장"],["Cloud Gray","top",20,"상판 · 바닥"],["Pure Matte","front",10,"카운터 전면"],["Sand Oak","accent",7,"포인트 우드"],["Hairline Steel","metal",3,"장비 · 금속"]],
+  mats:[["M-01","상판","인조대리석 화이트 무광","marble","top","12T · 무광 · 얼룩 방지 코팅"],["M-02","카운터 전면","화이트 무광 도장 MDF","paint","front","18T · 우레탄 무광"],["M-03","포인트","애쉬 원목 무늬 HPL","oak","accent","선반 · 손잡이 · 가구"],["M-04","바닥","라이트 그레이 데코타일","concrete","floor","3T · 무광"],["M-05","금속","스테인리스 헤어라인","steel","metal","SUS304 · 싱크·머신 구간"],["M-06","벽","화이트 수성 무광 도장","paint","wall","벽 · 천장 공통"]],
+  light:[["바 작업면","4000K","Ra 90+","500 lx","라인 LED · 선반 하부"],["객석","3500K","Ra 90+","200~300 lx","매입 다운라이트"],["진열·메뉴","4000K","Ra 90+","700 lx","트랙 스포트"]],
+  equip:["화이트 · 스테인리스 머신","블랙 장비는 1~2개까지만 포인트로","배선 정리함·매립 콘센트 필수"],
+  tips:["흰 상판은 커피 얼룩이 잘 보여요 — 무광 인조대리석에 얼룩 방지 코팅","장비·전선이 그대로 드러나니 배선 경로를 시공 전에 확정하세요"]},
+ {id:"wood",name:"웜 우드",en:"Warm Wood",kw:["Warm","Natural","Cozy","Neighborhood"],
+  statement:"원목의 결과 전구색 빛으로 오래 머무르고 싶은 동네 카페. 손이 닿는 곳마다 나무를 두고, 물을 쓰는 구간만 금속으로 바꿔 관리까지 고려합니다.",
+  fit:"홀 중심 · 동네 카페 · 디저트",
+  pal:{wall:"#EFE6DA",front:"#7A5236",top:"#C89C6D",accent:"#4F6B4A",floor:"#8B6A4E",metal:"#2B2B2B"},
+  colors:[["Oatmeal","wall",55,"벽 · 천장"],["Walnut","front",20,"카운터 전면 · 가구"],["Honey Oak","top",13,"상판 · 선반"],["Olive","accent",7,"패브릭 · 타일 포인트"],["Matte Black","metal",5,"조명 · 금속"]],
+  mats:[["M-01","상판","오크 집성목 오일 마감","oak","top","30T · 머신·싱크 구간은 SUS 교체"],["M-02","카운터 전면","월넛 템바보드","fluted","front","폭 20mm 골 · 무광 오일"],["M-03","포인트","올리브 그린 수공예 타일","tile","accent","백월 포인트 · 75×150"],["M-04","바닥","우드 패턴 데코타일","wood","floor","3T · 헤링본 또는 일자"],["M-05","금속","블랙 분체도장 철재","blacksteel","metal","조명 · 선반 브래킷"],["M-06","벽","오트밀 라임 페인트","paint","wall","미장 질감 · 무광"]],
+  light:[["바 작업면","3000K","Ra 90+","500 lx","선반 하부 LED"],["객석","2700K","Ra 90+","150~250 lx","펜던트 + 간접"],["진열·메뉴","3000K","Ra 90+","600 lx","트랙 스포트"]],
+  equip:["블랙 또는 스테인리스 머신","우드 포터필터 핸들·탬퍼로 통일감","장비 상단이 손님 쪽 상판보다 높으면 우드로 가림판"],
+  tips:["원목 상판은 물에 약해요 — 머신·싱크 주변 600mm는 스테인리스","전구색 조명 아래 메뉴 사진은 색 보정이 필요해요"]},
+ {id:"industrial",name:"인더스트리얼",en:"Industrial",kw:["Raw","Concrete","Steel","Roastery"],
+  statement:"콘크리트와 철, 노출 설비가 그대로 드러나는 로스터리형 바. 거친 재료 위에 정확한 커피 장비를 세워 기술과 전문성을 보여 줍니다.",
+  fit:"로스터리 · 스페셜티 · 대형 매장",
+  pal:{wall:"#A9A6A1",front:"#3B3936",top:"#B9BCBF",accent:"#C0532F",floor:"#8E8B87",metal:"#1F1F1F"},
+  colors:[["Concrete","wall",50,"벽 · 천장"],["Polished Floor","floor",20,"바닥"],["Black Iron","front",15,"카운터 전면"],["Steel","top",10,"상판 · 장비"],["Rust","accent",5,"사인 · 소품"]],
+  mats:[["M-01","상판","스테인리스 헤어라인","steel","top","SUS304 1.2T · 일체형 싱크"],["M-02","카운터 전면","흑피 철판","blacksteel","front","3.2T · 투명 클리어 코팅"],["M-03","벽","노출 콘크리트","concrete","wall","기존 면 보수 후 발수 코팅"],["M-04","바닥","폴리싱 콘크리트","concrete","floor","표면 강화 · 반광"],["M-05","포인트","재생 적벽돌","brick","accent","백월 일부 · 줄눈 그레이"],["M-06","금속","블랙 파이프 프레임","blacksteel","metal","선반 · 조명 행거"]],
+  light:[["바 작업면","4000K","Ra 90+","500~700 lx","레일 스포트 집중"],["객석","3000K","Ra 85+","200 lx","에디슨 펜던트"],["로스터·진열","4000K","Ra 90+","500 lx","트랙 스포트"]],
+  equip:["스테인리스·메탈 머신, 대형 그라인더 노출","로스터가 보이게 동선 배치","블랙 장비와 철재 프레임 톤 맞추기"],
+  tips:["딱딱한 마감이 많아 소리가 울려요 — 천장 흡음재를 넣으세요","노출 배관은 급배수·전기 경로를 먼저 정해야 깔끔해요"]},
+ {id:"retro",name:"빈티지 레트로",en:"Retro Modern",kw:["Nostalgic","Tile","Color","Photo spot"],
+  statement:"컬러 타일과 둥근 형태로 사진에 남고 싶은 뉴트로 바. 크림 바탕에 두 가지 색만 강하게 써서 레트로하지만 정돈된 인상을 줍니다.",
+  fit:"디저트 · 관광 상권 · 사진 맛집",
+  pal:{wall:"#F3E3C3",front:"#2F6F6A",top:"#F1ECE2",accent:"#D9822B",floor:"#B5563A",metal:"#C9CCCF"},
+  colors:[["Cream","wall",50,"벽 · 천장"],["Deep Teal","front",20,"카운터 전면"],["Ivory","top",15,"상판"],["Tangerine","accent",8,"사인 · 소품"],["Brick Red","floor",7,"바닥 체커"]],
+  mats:[["M-01","상판","테라조","terrazzo","top","20T · 무광 연마"],["M-02","카운터 전면","틸 서브웨이 타일","tile","front","75×150 · 유광 · 에폭시 줄눈"],["M-03","바닥","체커보드 타일","checker","floor","300×300 · 크림/브릭"],["M-04","벽","크림 수성 도장","paint","wall","하부 우드 웨인스코팅"],["M-05","포인트","탠저린 라운드 몰딩","paint","accent","카운터 모서리 R"],["M-06","금속","크롬 · 스테인리스","steel","metal","손잡이 · 조명"]],
+  light:[["바 작업면","3500K","Ra 90+","500 lx","선반 하부 LED"],["객석","3000K","Ra 90+","200~300 lx","유리갓 펜던트"],["포인트","—","—","—","네온 사인 1곳"]],
+  equip:["크림·파스텔 머신 또는 스테인리스","레트로 디자인 그라인더","컬러 장비는 1대만 — 나머지는 무채색"],
+  tips:["타일 줄눈은 오염되기 쉬워요 — 에폭시 줄눈 사용","포인트 색은 2가지까지, 나머지는 크림·화이트로"]},
+ {id:"botanical",name:"내추럴 그린",en:"Botanical Natural",kw:["Green","Daylight","Soft","Healthy"],
+  statement:"식물과 밝은 나무, 부드러운 그린으로 숨 쉬는 듯한 바. 자연광을 최대한 들이고 손이 닿는 재료는 따뜻하게 골라 누구나 편안한 공간을 만듭니다.",
+  fit:"시니어 운영 · 주거 상권 · 브런치",
+  pal:{wall:"#E6ECE2",front:"#DCCDB5",top:"#E9DDC8",accent:"#5E8C61",floor:"#C9BBA3",metal:"#B07D5B"},
+  colors:[["Sage Mist","wall",50,"벽 · 천장"],["Linen","front",20,"카운터 전면"],["White Oak","top",15,"상판 · 가구"],["Leaf Green","accent",10,"식물 · 패브릭"],["Terracotta","metal",5,"화분 · 소품"]],
+  mats:[["M-01","상판","화이트 오크 HPL","oak","top","12T · 무광 · 내수"],["M-02","카운터 전면","플루티드 패널","fluted","front","리넨 톤 · 하부 걸레받이 진한 색"],["M-03","포인트","라탄 위빙","rattan","accent","카운터 상부 · 조명갓"],["M-04","바닥","내추럴 오크 데코타일","wood","floor","3T · 일자 시공"],["M-05","벽","세이지 그린 도장","paint","wall","무광 · 항균"],["M-06","소품","테라코타 화분","paint","metal","실내 식물 + 조화 혼합"]],
+  light:[["바 작업면","3500K","Ra 90+","500 lx","선반 하부 LED"],["객석","3500K","Ra 90+","250~300 lx","라탄 펜던트 + 자연광"],["식물·진열","4000K","Ra 90+","—","식물 생장등 겸용 스포트"]],
+  equip:["화이트·민트 머신","우드 액세서리 · 라탄 트레이","버튼식 장비(블렌더·오토스팀)로 조작 단순하게"],
+  tips:["실내 식물은 물 주기·통풍을 계획하세요 — 조화와 섞으면 관리가 쉬워요","밝은 패널은 손때가 타니 아래 150mm는 진한 색으로"]},
+ {id:"dark",name:"모던 다크",en:"Modern Dark",kw:["Chic","Night","Brass","Premium"],
+  statement:"짙은 면과 황동 라인으로 저녁에 더 빛나는 바. 빛을 필요한 곳에만 떨어뜨려 장비와 음료가 무대의 주인공이 되게 합니다.",
+  fit:"야간 영업 · 커피바 · 프리미엄 디저트",
+  pal:{wall:"#2E2F33",front:"#1E1F22",top:"#2A2A2C",accent:"#C9A45C",floor:"#3A3634",metal:"#5A4030"},
+  colors:[["Charcoal Night","wall",50,"벽 · 천장"],["Ink Black","front",20,"카운터 전면"],["Nero Ceramic","top",12,"상판"],["Brushed Brass","accent",10,"몰딩 · 조명"],["Smoked Walnut","metal",8,"가구 · 선반"]],
+  mats:[["M-01","상판","블랙 세라믹","marble","top","12T · 무광 · 내열"],["M-02","카운터 전면","다크 플루티드 패널","fluted","front","무광 · 지문 방지"],["M-03","포인트","브러시드 황동","brass","accent","상·하부 라인 몰딩"],["M-04","바닥","다크 그레이 포세린","concrete","floor","600×600 · 무광"],["M-05","가구","스모크 월넛","wood","metal","선반 · 의자"],["M-06","벽","차콜 수성 도장","paint","wall","무광 · 일부 템바보드"]],
+  light:[["바 작업면","3000K","Ra 90+","500 lx 이상","작업면 집중 스포트"],["객석","2700K","Ra 90+","100~150 lx","저조도 펜던트"],["카운터 하부","2700K","—","—","간접 라인 LED"]],
+  equip:["블랙 머신 + 황동·구리 포인트","장비 상판 조명으로 반사광 연출","무광 블랙 소품으로 통일"],
+  tips:["어두워도 작업면은 500lx 이상 — 사고와 실수를 줄여요","먼지·지문이 잘 보이니 무광·지문 방지 마감으로"]}
 ];
-let CONCEPT=null, CONCEPT_APPLIED=false;
+let CONCEPT=null, CONCEPT_APPLIED=false, CPROJ="";
 function kelvinColor(k){ return k<=2700?"#FFC27A":k<=3000?"#FFD196":k<=3500?"#FFE2B8":"#FFF4DE"; }
 function shade(hex,amt){ const n=parseInt(hex.slice(1),16); let r=(n>>16)+amt,g=((n>>8)&255)+amt,b=(n&255)+amt; r=Math.max(0,Math.min(255,r));g=Math.max(0,Math.min(255,g));b=Math.max(0,Math.min(255,b)); return "#"+((1<<24)+(r<<16)+(g<<8)+b).toString(16).slice(1); }
-function patternDefs(c){
-  const f=c.pal.front, d=shade(f,-22), l=shade(f,18);
-  return `<pattern id="pt-wood" width="160" height="40" patternUnits="userSpaceOnUse"><rect width="160" height="40" fill="${f}"/><path d="M0 12 Q40 4 80 12 T160 12" stroke="${d}" stroke-width="3" fill="none"/><path d="M0 30 Q50 22 100 30 T160 30" stroke="${d}" stroke-width="2" fill="none" opacity=".6"/></pattern>
-   <pattern id="pt-tile" width="60" height="30" patternUnits="userSpaceOnUse"><rect width="60" height="30" fill="${f}"/><path d="M0 0H60M0 15H60M0 30H60M15 0V15M45 15V30" stroke="${l}" stroke-width="2.5"/></pattern>
-   <pattern id="pt-fluted" width="28" height="10" patternUnits="userSpaceOnUse"><rect width="28" height="10" fill="${f}"/><rect width="10" height="10" fill="${d}" opacity=".5"/><rect x="10" width="4" height="10" fill="${l}" opacity=".7"/></pattern>
-   <pattern id="pt-concrete" width="80" height="80" patternUnits="userSpaceOnUse"><rect width="80" height="80" fill="${f}"/><circle cx="12" cy="18" r="2" fill="${d}"/><circle cx="55" cy="40" r="1.5" fill="${d}"/><circle cx="30" cy="66" r="2.2" fill="${l}"/><circle cx="70" cy="10" r="1.2" fill="${l}"/><path d="M0 79H80" stroke="${d}" stroke-width="1" opacity=".5"/></pattern>`;
+function rgbOf(hex){const n=parseInt(hex.slice(1),16); return [(n>>16)&255,(n>>8)&255,n&255];}
+function lum(hex){const [r,g,b]=rgbOf(hex); return (0.299*r+0.587*g+0.114*b)/255;}
+function rng(seed){let s=seed%2147483647; if(s<=0)s+=2147483646; return ()=>(s=s*16807%2147483647)/2147483647;}
+// 질감 패턴: id, 종류, 색, 크기 배율
+function texture(id,kind,color,k=1){
+  const S=Math.round(240*k), dk=shade(color,lum(color)<0.25?30:-45), [r,g,b]=rgbOf(dk).map(v=>(v/255).toFixed(3));
+  const noise=(fx,fy,oct,a1,a0,type="fractalNoise",seed=3)=>`<filter id="${id}-f" x="0" y="0" width="100%" height="100%" filterUnits="userSpaceOnUse"><feTurbulence type="${type}" baseFrequency="${fx/k} ${fy/k}" numOctaves="${oct}" seed="${seed}" stitchTiles="stitch"/><feColorMatrix type="matrix" values="0 0 0 0 ${r} 0 0 0 0 ${g} 0 0 0 0 ${b} ${a1} 0 0 0 ${a0}"/></filter>`;
+  const base=`<rect width="${S}" height="${S}" fill="${color}"/>`, over=`<rect width="${S}" height="${S}" filter="url(#${id}-f)"/>`;
+  let f="",inner="";
+  if(kind==="wood"||kind==="oak"){ f=noise(0.004,0.09,4,1.6,-0.55,"fractalNoise",7); inner=base+over; }
+  else if(kind==="concrete"){ f=noise(0.5,0.5,3,0.9,-0.25,"fractalNoise",11); inner=base+over+`<rect width="${S}" height="${S}" fill="${shade(color,-12)}" opacity=".25" filter="url(#${id}-f2)"/>`; f+=`<filter id="${id}-f2" x="0" y="0" width="100%" height="100%" filterUnits="userSpaceOnUse"><feTurbulence type="fractalNoise" baseFrequency="${0.02/k}" numOctaves="2" seed="5" stitchTiles="stitch"/><feColorMatrix type="matrix" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 1.4 0 0 0 -0.5"/></filter>`; }
+  else if(kind==="marble"){ f=noise(0.012,0.02,5,-4,1.25,"turbulence",4); inner=base+over; }
+  else if(kind==="steel"){ f=noise(0.002,0.7,2,1.0,-0.35,"fractalNoise",9); inner=base+over+`<rect width="${S}" height="${S}" fill="url(#${id}-g)"/>`; f+=`<linearGradient id="${id}-g" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#fff" stop-opacity=".35"/><stop offset=".5" stop-color="#fff" stop-opacity="0"/><stop offset="1" stop-color="#fff" stop-opacity=".2"/></linearGradient>`; }
+  else if(kind==="brass"){ f=noise(0.002,0.7,2,0.8,-0.3,"fractalNoise",9)+`<linearGradient id="${id}-g" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#fff3c4" stop-opacity=".55"/><stop offset=".45" stop-color="#fff" stop-opacity="0"/><stop offset="1" stop-color="#7a5a20" stop-opacity=".35"/></linearGradient>`; inner=base+over+`<rect width="${S}" height="${S}" fill="url(#${id}-g)"/>`; }
+  else if(kind==="blacksteel"){ f=noise(0.03,0.03,3,1.2,-0.45,"fractalNoise",13); inner=base+over; }
+  else if(kind==="paint"){ f=noise(0.9,0.9,2,0.35,-0.05,"fractalNoise",2); inner=base+over; }
+  else if(kind==="fluted"){ const w=Math.round(24*k); inner=base+Array.from({length:Math.ceil(S/w)},(_,i)=>`<rect x="${i*w}" width="${w*0.62}" height="${S}" fill="${shade(color,lum(color)<0.25?14:-18)}" opacity=".55"/><rect x="${i*w+w*0.62}" width="${w*0.12}" height="${S}" fill="${shade(color,lum(color)<0.25?40:28)}" opacity=".7"/>`).join(""); f=noise(0.004,0.09,3,0.6,-0.25,"fractalNoise",7); inner+=over; }
+  else if(kind==="tile"){ const tw=S/4, th=S/8; inner=base+over+Array.from({length:8},(_,j)=>Array.from({length:5},(_,i)=>`<rect x="${i*tw-(j%2?tw/2:0)+1.5*k}" y="${j*th+1.5*k}" width="${tw-3*k}" height="${th-3*k}" rx="${2*k}" fill="#fff" opacity=".07"/>`).join("")).join("")+Array.from({length:9},(_,j)=>`<line x1="0" y1="${j*th}" x2="${S}" y2="${j*th}" stroke="${shade(color,70)}" stroke-width="${3*k}"/>`).join("")+Array.from({length:8},(_,j)=>Array.from({length:5},(_,i)=>`<line x1="${i*tw+(j%2?tw/2:0)}" y1="${j*th}" x2="${i*tw+(j%2?tw/2:0)}" y2="${(j+1)*th}" stroke="${shade(color,70)}" stroke-width="${3*k}"/>`).join("")).join(""); f=noise(0.8,0.8,2,0.3,-0.05,"fractalNoise",2); }
+  else if(kind==="checker"){ const c2=CONCEPT?CONCEPT.pal.wall:"#F3E3C3", q=S/4; inner=base+Array.from({length:16},(_,i)=>{const x=i%4,y=Math.floor(i/4);return (x+y)%2?`<rect x="${x*q}" y="${y*q}" width="${q}" height="${q}" fill="${c2}"/>`:"";}).join("")+over; f=noise(0.8,0.8,2,0.25,-0.05,"fractalNoise",2); }
+  else if(kind==="brick"){ const bw=S/3, bh=S/8; inner=`<rect width="${S}" height="${S}" fill="#cfcac3"/>`+Array.from({length:8},(_,j)=>Array.from({length:4},(_,i)=>`<rect x="${i*bw-(j%2?bw/2:0)+3*k}" y="${j*bh+3*k}" width="${bw-6*k}" height="${bh-6*k}" fill="${shade(color,((i*7+j*3)%5-2)*8)}"/>`).join("")).join("")+over; f=noise(0.3,0.3,3,0.8,-0.25,"fractalNoise",17); }
+  else if(kind==="terrazzo"){ const R=rng(42), cols=[shade(color,-60),"#C9A27A","#8C9196",CONCEPT?CONCEPT.pal.accent:"#D9822B",CONCEPT?CONCEPT.pal.front:"#2F6F6A","#ffffff"]; inner=base+Array.from({length:70},()=>{const x=R()*S,y=R()*S,s=(3+R()*9)*k; return `<polygon points="${x},${y} ${x+s},${y+s*0.3} ${x+s*0.6},${y+s} ${x-s*0.2},${y+s*0.7}" fill="${cols[Math.floor(R()*cols.length)]}" opacity=".85"/>`;}).join("")+over; f=noise(0.9,0.9,2,0.2,-0.05,"fractalNoise",2); }
+  else if(kind==="rattan"){ const w=S/10; inner=base+Array.from({length:10},(_,i)=>`<line x1="${i*w}" y1="0" x2="${i*w}" y2="${S}" stroke="${shade(color,-40)}" stroke-width="${2*k}"/><line x1="0" y1="${i*w}" x2="${S}" y2="${i*w}" stroke="${shade(color,-40)}" stroke-width="${2*k}"/>`).join("")+Array.from({length:100},(_,i)=>{const x=i%10,y=Math.floor(i/10);return `<circle cx="${x*w+w/2}" cy="${y*w+w/2}" r="${w*0.22}" fill="none" stroke="${shade(color,-25)}" stroke-width="${1.5*k}"/>`;}).join(""); f=noise(0.6,0.6,2,0.3,-0.05,"fractalNoise",2); inner+=over; }
+  else { f=noise(0.9,0.9,2,0.3,-0.05); inner=base+over; }
+  return `${f}<pattern id="${id}" width="${S}" height="${S}" patternUnits="userSpaceOnUse">${inner}</pattern>`;
 }
-function frontFill(c){ return c.pattern==="flat"?c.pal.front:`url(#pt-${c.pattern})`; }
+function matColor(c,m){ return c.pal[m[4]]||m[4]; }
+function matOf(c,role){ return c.mats.find(m=>m[1]===role)||c.mats[0]; }
+// 바 정면 이미지 (실제 바 설계 장비 순서·폭 반영)
 function sceneSvg(c){
-  const P=c.pal, glow=kelvinColor(c.light.k), M=c.machine.c, mDark=shade(M,-40);
+  const P=c.pal, W=1600,H=900, glow=kelvinColor(+(c.light[1][1])||3000), mc=P.metal;
+  const fm=matOf(c,"카운터 전면"), tm=matOf(c,"상판"), floorM=matOf(c,"바닥"), wallM=c.mats.find(m=>m[1]==="벽")||["","","","paint","wall"];
+  // 장비 목록
+  let items=[]; if(typeof BAR!=="undefined"&&BAR){ let t=0; BAR.front.forEach(b=>{const L=b.id==="WORK"?flexW(BAR.front,BAR.flen):b.w; items.push({b,x:t,w:L}); t+=L;}); }
+  if(!items.length){ items=[["pos",450],["espresso",800],["autosteam",200],["knock",150],["grinder",250],["hotwater",300],["WORK",1100],["blender",250],["PICKUP",500]].map(([id,w],i,a)=>({b:{id,w},x:a.slice(0,i).reduce((s,z)=>s+z[1],0),w})); }
+  const total=Math.max(1,items.reduce((s,i)=>Math.max(s,i.x+i.w),0)), cx0=180, cw=1240, sc=cw/total, topY=600, ch=150;
+  const HH={espresso:540,grinder:600,autosteam:455,autotamp:286,hotwater:450,blender:450,pos:400,drip:420,showcase:700,dispenser:600,coldbrew:600};
+  const machineDark=lum(mc)<0.35;
+  const equip=items.map(it=>{ const h=(it.b.h||HH[it.b.id]||0)*sc*0.75; if(!h) return ""; const x=cx0+it.x*sc, w=Math.max(18,it.w*sc*0.86), xx=x+(it.w*sc-w)/2, y=topY-h;
+    const col=it.b.id==="espresso"||it.b.id==="grinder"||it.b.id==="autosteam"||it.b.id==="autotamp"?(c.id==="minimal"||c.id==="botanical"||c.id==="retro"?"#EDEBE7":c.id==="dark"||c.id==="wood"?"#1D1D1F":"#B7BBBF"):"#D9D9D9";
+    let g=`<rect x="${xx+8}" y="${topY-6}" width="${w}" height="10" rx="5" fill="#000" opacity=".18" filter="url(#sh)"/>`;
+    g+=`<rect x="${xx}" y="${y}" width="${w}" height="${h}" rx="${Math.min(10,w/6)}" fill="url(#eq-${col.slice(1)})" stroke="${shade(col,-50)}" stroke-width="1.5"/>`;
+    if(it.b.id==="espresso"){ const n=Math.max(1,Math.round(it.w/300)); for(let i=0;i<n;i++){const gx=xx+w*(i+0.5)/n; g+=`<rect x="${gx-16}" y="${y+h*0.55}" width="32" height="10" rx="3" fill="#3a3a3a"/><rect x="${gx-28}" y="${y+h*0.62}" width="56" height="6" rx="3" fill="#222"/>`;} g+=`<rect x="${xx}" y="${y}" width="${w}" height="${h*0.16}" rx="6" fill="#fff" opacity=".18"/>`; }
+    if(it.b.id==="grinder"){ g+=`<path d="M${xx+w*0.15} ${y} L${xx+w/2} ${y-h*0.45} L${xx+w*0.85} ${y} Z" fill="${shade(col,-25)}" opacity=".85"/>`; }
+    return g; }).join("");
+  const sel=(id)=>items.find(i=>i.b.id===id);
+  const lampsX=[cx0+cw*0.2,cx0+cw*0.5,cx0+cw*0.8];
   const plant=c.id==="botanical"||c.id==="wood";
-  return `<svg id="conceptsvg" viewBox="0 0 1600 900" xmlns="http://www.w3.org/2000/svg" font-family="Noto Sans KR, sans-serif">
-   <defs>${patternDefs(c)}<radialGradient id="glow"><stop offset="0" stop-color="${glow}" stop-opacity=".75"/><stop offset="1" stop-color="${glow}" stop-opacity="0"/></radialGradient>
-   <linearGradient id="wallg" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="${shade(P.wall,c.id==="dark"?6:4)}"/><stop offset="1" stop-color="${shade(P.wall,-10)}"/></linearGradient></defs>
-   <rect width="1600" height="900" fill="url(#wallg)"/>
-   <rect y="760" width="1600" height="140" fill="${P.floor}"/>
-   ${c.pattern==="tile"&&c.id==="retro"?Array.from({length:20},(_,i)=>`<rect x="${i*80}" y="${760+(i%2)*70}" width="80" height="70" fill="${shade(P.floor,40)}"/>`).join(""):""}
-   <!-- 백 선반 -->
-   <rect x="250" y="250" width="1100" height="16" fill="${shade(P.top,-30)}"/><rect x="250" y="370" width="1100" height="16" fill="${shade(P.top,-30)}"/>
-   ${Array.from({length:10},(_,i)=>`<rect x="${290+i*104}" y="${200+(i%3)*6}" width="44" height="${50-(i%3)*6}" rx="6" fill="${i%3===0?P.accent:shade(P.top,10)}" stroke="${shade(P.wall,-60)}" stroke-width="2"/>`).join("")}
-   ${Array.from({length:7},(_,i)=>`<path d="M${310+i*150} 370 v-60 h60 v60" fill="${shade(P.wall,-25)}" opacity=".7"/><rect x="${318+i*150}" y="322" width="44" height="12" fill="${P.accent}" opacity=".8"/>`).join("")}
-   <!-- 메뉴 보드 -->
-   <rect x="1180" y="90" width="300" height="130" rx="10" fill="${c.id==="dark"?"#111":shade(P.wall,-55)}"/><text x="1330" y="145" font-size="30" fill="${c.id==="dark"?P.accent:"#fff"}" text-anchor="middle" font-weight="700">MENU</text><path d="M1215 175h230M1215 195h170" stroke="${c.id==="dark"?P.accent:"#fff"}" stroke-width="4" opacity=".6"/>
+  return `<svg id="conceptsvg" viewBox="0 0 ${W} ${H}" xmlns="http://www.w3.org/2000/svg" font-family="Noto Sans KR, sans-serif">
+   <defs>${texture("s-wall",wallM[3],matColor(c,wallM),1.2)}${texture("s-front",fm[3],matColor(c,fm),0.9)}${texture("s-top",tm[3],matColor(c,tm),0.9)}${texture("s-floor",floorM[3],matColor(c,floorM),1.3)}
+    <radialGradient id="glow"><stop offset="0" stop-color="${glow}" stop-opacity="${c.id==="dark"?0.55:0.4}"/><stop offset="1" stop-color="${glow}" stop-opacity="0"/></radialGradient>
+    <linearGradient id="vign" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#000" stop-opacity="${c.id==="dark"?0.35:0.12}"/><stop offset=".55" stop-color="#000" stop-opacity="0"/></linearGradient>
+    <linearGradient id="topshade" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#000" stop-opacity="0"/><stop offset="1" stop-color="#000" stop-opacity=".22"/></linearGradient>
+    ${["EDEBE7","1D1D1F","B7BBBF","D9D9D9"].map(h=>`<linearGradient id="eq-${h}" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="${shade("#"+h,-18)}"/><stop offset=".35" stop-color="${shade("#"+h,14)}"/><stop offset="1" stop-color="${shade("#"+h,-28)}"/></linearGradient>`).join("")}
+    <filter id="sh" x="-20%" y="-50%" width="140%" height="200%"><feGaussianBlur stdDeviation="6"/></filter></defs>
+   <rect width="${W}" height="${H}" fill="url(#s-wall)"/>
+   ${c.id==="industrial"?`<rect x="1150" y="140" width="380" height="380" fill="url(#s-wall)"/>`:""}
+   ${c.id==="industrial"?`<defs>${texture("s-brick","brick",c.pal.accent,1)}</defs><rect x="1170" y="150" width="340" height="360" fill="url(#s-brick)" opacity=".9"/>`:""}
+   ${c.id==="wood"?`<defs>${texture("s-tile","tile",c.pal.accent,0.8)}</defs><rect x="${cx0+40}" y="330" width="${cw-80}" height="200" fill="url(#s-tile)"/>`:""}
+   <rect width="${W}" height="${H}" fill="url(#vign)"/>
+   <!-- 선반 -->
+   <rect x="${cx0+60}" y="310" width="${cw-120}" height="12" fill="${shade(P.top,-25)}"/><rect x="${cx0+60}" y="322" width="${cw-120}" height="10" fill="#000" opacity=".08" filter="url(#sh)"/>
+   ${Array.from({length:9},(_,i)=>{const x=cx0+110+i*(cw-220)/8; return `<rect x="${x-14}" y="${270}" width="28" height="40" rx="3" fill="${i%4===1?P.accent:shade(P.wall,lum(P.wall)<0.3?40:-18)}" opacity=".9"/>`;}).join("")}
    <!-- 조명 -->
-   ${[420,800,1180].map(x=>`<line x1="${x}" y1="0" x2="${x}" y2="110" stroke="#333" stroke-width="3"/><circle cx="${x}" cy="210" r="210" fill="url(#glow)"/><path d="M${x-45} 150 Q${x} 95 ${x+45} 150 Z" fill="${c.id==="industrial"?"#333":c.id==="retro"?"#F7F1E6":P.accent}" stroke="#222" stroke-width="2"/><circle cx="${x}" cy="156" r="12" fill="${glow}"/>`).join("")}
-   <!-- 장비 -->
-   <rect x="430" y="455" width="330" height="135" rx="16" fill="${M}" stroke="${mDark}" stroke-width="4"/><rect x="430" y="455" width="330" height="26" rx="10" fill="${mDark}" opacity=".35"/>
-   ${[510,680].map(x=>`<rect x="${x-26}" y="545" width="52" height="16" rx="4" fill="#555"/><rect x="${x-50}" y="560" width="100" height="10" rx="4" fill="#333"/><rect x="${x-10}" y="568" width="20" height="22" fill="#444"/>`).join("")}
-   <rect x="800" y="420" width="70" height="170" rx="10" fill="${M}" stroke="${mDark}" stroke-width="4"/><path d="M808 420 L835 360 L862 420 Z" fill="${shade(M,-20)}" opacity=".8" stroke="${mDark}" stroke-width="3"/>
-   <rect x="900" y="500" width="60" height="90" rx="8" fill="${shade(M,-15)}" stroke="${mDark}" stroke-width="3"/>
-   <rect x="1010" y="540" width="40" height="50" rx="6" fill="#fff" stroke="#bbb"/><rect x="1060" y="530" width="44" height="60" rx="6" fill="${P.accent}" opacity=".9"/>
-   ${plant?`<g><rect x="1190" y="520" width="70" height="70" rx="8" fill="${shade(P.front,-10)}"/><path d="M1225 520 C1180 470 1190 430 1215 410 M1225 520 C1240 460 1280 450 1290 420 M1225 520 C1215 480 1240 440 1250 400" stroke="#4F7A4F" stroke-width="10" fill="none" stroke-linecap="round"/></g>`:""}
-   ${c.id==="botanical"?`<g><path d="M120 760 C90 650 140 560 120 480" stroke="#4F7A4F" stroke-width="14" fill="none"/><ellipse cx="120" cy="470" rx="70" ry="40" fill="#6B9A6B"/><ellipse cx="80" cy="560" rx="50" ry="26" fill="#5E8C61"/><rect x="80" y="740" width="80" height="30" fill="${shade(P.front,-20)}"/></g>`:""}
+   ${lampsX.map(x=>`<line x1="${x}" y1="0" x2="${x}" y2="150" stroke="${lum(P.wall)<0.3?"#aaa":"#333"}" stroke-width="1.5"/><ellipse cx="${x}" cy="${topY}" rx="260" ry="190" fill="url(#glow)"/>${c.id==="botanical"?`<path d="M${x-50} 200 Q${x} 140 ${x+50} 200 Z" fill="url(#s-rattan)"/>`:`<path d="M${x-36} 196 Q${x} 150 ${x+36} 196 Z" fill="${c.id==="dark"||c.id==="retro"?c.pal.accent:c.id==="industrial"?"#222":shade(P.metal,0)}"/>`}<circle cx="${x}" cy="200" r="8" fill="${glow}"/>`).join("")}
+   ${c.id==="botanical"?`<defs>${texture("s-rattan","rattan",c.pal.front,0.5)}</defs>`:""}
+   <!-- 메뉴 -->
+   <rect x="${cx0+cw-250}" y="90" width="230" height="110" rx="4" fill="${lum(P.wall)<0.3?"#111":"#1f1f1f"}" opacity=".92"/><path d="M${cx0+cw-225} 125h150M${cx0+cw-225} 150h110M${cx0+cw-225} 175h130" stroke="${c.id==="dark"?c.pal.accent:"#eee"}" stroke-width="3" opacity=".7"/>
+   <!-- 바닥 -->
+   <rect y="${topY+ch+30}" width="${W}" height="${H-topY-ch-30}" fill="url(#s-floor)"/><rect y="${topY+ch+30}" width="${W}" height="${H-topY-ch-30}" fill="url(#topshade)" opacity=".5"/>
+   ${equip}
+   ${plant?`<g><rect x="${cx0+cw-130}" y="${topY-70}" width="60" height="70" rx="6" fill="${c.id==="botanical"?"#B07D5B":"#6B4B35"}"/><path d="M${cx0+cw-100} ${topY-70} C${cx0+cw-140} ${topY-130} ${cx0+cw-130} ${topY-170} ${cx0+cw-110} ${topY-190} M${cx0+cw-100} ${topY-70} C${cx0+cw-80} ${topY-140} ${cx0+cw-50} ${topY-150} ${cx0+cw-40} ${topY-180} M${cx0+cw-100} ${topY-70} C${cx0+cw-105} ${topY-120} ${cx0+cw-90} ${topY-160} ${cx0+cw-85} ${topY-200}" stroke="#4F7A4F" stroke-width="7" fill="none" stroke-linecap="round"/><ellipse cx="${cx0+cw-110}" cy="${topY-190}" rx="18" ry="9" fill="#5E8C61"/><ellipse cx="${cx0+cw-40}" cy="${topY-180}" rx="18" ry="9" fill="#5E8C61"/><ellipse cx="${cx0+cw-85}" cy="${topY-200}" rx="16" ry="8" fill="#6B9A6B"/></g>`:""}
    <!-- 카운터 -->
-   <rect x="180" y="590" width="1240" height="34" fill="${P.top}" stroke="${shade(P.top,-35)}" stroke-width="3"/>
-   <rect x="200" y="624" width="1200" height="136" fill="${frontFill(c)}" stroke="${shade(P.front,-35)}" stroke-width="3"/>
-   ${c.id==="dark"?`<rect x="200" y="624" width="1200" height="8" fill="${P.accent}"/><rect x="200" y="752" width="1200" height="8" fill="${P.accent}" opacity=".8"/>`:""}
-   ${c.id==="retro"?`<rect x="200" y="624" width="1200" height="10" fill="${P.accent}"/>`:""}
-   <rect x="200" y="760" width="1200" height="12" fill="${shade(P.floor,-30)}"/>
-   <text x="40" y="60" font-size="34" font-weight="900" fill="${c.id==="dark"?"#fff":"#1c1f24"}">${c.name}</text>
-   <text x="40" y="100" font-size="20" fill="${c.id==="dark"?"#ccc":"#555"}">${c.kw.map(k=>"#"+k).join("  ")}</text>
+   <rect x="${cx0-10}" y="${topY}" width="${cw+20}" height="30" fill="url(#s-top)"/><rect x="${cx0-10}" y="${topY}" width="${cw+20}" height="4" fill="#fff" opacity=".35"/>
+   <rect x="${cx0}" y="${topY+30}" width="${cw}" height="${ch}" fill="url(#s-front)"/><rect x="${cx0}" y="${topY+30}" width="${cw}" height="${ch}" fill="url(#topshade)"/>
+   ${c.id==="dark"?`<defs>${texture("s-brass","brass",c.pal.accent,0.6)}</defs><rect x="${cx0}" y="${topY+30}" width="${cw}" height="7" fill="url(#s-brass)"/><rect x="${cx0}" y="${topY+ch+23}" width="${cw}" height="7" fill="url(#s-brass)"/>`:""}
+   ${c.id==="retro"?`<rect x="${cx0}" y="${topY+30}" width="${cw}" height="9" fill="${c.pal.accent}"/>`:""}
+   <rect x="${cx0}" y="${topY+ch+30}" width="${cw}" height="10" fill="#000" opacity=".25" filter="url(#sh)"/>
   </svg>`;
 }
+function swatchSvg(c,m,i){ const col=matColor(c,m); return `<svg viewBox="0 0 240 240" xmlns="http://www.w3.org/2000/svg"><defs>${texture("sw"+i,m[3],col,1)}<linearGradient id="sw${i}-l" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#fff" stop-opacity=".18"/><stop offset=".6" stop-color="#fff" stop-opacity="0"/><stop offset="1" stop-color="#000" stop-opacity=".12"/></linearGradient></defs><rect width="240" height="240" fill="url(#sw${i})"/><rect width="240" height="240" fill="url(#sw${i}-l)"/></svg>`; }
 function renderConceptList(){
   document.getElementById("clist").innerHTML=CONCEPTS.map(c=>`<button class="ccard ${CONCEPT&&CONCEPT.id===c.id?"on":""}" data-id="${c.id}">
-    <span class="sw">${["wall","front","top","accent","floor"].map(k=>`<i style="background:${c.pal[k]}"></i>`).join("")}</span>
-    <b>${c.name}</b><small>${c.kw.slice(0,3).join(" · ")}</small></button>`).join("");
+    <span class="sw">${c.colors.map(x=>`<i style="background:${c.pal[x[1]]};flex:${x[2]}"></i>`).join("")}</span>
+    <b>${c.name}</b><small>${c.en} · ${c.fit.split(" · ")[0]}</small></button>`).join("");
   document.querySelectorAll(".ccard").forEach(b=>b.onclick=()=>{const src=CONCEPTS.find(x=>x.id===b.dataset.id); CONCEPT=JSON.parse(JSON.stringify(src)); CONCEPT_APPLIED=false; renderConceptList(); renderConcept();});
 }
-const PAL_NAMES={wall:"벽",front:"카운터 전면",top:"카운터 상판",accent:"포인트",floor:"바닥"};
 function renderConcept(){
   const c=CONCEPT, el=document.getElementById("cboard");
-  if(!c){ el.innerHTML=`<div class="panel empty-r"><b>왼쪽에서 콘셉트를 하나 고르세요</b>색·마감재·조명·장비 색상을 한 장의 보드로 보여 주고, 바 설계 평면도·입면도에도 그 색을 입힐 수 있어요.</div>`; return; }
-  el.innerHTML=`
-   <div class="panel"><div class="scene">${sceneSvg(c)}</div><p class="desc" style="margin:10px 0 0">${c.desc}</p></div>
-   <div class="two">
-    <div class="panel"><h3>컬러 팔레트</h3><p class="desc">칸을 눌러 색을 바꿀 수 있어요. 바꾸면 위 그림과 바 설계에 바로 반영돼요.</p>
-      <div class="pal">${Object.keys(PAL_NAMES).map(k=>`<label class="pc"><input type="color" data-k="${k}" value="${c.pal[k]}"><span style="background:${c.pal[k]}"></span><b>${PAL_NAMES[k]}</b><small>${c.pal[k].toUpperCase()}</small></label>`).join("")}</div></div>
-    <div class="panel"><h3>조명 · 장비 색상</h3>
-      <div class="lrow"><span class="lb" style="background:${kelvinColor(c.light.k)}"></span><div><b>${c.light.k}K</b><small>${c.light.txt}</small></div></div>
-      <div class="lrow"><span class="lb" style="background:${c.machine.c};border:1px solid #ccc"></span><div><b>장비 색상</b><small>${c.machine.txt}</small></div></div>
-      <div class="lrow"><span class="lb" style="background:${c.pal.accent}"></span><div><b>포인트 색</b><small>컵·소품·사인 등 작은 면적에만 쓰면 좋아요</small></div></div></div>
+  if(!c){ el.innerHTML=`<div class="panel empty-r"><b>왼쪽에서 콘셉트를 하나 고르세요</b>마감재 샘플, 색 비율, 조명 사양, 바 정면 이미지까지 한 장의 컨셉보드로 정리해요. 바 설계를 먼저 해 두면 그 장비 배치가 이미지에 들어가요.</div>`; return; }
+  const today=new Date(), ds=`${today.getFullYear()}.${String(today.getMonth()+1).padStart(2,"0")}.${String(today.getDate()).padStart(2,"0")}`;
+  el.innerHTML=`<div class="board" id="boardsheet">
+   <div class="bhead"><div><span class="eyebrow">CONCEPT BOARD</span><input id="cproj" class="projname" placeholder="프로젝트명 입력 (예: 산수원카페)" value="${CPROJ.replace(/"/g,"&quot;")}"></div>
+     <div class="btitle"><span class="en">${c.en}</span><b>${c.name}</b></div></div>
+   <div class="brow1">
+     <div class="hero">${sceneSvg(c)}<span class="cap">BAR ELEVATION · ${typeof BAR!=="undefined"&&BAR?"바 설계 배치 반영":"기본 배치 예시"}</span></div>
+     <div class="stmt"><span class="lbl">CONCEPT</span><p>${c.statement}</p>
+       <span class="lbl">KEYWORDS</span><div class="kws">${c.kw.map(k=>`<span>${k}</span>`).join("")}</div>
+       <span class="lbl">맞는 매장</span><p class="fit">${c.fit}</p>
+       <span class="lbl">COLOR RATIO</span><div class="ratio">${c.colors.map(x=>`<i style="background:${c.pal[x[1]]};flex:${x[2]}" title="${x[0]} ${x[2]}%"></i>`).join("")}</div>
+       <div class="ratiolbl">${c.colors.map(x=>`<span>${x[2]}%</span>`).join("")}</div></div>
    </div>
-   <div class="two">
-    <div class="panel"><h3>마감재</h3><table><tbody>${[["상판",c.mat.top],["카운터 전면",c.mat.front],["바닥",c.mat.floor],["벽",c.mat.wall]].map(([a,b])=>`<tr><th style="width:110px">${a}</th><td>${b}</td></tr>`).join("")}</tbody></table></div>
-    <div class="panel"><h3>주의할 점</h3><div class="alerts">${c.tips.map(t=>`<div class="alert warn"><span>${t}</span></div>`).join("")}</div>
-      <h3 style="margin-top:14px">메모</h3><textarea id="cmemo" placeholder="이 매장만의 메모 (예: 로고 색, 원하는 소품)">${c.memo||""}</textarea></div>
+   <div class="sec"><span class="lbl">MATERIALS</span>
+     <div class="mats">${c.mats.map((m,i)=>`<div class="mat"><div class="mimg">${swatchSvg(c,m,i)}</div><span class="code">${m[0]} · ${m[1]}</span><b>${m[2]}</b><small>${m[5]}</small></div>`).join("")}</div></div>
+   <div class="brow3">
+     <div class="sec"><span class="lbl">COLOR PALETTE <em>칩을 눌러 색 변경</em></span>
+       <div class="chips">${c.colors.map(x=>{const hx=c.pal[x[1]], [r,g,b]=rgbOf(hx); return `<label class="chip2"><input type="color" data-k="${x[1]}" value="${hx}"><span class="cc" style="background:${hx}"></span><b>${x[0]}</b><small class="hx">${hx.toUpperCase()} · RGB ${r} ${g} ${b}</small><small>${x[3]} · ${x[2]}%</small></label>`;}).join("")}</div></div>
+     <div class="sec"><span class="lbl">LIGHTING</span>
+       <table class="spec"><thead><tr><th>구역</th><th>색온도</th><th>연색성</th><th>조도</th><th>기구</th></tr></thead><tbody>${c.light.map(l=>`<tr><td>${l[0]}</td><td><i class="kdot" style="background:${kelvinColor(+l[1].replace(/\D/g,"")||3000)}"></i>${l[1]}</td><td>${l[2]}</td><td>${l[3]}</td><td>${l[4]}</td></tr>`).join("")}</tbody></table>
+       <span class="lbl" style="margin-top:14px">EQUIPMENT FINISH</span><ul class="eq">${c.equip.map(e=>`<li>${e}</li>`).join("")}</ul>
+       <span class="lbl" style="margin-top:14px">NOTE</span><ul class="eq warnl">${c.tips.map(e=>`<li>${e}</li>`).join("")}</ul></div>
    </div>
-   <div class="panel cact"><button id="capply" class="${CONCEPT_APPLIED?"on":""}">${CONCEPT_APPLIED?"✓ 바 설계에 적용됨 — 바 설계 보기 →":"이 콘셉트를 바 설계에 적용 →"}</button><button id="cpng">PNG 저장</button><button id="cprint">인쇄</button><span id="cmsg" class="barmsg"></span></div>`;
-  el.querySelectorAll(".pc input").forEach(inp=>inp.addEventListener("input",()=>{c.pal[inp.dataset.k]=inp.value; renderConceptScene(); const sw=inp.nextElementSibling; sw.style.background=inp.value; sw.parentElement.querySelector("small").textContent=inp.value.toUpperCase(); if(CONCEPT_APPLIED&&BAR) renderBar();}));
-  document.getElementById("cmemo").oninput=e=>{c.memo=e.target.value;};
-  document.getElementById("capply").onclick=()=>{ if(CONCEPT_APPLIED){document.querySelector('nav button[data-v="bar"]').click(); return;} CONCEPT_APPLIED=true; if(!BAR) buildBar(); else renderBar(); renderConcept(); cMsg("바 설계 평면도·입면도에 이 콘셉트 색을 입혔어요."); };
-  document.getElementById("cpng").onclick=()=>{ if(!/github\.io$/.test(location.hostname)&&location.protocol!=="file:"){cMsg("이 화면에서는 파일 저장이 막혀 있어요. github.io 주소에서 저장하거나 화면을 캡처해 주세요.");return;}
-    const sv=document.getElementById("conceptsvg"), img=new Image(); img.onload=()=>{const cv=document.createElement("canvas"); cv.width=1600; cv.height=900; cv.getContext("2d").drawImage(img,0,0); cv.toBlob(b=>{try{const a=document.createElement("a");a.href=URL.createObjectURL(b);a.download=`컨셉보드_${c.name}.png`;document.body.appendChild(a);a.click();a.remove();cMsg("PNG로 저장했어요.");}catch(e){cMsg("저장이 막혀 있어요. 화면을 캡처해 주세요.");}});}; img.src="data:image/svg+xml;charset=utf-8,"+encodeURIComponent(new XMLSerializer().serializeToString(sv)); };
+   <div class="tblock"><span><em>PROJECT</em>${CPROJ||"—"}</span><span><em>CONCEPT</em>${c.name}</span><span><em>DATE</em>${ds}</span><span><em>REV</em>v1</span><span><em>BY</em>원클리어 · 장비찾기</span></div>
+  </div>
+  <div class="panel cact"><button id="capply" class="${CONCEPT_APPLIED?"on":""}">${CONCEPT_APPLIED?"✓ 바 설계에 적용됨 — 바 설계 보기 →":"이 콘셉트를 바 설계에 적용 →"}</button><button id="cpng">PNG 저장</button><button id="cprint">인쇄 (A3 가로)</button><span id="cmsg" class="barmsg"></span></div>`;
+  el.querySelectorAll(".chip2 input").forEach(inp=>inp.addEventListener("change",()=>{c.pal[inp.dataset.k]=inp.value; renderConcept(); if(CONCEPT_APPLIED&&BAR) renderBar();}));
+  document.getElementById("cproj").oninput=e=>{CPROJ=e.target.value; const t=document.querySelector(".tblock span"); if(t) t.innerHTML=`<em>PROJECT</em>${CPROJ.replace(/</g,"&lt;")||"—"}`;};
+  document.getElementById("capply").onclick=()=>{ if(CONCEPT_APPLIED){document.querySelector('nav button[data-v="bar"]').click(); return;} CONCEPT_APPLIED=true; if(!BAR) buildBar(); else renderBar(); renderConcept(); cMsg("바 설계 평면도·입면도에 이 콘셉트의 마감재 색과 질감을 입혔어요."); };
+  document.getElementById("cpng").onclick=saveBoardPng;
   document.getElementById("cprint").onclick=()=>{try{window.print()}catch(e){cMsg("인쇄가 막혀 있어요. 브라우저 메뉴에서 인쇄해 주세요.")}};
 }
-function renderConceptScene(){ const s=document.querySelector("#cboard .scene"); if(s&&CONCEPT) s.innerHTML=sceneSvg(CONCEPT); }
-function cMsg(t){const m=document.getElementById("cmsg"); if(!m) return; m.textContent=t; setTimeout(()=>{if(m) m.textContent="";},4000);}
+function saveBoardPng(){
+  if(!/github\.io$/.test(location.hostname)&&location.protocol!=="file:"){cMsg("이 화면에서는 파일 저장이 막혀 있어요. github.io 주소에서 저장하거나 화면을 캡처해 주세요.");return;}
+  const sv=document.getElementById("conceptsvg"), img=new Image(); img.onload=()=>{const cv=document.createElement("canvas"); cv.width=1600; cv.height=900; cv.getContext("2d").drawImage(img,0,0); cv.toBlob(b=>{try{const a=document.createElement("a");a.href=URL.createObjectURL(b);a.download=`컨셉보드_${CONCEPT.name}.png`;document.body.appendChild(a);a.click();a.remove();cMsg("바 정면 이미지를 PNG로 저장했어요. 보드 전체는 인쇄(PDF 저장)를 이용하세요.");}catch(e){cMsg("저장이 막혀 있어요. 화면을 캡처해 주세요.");}});}; img.src="data:image/svg+xml;charset=utf-8,"+encodeURIComponent(new XMLSerializer().serializeToString(sv));
+}
+function cMsg(t){const m=document.getElementById("cmsg"); if(!m) return; m.textContent=t; setTimeout(()=>{if(m) m.textContent="";},5000);}
 // 바 설계 색 (콘셉트 적용 시)
-function barColors(){ if(CONCEPT&&CONCEPT_APPLIED){const P=CONCEPT.pal; return {top:P.top,front:P.front,frontFill:frontFill(CONCEPT),wall:P.wall,floor:P.floor,accent:P.accent,defs:patternDefs(CONCEPT)};} return null; }
+function barColors(){ if(!(CONCEPT&&CONCEPT_APPLIED)) return null; const c=CONCEPT, P=c.pal, fm=matOf(c,"카운터 전면"), tm=matOf(c,"상판");
+  return {top:matColor(c,tm),front:matColor(c,fm),frontFill:"url(#bx-front)",wall:P.wall,floor:P.floor,accent:P.accent,defs:texture("bx-front",fm[3],matColor(c,fm),3)}; }
 renderConceptList(); renderConcept();
 </script>
 </body>
