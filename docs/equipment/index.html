@@ -1598,6 +1598,17 @@ function texture(id,kind,color,k=1){
 const MATKIND={wood:"원목",oak:"오크",fluted:"슬랫·템바보드",marble:"대리석",terrazzo:"테라조",tile:"타일",brick:"벽돌",concrete:"콘크리트·시멘트",paint:"도장",checker:"체커 타일",rattan:"라탄",steel:"스테인리스",blacksteel:"블랙 스틸",brass:"브라스"};
 let MATADD=false;
 function hex6(h){ h=String(h||"#888888").trim(); if(/^#[0-9a-f]{3}$/i.test(h)) h="#"+h.slice(1).split("").map(x=>x+x).join(""); return /^#[0-9a-f]{6}$/i.test(h)?h.toLowerCase():"#888888"; }
+function colorName(hx){ const [r,g,b]=rgbOf(hex6(hx)).map(v=>v/255), mx=Math.max(r,g,b), mn=Math.min(r,g,b), l=(mx+mn)/2, d=mx-mn, sat=d===0?0:d/(1-Math.abs(2*l-1));
+  let h=0; if(d){ h=mx===r?((g-b)/d)%6:mx===g?(b-r)/d+2:(r-g)/d+4; h*=60; if(h<0) h+=360; }
+  if(l>0.93) return sat>0.25?"Cream White":"Pure White"; if(l<0.12) return "Black";
+  if(sat<0.12){ const warm=r>b+0.02; return l>0.8?(warm?"Warm White":"Light Gray"):l>0.6?(warm?"Greige":"Cloud Gray"):l>0.35?(warm?"Warm Gray":"Gray"):"Charcoal"; }
+  const pre=l>0.75?"Light ":l<0.3?"Deep ":"";
+  let n; if(h<15||h>=345) n=l<0.35?"Burgundy":"Red"; else if(h<35) n=sat<0.45?(l>0.6?"Sand":"Terracotta"):"Terracotta"; else if(h<50) n=sat<0.4?(l>0.55?"Sand Oak":"Walnut"):(l>0.6?"Honey":"Oak Brown");
+  else if(h<70) n=sat<0.4?"Olive":"Mustard"; else if(h<160) n=sat<0.3?"Sage":l<0.3?"Forest":"Green"; else if(h<200) n="Teal"; else if(h<250) n=l<0.3?"Navy":"Blue"; else if(h<290) n="Purple"; else n=l<0.4?"Plum":"Pink";
+  return (pre+n).replace("Deep Forest","Forest").replace("Deep Navy","Navy"); }
+function normColors(c){ const t=c.colors.reduce((a,x)=>a+(+x[2]||0),0)||1; let acc=0; c.colors.forEach((x,i)=>{ x[2]=i===c.colors.length-1?Math.max(1,100-acc):Math.max(1,Math.round(x[2]/t*100)); acc+=x[2]; }); }
+function palEdited(c,key){ const x=c.colors.find(z=>z[1]===key); if(x) x[0]=colorName(c.pal[key]); }
+const ROLE_SHARE={"벽":35,"바닥":20,"상판":10,"카운터 전면":10,"천장":15,"백스플래시":6};
 function renumMats(c){ c.mats.forEach((m,i)=>m[0]=`M-${String(i+1).padStart(2,"0")}`); }
 function matColor(c,m){ return c.pal[m[4]]||m[4]; }
 function matOf(c,role){ return c.mats.find(m=>m[1]===role)||c.mats[0]; }
@@ -1742,7 +1753,7 @@ function renderConcept(){
        <table class="spec"><thead><tr><th>구역</th><th>색온도</th><th>연색성</th><th>조도</th><th>기구</th></tr></thead><tbody>${c.light.map(l=>`<tr><td>${l[0]}</td><td><i class="kdot" style="background:${kelvinColor(+l[1].replace(/\D/g,"")||3000)}"></i>${l[1]}</td><td>${l[2]}</td><td>${l[3]}</td><td>${l[4]}</td></tr>`).join("")}</tbody></table>
        <span class="lbl" style="margin-top:14px">EQUIPMENT FINISH</span><ul class="eq">${c.equip.map(e=>`<li>${e}</li>`).join("")}</ul>
        <span class="lbl" style="margin-top:14px">FF&amp;E <em>가구 · 조명 · 소품</em></span><ul class="eq">${c.ff.map(e=>`<li>${e}</li>`).join("")}</ul>
-       <span class="lbl" style="margin-top:14px">NOTE</span><ul class="eq warnl">${conceptChecks(c).map(e=>`<li class="${e[0]}">${e[1]}</li>`).join("")}${c.tips.map(e=>`<li>${e}</li>`).join("")}</ul></div>
+       <span class="lbl" style="margin-top:14px">NOTE</span><ul class="eq warnl">${conceptChecks(c).map(e=>`<li class="${e[0]}">${e[1]}</li>`).join("")}${c.tips.filter(t=>{ const LR=role=>{const m=c.mats.find(z=>z[1]===role); return m?lrv(matColor(c,m)):100;}; if(/흰 상판|화이트 상판/.test(t)&&LR("상판")<65) return false; if(/흰 벽|화이트 벽/.test(t)&&LR("벽")<65) return false; if(/어두운 상판|블랙 상판/.test(t)&&LR("상판")>40) return false; return true; }).map(e=>`<li>${e}</li>`).join("")}</ul></div>
    </div>
    <div class="tblock"><span><em>PROJECT</em>${CPROJ||"—"}</span><span><em>CONCEPT</em>${c.name}</span><span><em>DATE</em>${ds}</span><span><em>REV</em>v1</span><span><em>BY</em>원클리어 · 장비찾기</span></div>
   </div>
@@ -1752,13 +1763,20 @@ function renderConcept(){
   if(HV==="ph") bindPh(c); else arDispose();
   if(HV==="3d"){ const go=()=>window.render3D(document.getElementById("r3d")); if(window.render3D) setTimeout(go,30); else window.addEventListener("r3d-ready",go,{once:true}); }
   const matChanged=(msg)=>{ renderConcept(); if(CONCEPT_APPLIED&&BAR) renderBar(); if(msg) cMsg(msg); };
-  el.querySelectorAll(".matcol").forEach(inp=>inp.addEventListener("change",()=>{ const m=c.mats[+inp.dataset.i]; m[4]=inp.value; matChanged(`${m[0]} ${m[2]} 색을 ${inp.value.toUpperCase()}로 바꿨어요.`); }));
-  el.querySelectorAll(".matdel").forEach(b=>b.onclick=ev=>{ ev.preventDefault(); const i=+b.dataset.i, m=c.mats[i]; c.mats.splice(i,1); renumMats(c); matChanged(`${m[2]}(${m[1]})를 뺐어요.`); });
+  el.querySelectorAll(".matcol").forEach(inp=>inp.addEventListener("change",()=>{ const m=c.mats[+inp.dataset.i];
+    const shared=c.mats.some(z=>z!==m&&z[4]===m[4]);
+    if(c.pal[m[4]]!==undefined&&!shared){ c.pal[m[4]]=inp.value; palEdited(c,m[4]); }
+    else { const key="mx"+(Date.now()%1e7); c.pal[key]=inp.value; m[4]=key; c.colors.push([colorName(inp.value),key,ROLE_SHARE[m[1]]||5,`${m[1]} · ${MATKIND[m[3]]||m[3]}`]); normColors(c); }
+    matChanged(`${m[0]} ${m[2]} 색을 ${inp.value.toUpperCase()}로 바꿨어요.`); }));
+  el.querySelectorAll(".matdel").forEach(b=>b.onclick=ev=>{ ev.preventDefault(); const i=+b.dataset.i, m=c.mats[i]; c.mats.splice(i,1); renumMats(c);
+    if(c.pal[m[4]]!==undefined&&!c.mats.some(z=>z[4]===m[4])){ const ci=c.colors.findIndex(z=>z[1]===m[4]); if(ci>=0&&c.colors.length>1){ c.colors.splice(ci,1); normColors(c); } } matChanged(`${m[2]}(${m[1]})를 뺐어요.`); });
   const ma=document.getElementById("matadd"); if(ma) ma.onclick=()=>{ MATADD=true; renderConcept(); const r=document.getElementById("ma_role"); if(r) r.focus(); };
   const mno=document.getElementById("ma_no"); if(mno) mno.onclick=()=>{ MATADD=false; renderConcept(); };
   const mok=document.getElementById("ma_ok"); if(mok) mok.onclick=()=>{ const g=id=>document.getElementById(id).value.trim(); const role=g("ma_role")||"포인트", kind=document.getElementById("ma_kind").value, name=g("ma_name")||(MATKIND[kind]+" 마감");
-    c.mats.push(["",role,name,kind,document.getElementById("ma_col").value,g("ma_spec")||"—"]); renumMats(c); MATADD=false; matChanged(`${name}(${role})를 추가했어요.${["상판","카운터 전면","바닥","벽"].includes(role)?" 같은 위치의 첫 번째 마감재가 3D·바 설계에 쓰여요.":""}`); };
-  el.querySelectorAll(".chip2 input").forEach(inp=>inp.addEventListener("change",()=>{c.pal[inp.dataset.k]=inp.value; renderConcept(); if(CONCEPT_APPLIED&&BAR) renderBar();}));
+    const hx=document.getElementById("ma_col").value, key="mx"+(Date.now()%1e7); c.pal[key]=hx;
+    c.mats.push(["",role,name,kind,key,g("ma_spec")||"—"]); renumMats(c);
+    c.colors.push([colorName(hx),key,ROLE_SHARE[role]||5,`${role} · ${name}`]); normColors(c); MATADD=false; matChanged(`${name}(${role})를 추가했어요.${["상판","카운터 전면","바닥","벽"].includes(role)?" 같은 위치의 첫 번째 마감재가 3D·바 설계에 쓰여요.":""}`); };
+  el.querySelectorAll(".chip2 input").forEach(inp=>inp.addEventListener("change",()=>{c.pal[inp.dataset.k]=inp.value; palEdited(c,inp.dataset.k); renderConcept(); if(CONCEPT_APPLIED&&BAR) renderBar();}));
   document.getElementById("cproj").oninput=e=>{CPROJ=e.target.value; const t=document.querySelector(".tblock span"); if(t) t.innerHTML=`<em>PROJECT</em>${CPROJ.replace(/</g,"&lt;")||"—"}`;};
   document.getElementById("capply").onclick=()=>{ if(CONCEPT_APPLIED){document.querySelector('nav button[data-v="bar"]').click(); return;} CONCEPT_APPLIED=true; if(!BAR) buildBar(); else renderBar(); renderConcept(); cMsg("바 설계 평면도·입면도에 이 콘셉트의 마감재 색과 질감을 입혔어요."); };
   document.getElementById("cpng").onclick=saveBoardPng;
@@ -1766,7 +1784,8 @@ function renderConcept(){
   document.getElementById("cprint").onclick=()=>{try{window.print()}catch(e){cMsg("인쇄가 막혀 있어요. 브라우저 메뉴에서 인쇄해 주세요.")}};
 }
 function conceptChecks(c){
-  const out=[], L=k=>lrv(c.pal[k]);
+  const RM={front:"카운터 전면",floor:"바닥",top:"상판",wall:"벽"};
+  const out=[], L=k=>{ const m=RM[k]&&c.mats.find(z=>z[1]===RM[k]); return lrv(m?matColor(c,m):c.pal[k]); };
   const ff=Math.abs(L("front")-L("floor")), tf=Math.abs(L("top")-L("front"));
   out.push(ff>=30?["ok",`카운터 전면과 바닥의 밝기 차이(LRV ${ff})가 충분해 카운터 경계가 잘 보여요.`]:["warn",`카운터 전면과 바닥의 밝기 차이가 LRV ${ff}로 작아요(권장 30 이상). 시니어·저시력 손님을 위해 걸레받이를 대비색으로 하세요.`]);
   if(tf<15) out.push(["warn",`상판과 전면의 밝기 차이가 LRV ${tf}로 작아 경계가 흐려요. 상판 엣지에 대비 라인을 넣으세요.`]);
