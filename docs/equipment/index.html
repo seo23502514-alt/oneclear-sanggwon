@@ -547,6 +547,7 @@ const SPEC = {
 const ICE_SIZES=[30,50,70,100,150,200];
 const val=id=>+document.getElementById(id).value;
 
+const EXTRA_SPEC={espresso:"2그룹 반자동",grinder:"에스프레소용 1대",drip:"핸드드립 세트 2~3구",coldbrew:"더치 타워 또는 침출식",tablefridge:"테이블 냉장고 1500",showcase:"제과 쇼케이스 900",ice:"일 50kg급",freezer:"업소용 냉동고",blender:"업소용 블렌더",hotwater:"온수기 8~10L",dispenser:"음료 디스펜서 2구",pitcher:"스팀 피처 2개 이상",dishwasher:"언더카운터 도어형",sterilizer:"자외선 컵 소독기",filter:"정수 필터",sink:"싱크대 1조",induction:"인덕션 1구",oven:"컨벡션 오븐",waffle:"와플 기계",pos:"POS",scale:"0.1g 저울",tamper:"58mm 탬퍼",knock:"카운터 매립형",autosteam:"스팀보스 S",autotamp:"퍽프레스 Q2"};
 function analyze(silent){
   const area=val("area"),seats=val("seats"),type=document.getElementById("type").value;
   const menus=[...document.querySelectorAll("#menus input:checked")].map(i=>i.value);
@@ -608,11 +609,15 @@ function analyze(silent){
   add("pos",1,senior?"큰 화면·단순 메뉴의 POS(+키오스크 선택)":staff<=1?"POS + 키오스크":"POS",senior?"시니어 운영은 화면이 단순한 기종이 실수가 적음":staff<=1?"1인 운영이면 키오스크로 주문을 분산":"주문·결제");
   add("scale",has("espresso")?2:1,"0.1g 단위, 타이머 내장","레시피를 일정하게 유지" + (senior?" — 시니어 운영 매장에 특히 중요":""));
 
+  // 장비 사전에 있는 나머지 장비도 모두 목록에 넣음 (선택 · 참고). 합계·경고 계산에서는 뺌
+  E.forEach(e=>{ if(rec.some(r=>r.id===e.id)||!SPEC[e.id]) return; const s=SPEC[e.id], o=typeof s.kw==="object";
+    add(e.id,1,EXTRA_SPEC[e.id]||e.alias.split(" · ")[0],`지금 조건(메뉴·좌석·잔 수)에서는 꼭 필요하지 않아요. ${e.use}`,false,o?s.kw[2]:undefined,o?s.w[2]:undefined); rec[rec.length-1].extra=true; });
+  const core=rec.filter(r=>!r.extra);
   // 합계
-  const totalKw = rec.reduce((a,r)=>a+r.kw,0);
+  const totalKw = core.reduce((a,r)=>a+r.kw,0);
   const simKw = totalKw*0.7;
-  const useFront = rec.filter(r=>r.z==="front").reduce((a,r)=>a+r.w,0);
-  const useBack = rec.filter(r=>r.z==="back").reduce((a,r)=>a+r.w,0);
+  const useFront = core.filter(r=>r.z==="front").reduce((a,r)=>a+r.w,0);
+  const useBack = core.filter(r=>r.z==="back").reduce((a,r)=>a+r.w,0);
   const perStaff = peak/staff;
 
   // 경고
@@ -627,7 +632,7 @@ function analyze(silent){
   if(groups===3) al.push(["warn","3그룹 전력",`3그룹 머신은 단독으로 6kW 이상 쓰는 경우가 많습니다. 전용 회로가 필요해요.`]);
   if(iceDay>iceSize*0.85) al.push(["warn","얼음 여유",`추정 필요량이 제빙기 생산량에 가깝습니다. 한 단계 큰 용량이나 냉동고 보관을 함께 쓰세요.`]);
   if(senior) al.push(["ok","시니어 운영",`버튼식 블렌더, 타이머 저울, POS 단순 화면처럼 실수를 줄이는 기종을 우선 고르세요.`]);
-  if(area<12 && rec.length>16) al.push(["warn","공간 대비 장비",`${area}평에 장비 ${rec.length}종은 많은 편입니다. 선택 장비부터 줄여 보세요.`]);
+  if(area<12 && core.length>16) al.push(["warn","공간 대비 장비",`${area}평에 장비 ${core.length}종은 많은 편입니다. 선택 장비부터 줄여 보세요.`]);
 
   // 등급
   const pen = al.filter(a=>a[0]==="bad").length*2 + al.filter(a=>a[0]==="warn").length;
@@ -650,10 +655,10 @@ function renderReport(d){
   // category breakdown
   const catCount={}; d.rec.forEach(r=>{const c=E.find(e=>e.id===r.id).cat; catCount[c]=(catCount[c]||0)+r.qty;});
   const maxC=Math.max(...Object.values(catCount));
-  const kwList=d.rec.filter(r=>r.kw>0).sort((a,b)=>b.kw-a.kw);
+  const kwList=d.rec.filter(r=>r.kw>0&&!r.extra).sort((a,b)=>b.kw-a.kw);
   const maxKw=kwList.length?kwList[0].kw:1;
   const strip=(zone,len)=>{
-    const items=d.rec.filter(r=>r.z===zone&&r.w>0);
+    const items=d.rec.filter(r=>r.z===zone&&r.w>0&&!r.extra);
     const used=items.reduce((a,r)=>a+r.w,0), total=Math.max(len,used);
     return `<div class="strip">${items.map(r=>{const e=E.find(x=>x.id===r.id);return `<div style="width:${r.w/total*100}%;background:${CATS[e.cat].color}" title="${e.name} ${r.w}mm">${e.name.replace(/[·].*/,"")}</div>`}).join("")}${len>used?`<div style="width:${(len-used)/total*100}%;background:repeating-linear-gradient(45deg,#f1f2f4,#f1f2f4 6px,#e6e8eb 6px,#e6e8eb 12px);color:var(--muted)">작업 공간 ${(len-used).toLocaleString()}mm</div>`:""}</div>
     <div class="striplbl"><span>장비 ${used.toLocaleString()}mm</span><span>카운터 ${len.toLocaleString()}mm</span></div>`;
@@ -692,7 +697,7 @@ function renderReport(d){
       <thead><tr><th></th><th>장비</th><th>추천 규격</th><th>근거</th><th>전력</th><th>구매처</th></tr></thead>
       <tbody>${d.rec.map(r=>{const e=E.find(x=>x.id===r.id),c=CATS[e.cat],kw=encodeURIComponent(e.kw);return `<tr>
         <td><div class="ic" style="background:${c.bg};color:${c.color}">${IC[e.id]}</div></td>
-        <td><a href="#" data-id="${e.id}" class="open" style="font-size:14px;color:var(--ink)">${e.name}</a>${r.qty>1?` ×${r.qty}`:""}<br><span class="pill ${r.must?"":"opt"}">${r.must?"필수":"선택"}</span>${recFootprint(r)?` <button class="optbtn" data-ri="${d.rec.indexOf(r)}">${r.must?"바에서 빼기":"바에 배치 →"}</button>`:""}</td>
+        <td><a href="#" data-id="${e.id}" class="open" style="font-size:14px;color:var(--ink)">${e.name}</a>${r.qty>1?` ×${r.qty}`:""}<br><span class="pill ${r.must?"":"opt"}">${r.must?"필수":r.extra?"선택 · 참고":"선택"}</span>${recFootprint(r)?` <button class="optbtn" data-ri="${d.rec.indexOf(r)}">${r.must?"바에서 빼기":"바에 배치 →"}</button>`:""}</td>
         <td>${r.spec}</td><td class="why">${r.why}</td>
         <td style="white-space:nowrap">${r.kw?r.kw.toFixed(1)+"kW":"—"}</td>
         <td><a href="https://search.shopping.naver.com/search/all?query=${kw}" target="_blank" rel="noopener">네이버</a> · <a href="https://search.danawa.com/dsearch.php?query=${kw}" target="_blank" rel="noopener">다나와</a></td></tr>`}).join("")}</tbody>
@@ -1053,7 +1058,7 @@ function toggleOptional(ri,goTab){
 }
 function flexW(list,len){const used=list.filter(b=>b.id!=="WORK").reduce((a,b)=>a+b.w,0);return Math.max(0,len-used);}
 function nameOf(b){ if(b.label) return b.label; const e=E.find(x=>x.id===b.id); return e?e.name:b.id; }
-function colorOf(b){ if(b.id==="WORK") return "#d9dde3"; if(b.id==="PICKUP") return "#f2c48d"; const e=E.find(x=>x.id===b.id); return e?CATS[e.cat].color:"#999"; }
+function colorOf(b){ if(b.id==="WORK") return "#d9dde3"; if(b.id==="ice") return "#2b9fd9"; if(b.id==="PICKUP") return "#f2c48d"; const e=E.find(x=>x.id===b.id); return e?CATS[e.cat].color:"#999"; }
 
 function renderBar(){
   if(!BAR) return;
@@ -1903,13 +1908,17 @@ function build(host){
   const bodyMat=new THREE.MeshStandardMaterial({color:eqColor,roughness:eqMetal?0.28:0.35,metalness:eqMetal?0.9:0.15});
   const steel=new THREE.MeshStandardMaterial({color:0xd4d7da,roughness:0.22,metalness:1});
   const glass=new THREE.MeshPhysicalMaterial({color:0xffffff,roughness:0.03,transmission:0.92,thickness:0.01,transparent:true,opacity:0.35});
-  const placeRow=(list,len,zc,depthC,faceSign)=>{
+  const iceBody=new THREE.MeshStandardMaterial({color:0xe9f2f7,roughness:0.35,metalness:0.2}), icePanel=new THREE.MeshStandardMaterial({color:0x2b9fd9,roughness:0.25,metalness:0.1,emissive:0x0a3b5c,emissiveIntensity:0.25}), iceVent=plain("#1f2a33",0.7);
+  const placeRow=(list,len,zc0,depthC,faceSign)=>{ const zc=zc0;
     if(!list) return; let t=0;
     const rawL=b=>mm(b.id==="WORK"?(window.FLEXW_REF?window.FLEXW_REF(list,len*1000):0):b.w);
     const tot=list.reduce((a,b)=>a+rawL(b),0), kf=tot>len?len/tot:1;   // 카운터보다 길면 비율로 줄여서 모두 올림
     list.forEach(b=>{ const L=rawL(b)*kf; const x=-len/2+t+L/2; t+=L; if(L<=0) return;
       const id=b.id, hgt=mm(b.h||HH[id]||0), dep=Math.min(depthC-0.06,mm(b.d||DD[id]||400)), w=Math.max(0.08,L*0.9), y=ch;
-      if(FLOOR_H[id]){ const hh=mm(b.h||FLOOR_H[id]);
+      if(id==="ice"){ const hh=Math.min(mm(b.h||840),ch-0.02), dp=depthC-0.04, zc=zc0+faceSign*0.035, fz=zc+faceSign*(dp/2+0.004);
+        box(L-0.02,hh,dp,iceBody,x,hh/2,zc,0.01); box(L-0.1,hh*0.42,0.01,icePanel,x,hh*0.68,fz); box(L-0.1,hh*0.22,0.008,iceVent,x,hh*0.2,fz);
+        const lb=new THREE.Mesh(new THREE.PlaneGeometry(Math.min(0.3,L*0.6),0.075),new THREE.MeshBasicMaterial({map:signTex("ICE","#ffffff"),transparent:true})); lb.position.set(x+0.03,hh*0.72,fz+faceSign*0.008); if(faceSign<0) lb.rotation.y=Math.PI; scene.add(lb); return; }
+      if(FLOOR_H[id]){ const hh=mm(b.h||FLOOR_H[id]); const zc=zc0+faceSign*0.035;
         if(hh>ch+0.1){ const th=Math.min(hh,inH-0.25); box(L-0.02,th,depthC-0.04,steel,x,th/2,zc,0.01); box(L-0.12,th*0.62,0.01,glass,x,th*0.55,zc+faceSign*((depthC-0.04)/2+0.004)); box(0.02,th*0.4,0.03,steel,x+(L/2-0.1),th*0.55,zc+faceSign*((depthC-0.04)/2+0.02)); return; }
         box(L-0.02,Math.min(hh,ch-0.02),depthC-0.04,steel,x,Math.min(hh,ch-0.02)/2,zc,0.01); box(L-0.08,0.02,0.02,plain("#202224",0.8),x,Math.min(hh,ch-0.02)-0.06,zc+faceSign*((depthC-0.04)/2+0.01)); return; }
       if(id==="espresso"){ box(w,hgt*0.78,dep,bodyMat,x,y+hgt*0.39+0.06,zc,0.03); box(w,0.06,dep*0.95,blackMat,x,y+0.03,zc,0.01); box(w*0.92,0.02,dep*0.8,steel,x,y+hgt*0.78+0.07,zc);
