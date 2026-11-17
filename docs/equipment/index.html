@@ -1507,9 +1507,9 @@ function sceneSvg(c){
   let items=[]; if(typeof BAR!=="undefined"&&BAR){ let t=0; BAR.front.forEach(b=>{const L=b.id==="WORK"?flexW(BAR.front,BAR.flen):b.w; items.push({b,x:t,w:L}); t+=L;}); }
   if(!items.length){ items=[["pos",450],["espresso",800],["autosteam",200],["knock",150],["grinder",250],["hotwater",300],["WORK",1100],["blender",250],["PICKUP",500]].map(([id,w],i,a)=>({b:{id,w},x:a.slice(0,i).reduce((s,z)=>s+z[1],0),w})); }
   const total=Math.max(1,items.reduce((s,i)=>Math.max(s,i.x+i.w),0)), cx0=180, cw=1240, sc=cw/total, topY=600, ch=150;
-  const HH={espresso:540,grinder:600,autosteam:455,autotamp:286,hotwater:450,blender:450,pos:400,drip:420,showcase:700,dispenser:600,coldbrew:600};
+  const HH=Object.assign({},EQ_HH,{ice:0,tablefridge:0,dishwasher:0});
   const machineDark=lum(mc)<0.35;
-  const equip=items.map(it=>{ const h=(it.b.h||HH[it.b.id]||0)*sc*0.75; if(!h) return ""; const x=cx0+it.x*sc, w=Math.max(18,it.w*sc*0.86), xx=x+(it.w*sc-w)/2, y=topY-h;
+  const drawEq=(items,sc,topY,cx0)=>items.map(it=>{ const nh=["WORK","PICKUP","knock","sink","ice","tablefridge","dishwasher"].includes(it.b.id); const h=(it.b.h&&!nh?it.b.h:(HH[it.b.id]!==undefined?HH[it.b.id]:(nh?0:300)))*sc*0.75; if(!h||it.w<=0) return ""; const x=cx0+it.x*sc, w=Math.max(18,it.w*sc*0.86), xx=x+(it.w*sc-w)/2, y=topY-h;
     const EQC={minimal:"#EDEBE7",botanical:"#EDEBE7",retro:"#EDEBE7",scandi:"#EDEBE7",gallery:"#EDEBE7",organic:"#EDEBE7",mediterranean:"#EDEBE7",terracotta:"#EDEBE7",wood:"#1D1D1F",dark:"#1D1D1F",bookcafe:"#1D1D1F",japandi:"#1D1D1F",korean:"#1D1D1F",midcentury:"#1D1D1F",bistro:"#1D1D1F",industrial:"#B7BBBF",tech:"#B7BBBF",brutal:"#B7BBBF"};
     const col=["espresso","grinder","autosteam","autotamp"].includes(it.b.id)?(EQC[c.id]||"#B7BBBF"):"#D9D9D9";
     let g=`<rect x="${xx+8}" y="${topY-6}" width="${w}" height="10" rx="5" fill="#000" opacity=".18" filter="url(#sh)"/>`;
@@ -1517,6 +1517,12 @@ function sceneSvg(c){
     if(it.b.id==="espresso"){ const n=Math.max(1,Math.round(it.w/300)); for(let i=0;i<n;i++){const gx=xx+w*(i+0.5)/n; g+=`<rect x="${gx-16}" y="${y+h*0.55}" width="32" height="10" rx="3" fill="#3a3a3a"/><rect x="${gx-28}" y="${y+h*0.62}" width="56" height="6" rx="3" fill="#222"/>`;} g+=`<rect x="${xx}" y="${y}" width="${w}" height="${h*0.16}" rx="6" fill="#fff" opacity=".18"/>`; }
     if(it.b.id==="grinder"){ g+=`<path d="M${xx+w*0.15} ${y} L${xx+w/2} ${y-h*0.45} L${xx+w*0.85} ${y} Z" fill="${shade(col,-25)}" opacity=".85"/>`; }
     return g; }).join("");
+  const equip=drawEq(items,sc,topY,cx0);
+  // 백(뒤쪽) 카운터: 앞 카운터 뒤로 살짝 높게 보이게
+  let backSvg="";
+  if(typeof BAR!=="undefined"&&BAR){ const bl=[...BAR.back,...(BAR.side||[]).filter(b=>b.id!=="WORK")]; let t=0; const bit=bl.map(b=>{const L=b.id==="WORK"?flexW(BAR.back,BAR.blen):b.w; const o={b,x:t,w:L}; t+=L; return o;});
+    if(bit.some(i=>!["WORK","PICKUP"].includes(i.b.id))){ const bw=cw-60, bsc=Math.min(bw/Math.max(1,t),sc)*0.82, bx0=cx0+30+(bw-t*bsc)/2, by=topY-78;
+      backSvg=`<rect x="${cx0+20}" y="${by}" width="${cw-40}" height="14" fill="url(#s-top)"/><rect x="${cx0+20}" y="${by+14}" width="${cw-40}" height="${topY-by-14}" fill="${shade(P.wall,lum(P.wall)<0.3?18:-22)}"/><rect x="${cx0+20}" y="${by+14}" width="${cw-40}" height="${topY-by-14}" fill="url(#topshade)"/>`+drawEq(bit,bsc,by,bx0).replace(/<rect /g,'<rect opacity=".92" '); } }
   const sel=(id)=>items.find(i=>i.b.id===id);
   const lampsX=[cx0+cw*0.2,cx0+cw*0.5,cx0+cw*0.8];
   const plant=c.id==="botanical"||c.id==="wood";
@@ -1542,6 +1548,7 @@ function sceneSvg(c){
    <rect x="${cx0+cw-250}" y="90" width="230" height="110" rx="4" fill="${lum(P.wall)<0.3?"#111":"#1f1f1f"}" opacity=".92"/><path d="M${cx0+cw-225} 125h150M${cx0+cw-225} 150h110M${cx0+cw-225} 175h130" stroke="${c.id==="dark"?c.pal.accent:"#eee"}" stroke-width="3" opacity=".7"/>
    <!-- 바닥 -->
    <rect y="${topY+ch+30}" width="${W}" height="${H-topY-ch-30}" fill="url(#s-floor)"/><rect y="${topY+ch+30}" width="${W}" height="${H-topY-ch-30}" fill="url(#topshade)" opacity=".5"/>
+   ${backSvg}
    ${equip}
    ${plant?`<g><rect x="${cx0+cw-130}" y="${topY-70}" width="60" height="70" rx="6" fill="${c.id==="botanical"?"#B07D5B":"#6B4B35"}"/><path d="M${cx0+cw-100} ${topY-70} C${cx0+cw-140} ${topY-130} ${cx0+cw-130} ${topY-170} ${cx0+cw-110} ${topY-190} M${cx0+cw-100} ${topY-70} C${cx0+cw-80} ${topY-140} ${cx0+cw-50} ${topY-150} ${cx0+cw-40} ${topY-180} M${cx0+cw-100} ${topY-70} C${cx0+cw-105} ${topY-120} ${cx0+cw-90} ${topY-160} ${cx0+cw-85} ${topY-200}" stroke="#4F7A4F" stroke-width="7" fill="none" stroke-linecap="round"/><ellipse cx="${cx0+cw-110}" cy="${topY-190}" rx="18" ry="9" fill="#5E8C61"/><ellipse cx="${cx0+cw-40}" cy="${topY-180}" rx="18" ry="9" fill="#5E8C61"/><ellipse cx="${cx0+cw-85}" cy="${topY-200}" rx="16" ry="8" fill="#6B9A6B"/></g>`:""}
    <!-- 카운터 -->
@@ -1898,7 +1905,9 @@ function build(host){
   const glass=new THREE.MeshPhysicalMaterial({color:0xffffff,roughness:0.03,transmission:0.92,thickness:0.01,transparent:true,opacity:0.35});
   const placeRow=(list,len,zc,depthC,faceSign)=>{
     if(!list) return; let t=0;
-    list.forEach(b=>{ const L=mm(b.id==="WORK"?(window.FLEXW_REF?window.FLEXW_REF(list,len*1000):0):b.w); const x=-len/2+t+L/2; t+=L; if(L<=0) return;
+    const rawL=b=>mm(b.id==="WORK"?(window.FLEXW_REF?window.FLEXW_REF(list,len*1000):0):b.w);
+    const tot=list.reduce((a,b)=>a+rawL(b),0), kf=tot>len?len/tot:1;   // 카운터보다 길면 비율로 줄여서 모두 올림
+    list.forEach(b=>{ const L=rawL(b)*kf; const x=-len/2+t+L/2; t+=L; if(L<=0) return;
       const id=b.id, hgt=mm(b.h||HH[id]||0), dep=Math.min(depthC-0.06,mm(b.d||DD[id]||400)), w=Math.max(0.08,L*0.9), y=ch;
       if(FLOOR_H[id]){ const hh=mm(b.h||FLOOR_H[id]); box(L-0.02,Math.min(hh,ch-0.02),depthC-0.04,steel,x,Math.min(hh,ch-0.02)/2,zc,0.01); return; }
       if(id==="espresso"){ box(w,hgt*0.78,dep,bodyMat,x,y+hgt*0.39+0.06,zc,0.03); box(w,0.06,dep*0.95,blackMat,x,y+0.03,zc,0.01); box(w*0.92,0.02,dep*0.8,steel,x,y+hgt*0.78+0.07,zc);
@@ -1909,12 +1918,31 @@ function build(host){
       if(id==="blender"){ box(w,hgt*0.3,dep,blackMat,x,y+hgt*0.15,zc,0.02); const jar=new THREE.Mesh(new THREE.CylinderGeometry(w*0.4,w*0.32,hgt*0.7,24),glass); jar.position.set(x,y+hgt*0.65,zc); add(jar); return; }
       if(id==="pos"){ box(0.18,0.05,0.18,blackMat,x,y+0.025,zc); const st=box(0.03,0.22,0.03,blackMat,x,y+0.14,zc); const sc=box(0.36,0.26,0.03,blackMat,x,y+0.33,zc+faceSign*0.02); sc.rotation.x=faceSign*0.18; box(0.08,0.03,0.12,plain("#e9e9e9",0.4),x+0.26,y+0.015,zc); return; }
       if(id==="showcase"){ box(w,0.12,dep,blackMat,x,y+0.06,zc); box(w,hgt*0.8,dep,glass,x,y+0.12+hgt*0.4,zc); [0.25,0.55].forEach(f=>{ box(w-0.04,0.008,dep-0.04,glass,x,y+0.12+hgt*0.8*f,zc); for(let i=0;i<Math.floor((w-0.1)/0.09);i++){ const pst=new THREE.Mesh(new THREE.SphereGeometry(0.035,12,8),plain(i%3?"#d39a52":"#e8c27c",0.7)); pst.scale.set(1.2,0.6,1); pst.position.set(x-w/2+0.08+i*0.09,y+0.12+hgt*0.8*f+0.025,zc); add(pst);} }); return; }
-      if(!hgt) return;
+      if(id==="knock"){ const kn=new THREE.Mesh(new THREE.CylinderGeometry(Math.min(0.07,L*0.42),Math.min(0.07,L*0.42),0.012,24),blackMat); kn.position.set(x,y+0.006,zc); add(kn); const bar2=new THREE.Mesh(new THREE.CylinderGeometry(0.008,0.008,Math.min(0.12,L*0.8),10),steel); bar2.rotation.z=Math.PI/2; bar2.position.set(x,y+0.03,zc); add(bar2); return; }
+      if(id==="sink"){ const bw2=Math.max(0.2,L-0.08), bd2=Math.min(depthC-0.16,0.42); box(bw2,0.012,bd2,steel,x,y+0.002,zc); box(bw2-0.04,0.006,bd2-0.04,plain("#5d6166",0.25,0.8),x,y+0.009,zc);
+        const fp=new THREE.Mesh(new THREE.CylinderGeometry(0.014,0.016,0.32,12),steel); fp.position.set(x,y+0.16,zc-faceSign*(bd2/2+0.04)); add(fp); const sp2=new THREE.Mesh(new THREE.CylinderGeometry(0.011,0.011,0.2,12),steel); sp2.rotation.x=Math.PI/2; sp2.position.set(x,y+0.31,zc-faceSign*(bd2/2-0.06)); add(sp2); return; }
+      if(id==="PICKUP"){ box(Math.min(0.32,w),0.012,Math.min(0.24,dep),woodTray,x,y+0.006,zc); for(let i=0;i<2;i++){ const cp=new THREE.Mesh(new THREE.CylinderGeometry(0.042,0.032,0.12,20),plain(i?"#f3efe8":"#d9c6a5",0.6)); cp.position.set(x-0.06+i*0.12,y+0.072,zc); add(cp);} return; }
+      if(id==="WORK") return;
+      const hg=hgt||0.3;
+      if(id==="induction"){ box(w,0.08,dep,blackMat,x,y+0.04,zc,0.01); return; }
+      if(id==="oven"){ box(w,hg,dep,steel,x,y+hg/2,zc,0.01); box(w*0.8,hg*0.55,0.01,plain("#141414",0.1,0.2),x,y+hg*0.45,zc+faceSign*(dep/2+0.002)); return; }
+      if(id==="dispenser"||id==="coldbrew"){ const tk=new THREE.Mesh(new THREE.CylinderGeometry(w*0.36,w*0.36,hg*0.8,28),glass); tk.position.set(x,y+hg*0.5,zc); add(tk); const liq=new THREE.Mesh(new THREE.CylinderGeometry(w*0.33,w*0.33,hg*0.5,28),plain(id==="coldbrew"?"#2b170c":"#c97a3a",0.3)); liq.position.set(x,y+hg*0.35,zc); add(liq); box(w*0.8,hg*0.1,dep*0.8,steel,x,y+hg*0.05,zc); return; }
       const mat=["autosteam","autotamp","hotwater"].includes(id)?(eqMetal?steel:bodyMat):plain("#dcdcdc",0.35,0.3);
-      box(w,hgt,dep,mat,x,y+hgt/2,zc,Math.min(0.02,w/8));
+      box(w,hg,dep,mat,x,y+hg/2,zc,Math.min(0.02,w/8));
     });
   };
-  if(bar){ placeRow([...bar.back,...(bar.side||[]).filter(b=>b.id!=="WORK")],bw,bd/2,bd,1); }
+  const woodTray=woodM?matFor(woodM[3],col(woodM),0.3,0.2):plain("#b08a5f",0.6);
+  // 카운터 아래 장비 (테이블 냉장고·식기세척기 등): 직원 쪽으로 문이 보이게
+  const placeUnder=(list,len,zFace,faceSign)=>{
+    if(!list||!list.length) return; const tot=list.reduce((a,b)=>a+mm(b.w),0), kf=tot>len-0.1?(len-0.1)/tot:1; let t=0;
+    list.forEach(b=>{ const L=mm(b.w)*kf, x=-len/2+0.05+t+L/2; t+=L; if(L<=0) return; const hh=Math.min(mm(b.h||(b.id==="dishwasher"?720:800)),ch-0.14), dp=0.5;
+      const zc2=zFace-faceSign*(dp/2)+faceSign*0.006; box(L-0.01,hh,dp,steel,x,0.1+hh/2,zc2,0.006);
+      const nDoor=b.id==="dishwasher"?1:Math.max(1,Math.round(L/0.6));
+      for(let i=1;i<nDoor;i++) box(0.004,hh-0.04,0.004,plain("#6c7075",0.4,0.6),x-L/2+L*i/nDoor,0.1+hh/2,zFace+faceSign*0.008);
+      for(let i=0;i<nDoor;i++){ const hx2=x-L/2+L*(i+0.5)/nDoor; box(Math.min(0.3,L/nDoor*0.6),0.016,0.02,steel,hx2,0.1+hh-0.06,zFace+faceSign*0.02,0.004); }
+      box(L-0.03,0.04,0.004,plain("#202224",0.8),x,0.12,zFace+faceSign*0.008); });
+  };
+  if(bar){ placeRow([...bar.back,...(bar.side||[]).filter(b=>b.id!=="WORK")],bw,bd/2,bd,1); placeUnder(bar.underB,bw,bd,1); }
 
   // 앞 카운터: 골 패널 몸체 + 오른쪽 둥근 끝 + 하부 간접조명
   const rr=fd/2, straight=flen-rr, cz=zCounterF-fd/2, cx0=-flen/2+straight/2;
@@ -1934,7 +1962,7 @@ function build(host){
   const ctop=new THREE.Mesh(new THREE.CylinderGeometry(rr+0.025,rr+0.025,0.04,48,1,false,0,Math.PI),topMatF); ctop.position.set(-flen/2+straight,ch-0.02,cz+0.01); add(ctop);
   // 상판 아래 그림자 라인
   box(flen-0.02,0.02,fd-0.02,plain("#000",1),cx0+rr/2-0.01,ch-0.05,cz).material.transparent=false;
-  if(bar) placeRow(bar.front,flen,cz-0.02,fd,-1);
+  if(bar){ placeRow(bar.front,flen,cz-0.02,fd,-1); placeUnder(bar.underF,straight,zCounterF-fd,-1); }
   // 소품: 식물, 컵 스택, 메뉴 스탠드
   plantAt(-flen/2+0.2,ch,cz+0.05,0.9); plantAt(flen/2-rr*0.6,ch,cz,0.75);
   for(let i=0;i<3;i++){ for(let j=0;j<5;j++){ const pc=new THREE.Mesh(new THREE.CylinderGeometry(0.042,0.033,0.11,20,1,true),plain(i===1?"#cfa97a":"#e9dcc6",0.8)); pc.material.side=THREE.DoubleSide; pc.position.set(-flen/2+0.5+i*0.11,ch+0.055+j*0.035,cz+0.15); add(pc);} }
