@@ -240,6 +240,13 @@ ul.eq{margin:0;padding-left:16px;font-size:13px;line-height:1.7}ul.warnl li::mar
 .tblock span{flex:1;min-width:120px;font-size:12.5px;padding:2px 12px 2px 0;border-right:1px solid var(--line);margin-right:12px}.tblock span:last-child{border-right:0}
 .tblock em{display:block;font-style:normal;font-size:10px;letter-spacing:.18em;color:#8a8580}
 @media print{@page{size:A3 landscape;margin:10mm}.top,.clistp,.cact{display:none!important}.cwrap{display:block;padding:0}.board{border:0;box-shadow:none;padding:0}body{background:#fff}}
+.cq{width:100%;font:inherit;font-size:13.5px;padding:8px 10px;border:1.5px solid var(--line);border-radius:8px;margin-bottom:8px}
+.cgroups{display:flex;flex-wrap:wrap;gap:4px;margin-bottom:10px}.cgroups button{font:inherit;font-size:12px;padding:4px 9px;border-radius:999px;border:1px solid var(--line);background:#fff;cursor:pointer}.cgroups button.on{background:var(--ink);color:#fff;border-color:var(--ink)}
+.clistp{position:sticky;top:12px;max-height:calc(100vh - 24px);overflow:auto}
+@media(max-width:900px){.clistp{position:static;max-height:none}}
+.ccard .cg{display:block;font-size:10px;letter-spacing:.14em;color:#8a8580;margin-bottom:2px}.ccard .cf{display:block;font-size:11.5px;color:#999;margin-top:2px}
+table.fs td{font-size:12.5px}
+ul.warnl li.ok::marker{color:var(--ok)}
 </style>
 </head>
 <body>
@@ -328,7 +335,7 @@ ul.eq{margin:0;padding-left:16px;font-size:13px;line-height:1.7}ul.warnl li::mar
 </div>
 </section>
 <section class="view" id="v-concept"><div class="cwrap">
-  <aside class="panel clistp"><h3>콘셉트 고르기</h3><p class="desc">고른 뒤 색을 바꿔 우리 매장 보드로 만들 수 있어요.</p><div id="clist"></div></aside>
+  <aside class="panel clistp"><h3>콘셉트 고르기</h3><p class="desc">스타일로 거르거나 재료·분위기로 검색하세요.</p><input id="cq" class="cq" type="search" placeholder="예: 원목, 대리석, 시니어, 디저트"><div id="cgroups" class="cgroups"></div><div id="clist"></div></aside>
   <div id="cboard" class="report"></div>
 </div></section>
 <section class="view" id="v-dict"><div class="dict">
@@ -1288,8 +1295,135 @@ const CONCEPTS=[
   mats:[["M-01","상판","블랙 세라믹","marble","top","12T · 무광 · 내열"],["M-02","카운터 전면","다크 플루티드 패널","fluted","front","무광 · 지문 방지"],["M-03","포인트","브러시드 황동","brass","accent","상·하부 라인 몰딩"],["M-04","바닥","다크 그레이 포세린","concrete","floor","600×600 · 무광"],["M-05","가구","스모크 월넛","wood","metal","선반 · 의자"],["M-06","벽","차콜 수성 도장","paint","wall","무광 · 일부 템바보드"]],
   light:[["바 작업면","3000K","Ra 90+","500 lx 이상","작업면 집중 스포트"],["객석","2700K","Ra 90+","100~150 lx","저조도 펜던트"],["카운터 하부","2700K","—","—","간접 라인 LED"]],
   equip:["블랙 머신 + 황동·구리 포인트","장비 상판 조명으로 반사광 연출","무광 블랙 소품으로 통일"],
-  tips:["어두워도 작업면은 500lx 이상 — 사고와 실수를 줄여요","먼지·지문이 잘 보이니 무광·지문 방지 마감으로"]}
+  tips:["어두워도 작업면은 500lx 이상 — 사고와 실수를 줄여요","먼지·지문이 잘 보이니 무광·지문 방지 마감으로"]},
+ {id:"japandi",name:"재팬디",en:"Japandi",group:"내추럴",kw:["Wabi-sabi","Ash","Calm","Craft"],
+  statement:"일본의 절제와 북유럽의 실용을 섞은 바. 밝은 애쉬와 먹색을 대비시키고 장식을 덜어 내어, 손으로 만든 도구와 커피 한 잔에 시선이 머물게 합니다.",
+  fit:"핸드드립 · 스페셜티 · 조용한 동네",
+  pal:{wall:"#EDE8E0",front:"#C8B49A",top:"#E3D9CB",accent:"#3E3A36",floor:"#B9A992",metal:"#7D6E5D"},
+  colors:[["Rice Paper","wall",55,"벽 · 천장"],["Ash Slat","front",18,"카운터 전면"],["Pale Oak","top",12,"상판 · 선반"],["Sumi Ink","accent",10,"포인트 · 금속"],["Walnut","metal",5,"가구"]],
+  mats:[["M-01","상판","화이트 애쉬 원목","oak","top","30T · 무광 오일 · 물 구간 SUS"],["M-02","카운터 전면","오크 수직 슬랫","fluted","front","슬랫 30mm · 간격 10mm"],["M-03","포인트","먹색 무광 도장","paint","accent","선반 브래킷 · 사인"],["M-04","바닥","마이크로 시멘트","concrete","floor","3mm · 무광 · 이음 없음"],["M-05","가구","월넛 원목","wood","metal","의자 · 벤치"],["M-06","벽","한지 질감 도장","paint","wall","미장 롤러 · 무광"]],
+  light:[["바 작업면","3000K","Ra 90+","500 lx","선반 하부 LED"],["객석","2700K","Ra 90+","150~200 lx","종이 갓 펜던트"],["드립 바","3000K","Ra 95","600 lx","핀 스포트"]],
+  equip:["화이트·블랙 무광 머신","도자기 드리퍼·서버 진열","장비 수를 줄이고 수납 안으로"],
+  ff:["낮은 원목 벤치","종이 갓 펜던트","도자기 컵·드리퍼"],
+  tips:["장식을 빼는 콘셉트라 수납이 부족하면 금방 어수선해져요 — 닫힌 수납 확보","애쉬 상판은 물·커피 얼룩에 약하니 머신 구간은 스테인리스"]},
+ {id:"scandi",name:"스칸디나비안",en:"Scandinavian",group:"미니멀",kw:["Hygge","Bright","Soft blue","Birch"],
+  statement:"밝은 자작나무와 부드러운 블루 그레이로 따뜻한 겨울 오후 같은 바. 빛을 최대한 반사시키는 밝은 면으로 작은 매장도 환하게 만듭니다.",
+  fit:"주거 상권 · 브런치 · 가족 손님",
+  pal:{wall:"#F7F6F3",front:"#E9E4DC",top:"#D8C3A5",accent:"#8BA6B8",floor:"#CDBBA0",metal:"#BFC3C7"},
+  colors:[["Snow","wall",55,"벽 · 천장"],["Oat","front",18,"카운터 전면"],["Birch","top",12,"상판 · 가구"],["Fjord Blue","accent",10,"패브릭 · 타일"],["Light Steel","metal",5,"금속"]],
+  mats:[["M-01","상판","자작나무 합판 + HPL","oak","top","18T · 엣지 노출 · 무광"],["M-02","카운터 전면","오트 컬러 무광 도장","paint","front","하부 150mm 진한 걸레받이"],["M-03","포인트","블루 그레이 타일","tile","accent","백월 · 75×300"],["M-04","바닥","라이트 오크 데코타일","wood","floor","3T"],["M-05","금속","라이트 스틸","steel","metal","손잡이 · 조명"],["M-06","벽","스노우 화이트 도장","paint","wall","무광"]],
+  light:[["바 작업면","4000K","Ra 90+","500 lx","라인 LED"],["객석","3000K","Ra 90+","250 lx","화이트 펜던트"],["창가","—","—","—","자연광 + 리넨 커튼"]],
+  equip:["화이트·라이트 그레이 머신","자작나무 트레이·소품","파스텔 블루 컵 포인트"],
+  ff:["자작나무 의자","울 쿠션 · 리넨 커튼","화이트 돔 펜던트"],
+  tips:["밝은 면이 많아 손때가 잘 보여요 — 하부는 진한 색으로","블루는 차갑게 보일 수 있으니 전구색 조명과 같이 쓰세요"]},
+ {id:"gallery",name:"갤러리 화이트큐브",en:"Gallery White Cube",group:"미니멀",kw:["Gallery","Monolith","Concrete","Art"],
+  statement:"전시장처럼 비워 낸 흰 공간에 덩어리 하나로 서 있는 바. 장비와 음료를 작품처럼 조명하고, 나머지는 모두 배경이 되도록 정리합니다.",
+  fit:"플래그십 · 브랜드 쇼룸 · 갤러리 카페",
+  pal:{wall:"#FFFFFF",front:"#EEEEEC",top:"#CFCFCC",accent:"#111111",floor:"#BDBDBA",metal:"#9AA0A6"},
+  colors:[["Gallery White","wall",60,"벽 · 천장"],["Monolith","front",15,"카운터 전면"],["Polished Floor","floor",12,"바닥"],["Concrete Top","top",8,"상판"],["Black","accent",5,"사인 · 디테일"]],
+  mats:[["M-01","상판","콘크리트 질감 세라믹","concrete","top","12T · 무광"],["M-02","카운터 전면","모놀리스 도장 (이음 없음)","paint","front","무광 · 모서리 무몰딩"],["M-03","바닥","폴리싱 콘크리트","concrete","floor","반광"],["M-04","포인트","블랙 스틸 디테일","blacksteel","accent","사인 · 선반 1개"],["M-05","금속","스테인리스 헤어라인","steel","metal","싱크 · 머신 구간"],["M-06","벽","갤러리 화이트 도장","paint","wall","무광 · 매입 조명 레일"]],
+  light:[["바 작업면","4000K","Ra 95","700 lx","트랙 스포트 집중"],["객석","3500K","Ra 90+","300 lx","매입 레일 스포트"],["전시·진열","4000K","Ra 95","1000 lx","줌 스포트"]],
+  equip:["장비 1대를 작품처럼 단독 조명","전선·배관 완전 매립","컵·도구는 닫힌 수납"],
+  ff:["모듈형 벤치","트랙 조명 레일","작품 · 굿즈 진열대"],
+  tips:["작은 얼룩도 잘 보여요 — 매일 정리 루틴 필요","비어 보이면 차가워요 — 따뜻한 음료 연출과 직원 동선이 보이게"]},
+ {id:"terracotta",name:"테라코타 웜",en:"Terracotta Earth",group:"내추럴",kw:["Earth","Curve","Plaster","Sun"],
+  statement:"흙빛 미장과 둥근 곡면으로 햇볕 든 남쪽 마을 같은 바. 손으로 바른 질감과 라임스톤 상판이 부드럽고 따뜻한 인상을 만듭니다.",
+  fit:"브런치 · 디저트 · 교외 매장",
+  pal:{wall:"#E9D8C4",front:"#C27D5A",top:"#E6D3BC",accent:"#6E7F5C",floor:"#B9876A",metal:"#8B6A4E"},
+  colors:[["Sand Plaster","wall",50,"벽 · 천장"],["Terracotta","front",20,"카운터 전면"],["Limestone","top",15,"상판"],["Sage","accent",8,"식물 · 패브릭"],["Clay Wood","metal",7,"가구"]],
+  mats:[["M-01","상판","라임스톤 질감 세라믹","marble","top","12T · 무광 · 라운드 엣지"],["M-02","카운터 전면","테라코타 미장 곡면","concrete","front","R 300 이상 곡면"],["M-03","바닥","테라코타 타일","tile","floor","200×200 · 무광"],["M-04","포인트","세이지 패브릭","paint","accent","쿠션 · 커튼"],["M-05","가구","오일 마감 원목","wood","metal","테이블 · 선반"],["M-06","벽","샌드 미장","concrete","wall","손미장 · 무광"]],
+  light:[["바 작업면","3000K","Ra 90+","500 lx","선반 하부 LED"],["객석","2700K","Ra 90+","200 lx","라탄 · 패브릭 펜던트"],["벽 질감","2700K","—","—","벽 워셔 간접"]],
+  equip:["크림·베이지 머신","도자기·라탄 소품","곡면 카운터에 맞춘 장비 배치 여유"],
+  ff:["둥근 등받이 의자","라탄 펜던트","올리브 나무"],
+  tips:["미장 곡면은 시공비·기간이 늘어요 — 곡면은 카운터 모서리만","흙빛 바닥은 밝은 우유 얼룩이 보이니 줄눈은 진한 색"]},
+ {id:"tech",name:"스테인리스 테크",en:"Stainless Tech",group:"인더스트리얼·모던",kw:["Precision","Lab","Steel","Future"],
+  statement:"실험실처럼 정밀한 스테인리스 바. 금속과 유리, 차가운 빛으로 추출 과정 자체를 보여 주며 기술과 일관성을 강조합니다.",
+  fit:"스페셜티 · 무인·자동화 · 오피스 상권",
+  pal:{wall:"#E6E8EA",front:"#C9CCCF",top:"#B9BCBF",accent:"#3D6BFF",floor:"#9EA3A8",metal:"#6F757B"},
+  colors:[["Lab Gray","wall",50,"벽 · 천장"],["Brushed Steel","front",20,"카운터 전면"],["Steel Top","top",12,"상판"],["Graphite","metal",10,"장비 · 프레임"],["Signal Blue","accent",8,"사인 · 라인 조명"]],
+  mats:[["M-01","상판","스테인리스 일체형","steel","top","SUS304 1.5T · 싱크 일체"],["M-02","카운터 전면","헤어라인 스테인리스 패널","steel","front","1.2T · 지문 방지"],["M-03","바닥","에폭시 라이트 그레이","concrete","floor","3mm · 무광"],["M-04","포인트","시그널 블루 라인","paint","accent","라인 조명 · 사인"],["M-05","금속","그래파이트 분체도장","blacksteel","metal","프레임 · 선반"],["M-06","벽","라이트 그레이 도장","paint","wall","무광 · 타공판 일부"]],
+  light:[["바 작업면","5000K","Ra 90+","750 lx","라인 LED"],["객석","4000K","Ra 90+","300 lx","매입 다운라이트"],["포인트","—","—","—","블루 라인 LED"]],
+  equip:["스테인리스 머신 · 오토스팀 · 자동 템핑","디지털 저울·계량 장비 노출","키오스크 · 픽업 표시판"],
+  ff:["스테인리스 하이 테이블","타공판 진열","픽업 알림 디스플레이"],
+  tips:["금속 면이 많아 차갑고 소리가 울려요 — 객석은 패브릭·흡음재로 보완","5000K는 음료가 창백해 보일 수 있어 객석은 4000K 이하"]},
+ {id:"organic",name:"오가닉 커브",en:"Organic Curve",group:"인더스트리얼·모던",kw:["Curve","Soft","Plaster","Arch"],
+  statement:"모서리를 모두 둥글린 부드러운 바. 아치와 곡면, 은은한 미장 질감으로 사진 속에서도 편안하게 보이는 공간을 만듭니다.",
+  fit:"디저트 · SNS 상권 · 여성 고객",
+  pal:{wall:"#F3EEE8",front:"#E6DDD3",top:"#F6F2EC",accent:"#C9A27A",floor:"#DCD3C8",metal:"#BFB6AA"},
+  colors:[["Cloud Plaster","wall",55,"벽 · 천장"],["Soft Stone","front",18,"카운터 전면 곡면"],["Ivory Top","top",12,"상판"],["Caramel","accent",10,"가구 · 소품"],["Pebble","metal",5,"금속 · 조명"]],
+  mats:[["M-01","상판","아이보리 인조대리석 라운드","marble","top","12T · R50 엣지"],["M-02","카운터 전면","곡면 미장","concrete","front","R 400 · 무광"],["M-03","포인트","카라멜 우드 아치","oak","accent","선반 · 문틀 아치"],["M-04","바닥","아이보리 포세린","concrete","floor","600×600 무광"],["M-05","금속","샴페인 골드","brass","metal","손잡이 · 조명"],["M-06","벽","클라우드 미장","concrete","wall","무광 미장"]],
+  light:[["바 작업면","3500K","Ra 90+","500 lx","곡면 상부 간접"],["객석","3000K","Ra 90+","250 lx","구형 펜던트"],["아치","3000K","—","—","아치 내부 간접"]],
+  equip:["크림·화이트 머신","둥근 형태 소품","장비 모서리 가림 곡면 패널"],
+  ff:["구형 펜던트","곡면 소파 · 원형 테이블","아치 거울"],
+  tips:["곡면 카운터는 장비 배치 폭이 줄어요 — 직선 구간에 장비 집중","밝은 미장은 오염이 보이니 하부 300mm는 진한 몰딩"]},
+ {id:"midcentury",name:"미드센추리 모던",en:"Mid-Century Modern",group:"빈티지·클래식",kw:["Teak","Mustard","Graphic","60s"],
+  statement:"티크 원목과 머스터드, 딥 틸이 어우러진 1960년대 감성의 바. 기하학 패턴과 다리 가는 가구로 경쾌하면서도 품격 있는 분위기를 만듭니다.",
+  fit:"디자인 카페 · 레코드·북 카페",
+  pal:{wall:"#EFE7DA",front:"#8A5A3B",top:"#F3EEE6",accent:"#D9A13B",floor:"#6E5A48",metal:"#2E5E57"},
+  colors:[["Warm Ivory","wall",50,"벽 · 천장"],["Teak","front",20,"카운터 전면 · 가구"],["Ivory Top","top",12,"상판"],["Mustard","accent",10,"패브릭 · 사인"],["Deep Teal","metal",8,"포인트 벽 · 타일"]],
+  mats:[["M-01","상판","아이보리 인조대리석","marble","top","12T · 무광"],["M-02","카운터 전면","티크 무늬목 슬랫","fluted","front","슬랫 40mm"],["M-03","포인트","머스터드 패브릭","paint","accent","의자 · 쿠션"],["M-04","바닥","다크 오크 헤링본","wood","floor","3T"],["M-05","포인트 벽","딥 틸 타일","tile","metal","백월 일부"],["M-06","벽","웜 아이보리 도장","paint","wall","무광"]],
+  light:[["바 작업면","3000K","Ra 90+","500 lx","선반 하부 LED"],["객석","2700K","Ra 90+","200 lx","스푸트닉·글로브 펜던트"],["진열","3000K","Ra 90+","500 lx","스포트"]],
+  equip:["블랙·크림 머신","레트로 그라인더","월넛·티크 도구 손잡이"],
+  ff:["가는 다리 라운지 체어","글로브 펜던트","레코드 플레이어 · 포스터"],
+  tips:["색이 많아지기 쉬워요 — 머스터드·틸 외 추가 색은 피하세요","티크 무늬목은 직사광선에 바래요 — 창가 쪽은 UV 필름"]},
+ {id:"bistro",name:"프렌치 비스트로",en:"French Bistro",group:"빈티지·클래식",kw:["Marble","Forest green","Brass","Classic"],
+  statement:"흰 대리석 상판과 포레스트 그린, 황동 레일이 어우러진 파리 골목의 바. 흑백 체커 바닥과 클래식 몰딩으로 오래된 단골집 같은 품격을 냅니다.",
+  fit:"디저트 · 와인 겸업 · 도심 상권",
+  pal:{wall:"#F2EDE3",front:"#1F3A2E",top:"#EAE7E2",accent:"#B08D57",floor:"#2B2B2B",metal:"#B08D57"},
+  colors:[["Parisian Cream","wall",50,"벽 · 천장"],["Forest Green","front",20,"카운터 전면 · 몰딩"],["Carrara","top",13,"상판"],["Black & White","floor",10,"체커 바닥"],["Brass","accent",7,"레일 · 조명"]],
+  mats:[["M-01","상판","카라라풍 화이트 대리석","marble","top","20T · 혼드 마감"],["M-02","카운터 전면","포레스트 그린 몰딩 패널","paint","front","클래식 프레임 몰딩"],["M-03","포인트","황동 발 받침 레일","brass","accent","카운터 하부"],["M-04","바닥","흑백 체커 타일","checker","floor","300×300"],["M-05","금속","황동 조명 · 손잡이","brass","metal","무광 황동"],["M-06","벽","파리지앵 크림 도장","paint","wall","상부 거울 · 하부 웨인스코팅"]],
+  light:[["바 작업면","3000K","Ra 90+","500 lx","선반 하부 LED"],["객석","2700K","Ra 90+","200 lx","황동 벽등 · 글로브"],["진열","3000K","Ra 90+","600 lx","케이크 쇼케이스 조명"]],
+  equip:["크림·블랙 머신 + 황동 포인트","대리석 위 유리 돔 디저트","클래식 레버 그라인더 진열"],
+  ff:["토넷 의자 · 대리석 원형 테이블","황동 벽등","칠판 메뉴 · 거울"],
+  tips:["천연 대리석은 산(레몬·커피)에 얼룩져요 — 인조 대리석이나 코팅 필수","체커 바닥은 공간이 좁아 보일 수 있어 대각선 시공 검토"]},
+ {id:"bookcafe",name:"코지 북카페",en:"Cozy Library",group:"빈티지·클래식",kw:["Library","Mahogany","Green","Quiet"],
+  statement:"마호가니 책장과 라이브러리 그린으로 오래 머무는 서재 같은 바. 낮은 조도와 따뜻한 나무로 조용히 일하고 읽는 손님을 맞습니다.",
+  fit:"오래 머무는 손님 · 대학가 · 스터디",
+  pal:{wall:"#E8DFD2",front:"#5A3A2A",top:"#6B4A35",accent:"#2F4A3A",floor:"#7A5A40",metal:"#B08D57"},
+  colors:[["Parchment","wall",45,"벽 · 천장"],["Mahogany","front",22,"카운터 · 책장"],["Library Green","accent",15,"포인트 벽 · 패브릭"],["Dark Oak","top",10,"상판"],["Old Brass","metal",8,"조명 · 손잡이"]],
+  mats:[["M-01","상판","다크 오크 원목","wood","top","40T · 우레탄 · 물 구간 SUS"],["M-02","카운터 전면","마호가니 패널","wood","front","프레임 몰딩"],["M-03","포인트","라이브러리 그린 도장","paint","accent","책장 뒤 벽"],["M-04","바닥","오크 헤링본","wood","floor","3T"],["M-05","금속","올드 브라스","brass","metal","뱅커 램프 · 손잡이"],["M-06","벽","파치먼트 도장","paint","wall","무광"]],
+  light:[["바 작업면","3000K","Ra 90+","500 lx","선반 하부 LED"],["객석","2700K","Ra 90+","300 lx (책상면)","뱅커 램프 · 테이블 조명"],["책장","2700K","—","—","선반 간접 LED"]],
+  equip:["블랙·브라스 머신","구리 주전자 · 드립 도구","콘센트 많은 좌석 계획"],
+  ff:["가죽 암체어","책장 · 사다리","뱅커 램프"],
+  tips:["어두운 마감은 공간이 좁아 보여요 — 천장은 밝게","오래 앉는 손님이 많으니 좌석별 콘센트·조명 필수"]},
+ {id:"korean",name:"코리안 모던",en:"Korean Modern Hanok",group:"로컬·에스닉",kw:["Hanok","Hanji","Pine","Quiet"],
+  statement:"한지의 은은한 빛과 소나무, 먹색 철물로 풀어낸 현대 한옥 바. 살대 패턴과 낮은 조도로 차분하고 정갈한 한국적 쉼을 만듭니다.",
+  fit:"관광 상권 · 전통 음료 · 시니어 운영",
+  pal:{wall:"#F1EBE0",front:"#5B4636",top:"#CBB89A",accent:"#9C3D2E",floor:"#8F7A63",metal:"#2F2F2F"},
+  colors:[["Hanji","wall",55,"벽 · 천장"],["Deep Pine","front",18,"카운터 전면 · 살대"],["Pine Top","top",12,"상판"],["Ink Iron","metal",8,"철물 · 조명"],["Dancheong Red","accent",7,"포인트 소품"]],
+  mats:[["M-01","상판","소나무 원목","oak","top","40T · 오일 · 물 구간 SUS"],["M-02","카운터 전면","짙은 목재 살대","fluted","front","살대 20mm · 격자 일부"],["M-03","포인트","주홍 칠 소품","paint","accent","찻잔 · 방석"],["M-04","바닥","콩댐 느낌 장판 · 마루","wood","floor","따뜻한 황갈색"],["M-05","금속","먹색 무쇠 철물","blacksteel","metal","조명 · 경첩"],["M-06","벽","한지 벽지 · 한지 조명","paint","wall","창호지 질감"]],
+  light:[["바 작업면","3000K","Ra 90+","500 lx","선반 하부 LED"],["객석","2700K","Ra 90+","150~200 lx","한지 등"],["창호","2700K","—","—","창호 뒤 간접"]],
+  equip:["블랙·우드 머신 또는 숨김 배치","전통차용 온수기 · 다기 진열","버튼식 장비로 조작 단순하게"],
+  ff:["좌식·입식 겸용 평상","한지 등","도자기 다기"],
+  tips:["한지는 습기·커피 얼룩에 약해요 — 바 주변은 한지 질감 패널로 대체","전통 요소를 과하게 쓰면 관광지처럼 보여요 — 2~3가지 요소만"]},
+ {id:"mediterranean",name:"지중해",en:"Mediterranean",group:"로컬·에스닉",kw:["Lime wash","Aegean","Travertine","Sun"],
+  statement:"석회 벽과 트래버틴, 에게해 블루 타일로 바다 마을의 햇살을 옮긴 바. 거친 흰 벽에 파란 포인트를 더해 밝고 시원한 인상을 줍니다.",
+  fit:"여름 음료 · 바닷가 · 브런치",
+  pal:{wall:"#F6F1E7",front:"#E8DCC8",top:"#D4C4A8",accent:"#2F5D8A",floor:"#C68A63",metal:"#B8A27A"},
+  colors:[["Lime White","wall",55,"벽 · 천장"],["Stucco","front",15,"카운터 전면"],["Travertine","top",12,"상판"],["Aegean Blue","accent",10,"타일 · 패브릭"],["Terracotta","floor",8,"바닥"]],
+  mats:[["M-01","상판","트래버틴 질감 세라믹","marble","top","12T · 무광"],["M-02","카운터 전면","스터코 미장","concrete","front","거친 손미장"],["M-03","포인트","에게해 블루 타일","tile","accent","카운터 상단 띠 · 백월"],["M-04","바닥","테라코타 타일","tile","floor","200×200"],["M-05","소품","라탄 · 마","rattan","metal","조명갓 · 매트"],["M-06","벽","라임 워시","paint","wall","석회 질감"]],
+  light:[["바 작업면","3500K","Ra 90+","500 lx","선반 하부 LED"],["객석","3000K","Ra 90+","250 lx","라탄 펜던트"],["창가","—","—","—","자연광 + 리넨 차양"]],
+  equip:["화이트·크림 머신","블루 컵 · 라탄 트레이","에이드·아이스 음료 진열 쇼케이스"],
+  ff:["라탄 의자","블루 스트라이프 쿠션","올리브·레몬 나무"],
+  tips:["블루를 넓게 쓰면 차가워요 — 포인트 10% 안으로","라임 워시 벽은 손이 닿는 높이에 발수 코팅"]},
+ {id:"brutal",name:"브루탈 모노",en:"Brutalist Mono",group:"인더스트리얼·모던",kw:["Monolith","Raw","Grey","Sculptural"],
+  statement:"거대한 콘크리트 덩어리 하나로 만든 조각 같은 바. 색을 빼고 질감과 빛만 남겨, 작은 장비와 사람의 움직임이 극적으로 보이게 합니다.",
+  fit:"플래그십 · 디자인 상권 · 대형 매장",
+  pal:{wall:"#9E9B96",front:"#8C8984",top:"#77746F",accent:"#E9E6E1",floor:"#6F6C68",metal:"#2A2A2A"},
+  colors:[["Raw Concrete","wall",45,"벽 · 천장"],["Monolith","front",25,"카운터 전면"],["Dark Slab","top",12,"상판"],["Bone","accent",10,"사인 · 컵"],["Iron","metal",8,"금속"]],
+  mats:[["M-01","상판","현장 타설 콘크리트","concrete","top","50T · 발수 코팅"],["M-02","카운터 전면","콘크리트 덩어리","concrete","front","거푸집 자국 노출"],["M-03","바닥","다크 폴리싱 콘크리트","concrete","floor","반광"],["M-04","포인트","본 화이트 세라믹","paint","accent","컵 · 사인"],["M-05","금속","흑철","blacksteel","metal","선반 · 손잡이"],["M-06","벽","노출 콘크리트","concrete","wall","원면 · 발수"]],
+  light:[["바 작업면","4000K","Ra 90+","600 lx","슬릿 스포트"],["객석","3000K","Ra 90+","150 lx","간접 · 벽 워셔"],["조형","3000K","—","—","그레이징 조명"]],
+  equip:["스테인리스·블랙 머신","장비 수 최소화","도구는 매립 수납"],
+  ff:["콘크리트 벤치","슬릿 조명","대형 화분 1점"],
+  tips:["타설 상판은 무겁고 균열이 생길 수 있어요 — 하부 구조 보강","색이 없어 차가워요 — 따뜻한 조명과 목재 소품 1~2개로 균형"]}
+
 ];
+const CGROUP0={minimal:"미니멀",wood:"내추럴",industrial:"인더스트리얼·모던",retro:"빈티지·클래식",botanical:"내추럴",dark:"인더스트리얼·모던"};
+const CFF0={minimal:["화이트 스툴 · 얇은 금속 다리 테이블","라인 펜던트","유리 진열 큐브"],wood:["원목 벤치 · 체어","패브릭 쿠션","드라이 플라워"],industrial:["철제 하이 체어","에디슨 펜던트","로스터 · 생두 자루 연출"],retro:["비닐 레더 스툴","유리갓 펜던트","네온 사인 · 포스터"],botanical:["라탄 체어","행잉 플랜트","자연목 테이블"],dark:["블랙 가죽 스툴","황동 펜던트","유리 돔 디저트 진열"]};
+CONCEPTS.forEach(c=>{c.group=c.group||CGROUP0[c.id]; c.ff=c.ff||CFF0[c.id]||[];});
+const CGROUPS=["전체","미니멀","내추럴","인더스트리얼·모던","빈티지·클래식","로컬·에스닉"];
+let CFILT="전체", CQ="";
+function lrv(hex){ return Math.round(rgbOf(hex).map(v=>{v/=255; return v<=0.04045?v/12.92:Math.pow((v+0.055)/1.055,2.4);}).reduce((a,v,i)=>a+v*[0.2126,0.7152,0.0722][i],0)*100); }
 let CONCEPT=null, CONCEPT_APPLIED=false, CPROJ="";
 function kelvinColor(k){ return k<=2700?"#FFC27A":k<=3000?"#FFD196":k<=3500?"#FFE2B8":"#FFF4DE"; }
 function shade(hex,amt){ const n=parseInt(hex.slice(1),16); let r=(n>>16)+amt,g=((n>>8)&255)+amt,b=(n&255)+amt; r=Math.max(0,Math.min(255,r));g=Math.max(0,Math.min(255,g));b=Math.max(0,Math.min(255,b)); return "#"+((1<<24)+(r<<16)+(g<<8)+b).toString(16).slice(1); }
@@ -1303,7 +1437,7 @@ function texture(id,kind,color,k=1){
   const base=`<rect width="${S}" height="${S}" fill="${color}"/>`, over=`<rect width="${S}" height="${S}" filter="url(#${id}-f)"/>`;
   let f="",inner="";
   if(kind==="wood"||kind==="oak"){ f=noise(0.004,0.09,4,1.6,-0.55,"fractalNoise",7); inner=base+over; }
-  else if(kind==="concrete"){ f=noise(0.5,0.5,3,0.9,-0.25,"fractalNoise",11); inner=base+over+`<rect width="${S}" height="${S}" fill="${shade(color,-12)}" opacity=".25" filter="url(#${id}-f2)"/>`; f+=`<filter id="${id}-f2" x="0" y="0" width="100%" height="100%" filterUnits="userSpaceOnUse"><feTurbulence type="fractalNoise" baseFrequency="${0.02/k}" numOctaves="2" seed="5" stitchTiles="stitch"/><feColorMatrix type="matrix" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 1.4 0 0 0 -0.5"/></filter>`; }
+  else if(kind==="concrete"){ f=noise(0.5,0.5,3,0.9,-0.25,"fractalNoise",11); inner=base+over+`<rect width="${S}" height="${S}" fill="${shade(color,-12)}" opacity=".12" filter="url(#${id}-f2)"/>`; f+=`<filter id="${id}-f2" x="0" y="0" width="100%" height="100%" filterUnits="userSpaceOnUse"><feTurbulence type="fractalNoise" baseFrequency="${0.02/k}" numOctaves="2" seed="5" stitchTiles="stitch"/><feColorMatrix type="matrix" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 1.4 0 0 0 -0.5"/></filter>`; }
   else if(kind==="marble"){ f=noise(0.012,0.02,5,-4,1.25,"turbulence",4); inner=base+over; }
   else if(kind==="steel"){ f=noise(0.002,0.7,2,1.0,-0.35,"fractalNoise",9); inner=base+over+`<rect width="${S}" height="${S}" fill="url(#${id}-g)"/>`; f+=`<linearGradient id="${id}-g" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#fff" stop-opacity=".35"/><stop offset=".5" stop-color="#fff" stop-opacity="0"/><stop offset="1" stop-color="#fff" stop-opacity=".2"/></linearGradient>`; }
   else if(kind==="brass"){ f=noise(0.002,0.7,2,0.8,-0.3,"fractalNoise",9)+`<linearGradient id="${id}-g" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#fff3c4" stop-opacity=".55"/><stop offset=".45" stop-color="#fff" stop-opacity="0"/><stop offset="1" stop-color="#7a5a20" stop-opacity=".35"/></linearGradient>`; inner=base+over+`<rect width="${S}" height="${S}" fill="url(#${id}-g)"/>`; }
@@ -1331,7 +1465,8 @@ function sceneSvg(c){
   const HH={espresso:540,grinder:600,autosteam:455,autotamp:286,hotwater:450,blender:450,pos:400,drip:420,showcase:700,dispenser:600,coldbrew:600};
   const machineDark=lum(mc)<0.35;
   const equip=items.map(it=>{ const h=(it.b.h||HH[it.b.id]||0)*sc*0.75; if(!h) return ""; const x=cx0+it.x*sc, w=Math.max(18,it.w*sc*0.86), xx=x+(it.w*sc-w)/2, y=topY-h;
-    const col=it.b.id==="espresso"||it.b.id==="grinder"||it.b.id==="autosteam"||it.b.id==="autotamp"?(c.id==="minimal"||c.id==="botanical"||c.id==="retro"?"#EDEBE7":c.id==="dark"||c.id==="wood"?"#1D1D1F":"#B7BBBF"):"#D9D9D9";
+    const EQC={minimal:"#EDEBE7",botanical:"#EDEBE7",retro:"#EDEBE7",scandi:"#EDEBE7",gallery:"#EDEBE7",organic:"#EDEBE7",mediterranean:"#EDEBE7",terracotta:"#EDEBE7",wood:"#1D1D1F",dark:"#1D1D1F",bookcafe:"#1D1D1F",japandi:"#1D1D1F",korean:"#1D1D1F",midcentury:"#1D1D1F",bistro:"#1D1D1F",industrial:"#B7BBBF",tech:"#B7BBBF",brutal:"#B7BBBF"};
+    const col=["espresso","grinder","autosteam","autotamp"].includes(it.b.id)?(EQC[c.id]||"#B7BBBF"):"#D9D9D9";
     let g=`<rect x="${xx+8}" y="${topY-6}" width="${w}" height="10" rx="5" fill="#000" opacity=".18" filter="url(#sh)"/>`;
     g+=`<rect x="${xx}" y="${y}" width="${w}" height="${h}" rx="${Math.min(10,w/6)}" fill="url(#eq-${col.slice(1)})" stroke="${shade(col,-50)}" stroke-width="1.5"/>`;
     if(it.b.id==="espresso"){ const n=Math.max(1,Math.round(it.w/300)); for(let i=0;i<n;i++){const gx=xx+w*(i+0.5)/n; g+=`<rect x="${gx-16}" y="${y+h*0.55}" width="32" height="10" rx="3" fill="#3a3a3a"/><rect x="${gx-28}" y="${y+h*0.62}" width="56" height="6" rx="3" fill="#222"/>`;} g+=`<rect x="${xx}" y="${y}" width="${w}" height="${h*0.16}" rx="6" fill="#fff" opacity=".18"/>`; }
@@ -1341,7 +1476,7 @@ function sceneSvg(c){
   const lampsX=[cx0+cw*0.2,cx0+cw*0.5,cx0+cw*0.8];
   const plant=c.id==="botanical"||c.id==="wood";
   return `<svg id="conceptsvg" viewBox="0 0 ${W} ${H}" xmlns="http://www.w3.org/2000/svg" font-family="Noto Sans KR, sans-serif">
-   <defs>${texture("s-wall",wallM[3],matColor(c,wallM),1.2)}${texture("s-front",fm[3],matColor(c,fm),0.9)}${texture("s-top",tm[3],matColor(c,tm),0.9)}${texture("s-floor",floorM[3],matColor(c,floorM),1.3)}
+   <defs>${texture("s-wall",wallM[3],matColor(c,wallM),wallM[3]==="concrete"?3:1.6)}${texture("s-front",fm[3],matColor(c,fm),0.9)}${texture("s-top",tm[3],matColor(c,tm),0.9)}${texture("s-floor",floorM[3],matColor(c,floorM),1.3)}
     <radialGradient id="glow"><stop offset="0" stop-color="${glow}" stop-opacity="${c.id==="dark"?0.55:0.4}"/><stop offset="1" stop-color="${glow}" stop-opacity="0"/></radialGradient>
     <linearGradient id="vign" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#000" stop-opacity="${c.id==="dark"?0.35:0.12}"/><stop offset=".55" stop-color="#000" stop-opacity="0"/></linearGradient>
     <linearGradient id="topshade" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#000" stop-opacity="0"/><stop offset="1" stop-color="#000" stop-opacity=".22"/></linearGradient>
@@ -1370,14 +1505,21 @@ function sceneSvg(c){
    ${c.id==="dark"?`<defs>${texture("s-brass","brass",c.pal.accent,0.6)}</defs><rect x="${cx0}" y="${topY+30}" width="${cw}" height="7" fill="url(#s-brass)"/><rect x="${cx0}" y="${topY+ch+23}" width="${cw}" height="7" fill="url(#s-brass)"/>`:""}
    ${c.id==="retro"?`<rect x="${cx0}" y="${topY+30}" width="${cw}" height="9" fill="${c.pal.accent}"/>`:""}
    <rect x="${cx0}" y="${topY+ch+30}" width="${cw}" height="10" fill="#000" opacity=".25" filter="url(#sh)"/>
+   ${(()=>{const dkb=lum(P.wall)<0.35; const call=(px,py,ly,code,txt)=>`<g><circle cx="${px}" cy="${py}" r="5" fill="${dkb?"#fff":"#111"}"/><polyline points="${px},${py} ${px+30},${ly} 1440,${ly}" fill="none" stroke="${dkb?"#fff":"#111"}" stroke-width="1.4"/><rect x="1440" y="${ly-22}" width="155" height="44" fill="${dkb?"#fff":"#111"}"/><text x="1450" y="${ly+8}" font-size="21" font-weight="700" fill="${dkb?"#111":"#fff"}">${code}</text><text x="1512" y="${ly+8}" font-size="19" fill="${dkb?"#111":"#fff"}">${txt}</text></g>`;
+     const code=role=>{const m=c.mats.find(x=>x[1]===role); return m?m[0]:"";};
+     return call(lampsX[2],200,150,"L-01",(c.light[1][1]||""))+call(cx0+cw-140,380,330,code("벽")||"M-06","벽")+call(cx0+cw-40,topY+14,560,code("상판"),"상판")+call(cx0+cw-40,topY+30+ch/2,680,code("카운터 전면"),"전면")+call(cx0+cw-40,topY+ch+80,800,code("바닥"),"바닥");})()}
   </svg>`;
 }
 function swatchSvg(c,m,i){ const col=matColor(c,m); return `<svg viewBox="0 0 240 240" xmlns="http://www.w3.org/2000/svg"><defs>${texture("sw"+i,m[3],col,1)}<linearGradient id="sw${i}-l" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#fff" stop-opacity=".18"/><stop offset=".6" stop-color="#fff" stop-opacity="0"/><stop offset="1" stop-color="#000" stop-opacity=".12"/></linearGradient></defs><rect width="240" height="240" fill="url(#sw${i})"/><rect width="240" height="240" fill="url(#sw${i}-l)"/></svg>`; }
 function renderConceptList(){
-  document.getElementById("clist").innerHTML=CONCEPTS.map(c=>`<button class="ccard ${CONCEPT&&CONCEPT.id===c.id?"on":""}" data-id="${c.id}">
+  const g=document.getElementById("cgroups");
+  if(g) { g.innerHTML=CGROUPS.map(x=>`<button class="${CFILT===x?"on":""}" data-g="${x}">${x}${x==="전체"?` ${CONCEPTS.length}`:` ${CONCEPTS.filter(c=>c.group===x).length}`}</button>`).join(""); g.querySelectorAll("button").forEach(b=>b.onclick=()=>{CFILT=b.dataset.g; renderConceptList();}); }
+  const q=CQ.trim().toLowerCase();
+  const list=CONCEPTS.filter(c=>(CFILT==="전체"||c.group===CFILT)&&(!q||[c.name,c.en,c.fit,c.group,...c.kw,...c.mats.map(m=>m[2])].join(" ").toLowerCase().includes(q)));
+  document.getElementById("clist").innerHTML=list.length?list.map(c=>`<button class="ccard ${CONCEPT&&CONCEPT.id===c.id?"on":""}" data-id="${c.id}">
     <span class="sw">${c.colors.map(x=>`<i style="background:${c.pal[x[1]]};flex:${x[2]}"></i>`).join("")}</span>
-    <b>${c.name}</b><small>${c.en} · ${c.fit.split(" · ")[0]}</small></button>`).join("");
-  document.querySelectorAll(".ccard").forEach(b=>b.onclick=()=>{const src=CONCEPTS.find(x=>x.id===b.dataset.id); CONCEPT=JSON.parse(JSON.stringify(src)); CONCEPT_APPLIED=false; renderConceptList(); renderConcept();});
+    <span class="cg">${c.group}</span><b>${c.name}</b><small>${c.en}</small><small class="cf">${c.fit}</small></button>`).join(""):`<p class="desc">맞는 콘셉트가 없어요.</p>`;
+  document.querySelectorAll(".ccard").forEach(b=>b.onclick=()=>{const src=CONCEPTS.find(x=>x.id===b.dataset.id); CONCEPT=JSON.parse(JSON.stringify(src)); CONCEPT_APPLIED=false; renderConceptList(); renderConcept(); document.getElementById("cboard").scrollIntoView({behavior:"smooth",block:"start"});});
 }
 function renderConcept(){
   const c=CONCEPT, el=document.getElementById("cboard");
@@ -1396,13 +1538,17 @@ function renderConcept(){
    </div>
    <div class="sec"><span class="lbl">MATERIALS</span>
      <div class="mats">${c.mats.map((m,i)=>`<div class="mat"><div class="mimg">${swatchSvg(c,m,i)}</div><span class="code">${m[0]} · ${m[1]}</span><b>${m[2]}</b><small>${m[5]}</small></div>`).join("")}</div></div>
+   <div class="sec"><span class="lbl">FINISH SCHEDULE <em>마감재 일람표</em></span>
+     <table class="spec fs"><thead><tr><th>코드</th><th>위치</th><th>자재</th><th>규격 · 마감</th><th>색상</th><th>LRV</th></tr></thead><tbody>${c.mats.map(m=>{const col=matColor(c,m);return `<tr><td><b>${m[0]}</b></td><td>${m[1]}</td><td>${m[2]}</td><td>${m[5]}</td><td><i class="kdot" style="background:${col};border-radius:2px"></i>${col.toUpperCase()}</td><td>${lrv(col)}</td></tr>`;}).join("")}
+     ${c.light.map((l,i)=>`<tr><td><b>L-0${i+1}</b></td><td>조명 · ${l[0]}</td><td>${l[4]}</td><td>${l[1]} · ${l[2]} · ${l[3]}</td><td><i class="kdot" style="background:${kelvinColor(+l[1].replace(/\D/g,"")||3000)}"></i>${l[1]}</td><td>—</td></tr>`).join("")}</tbody></table></div>
    <div class="brow3">
      <div class="sec"><span class="lbl">COLOR PALETTE <em>칩을 눌러 색 변경</em></span>
-       <div class="chips">${c.colors.map(x=>{const hx=c.pal[x[1]], [r,g,b]=rgbOf(hx); return `<label class="chip2"><input type="color" data-k="${x[1]}" value="${hx}"><span class="cc" style="background:${hx}"></span><b>${x[0]}</b><small class="hx">${hx.toUpperCase()} · RGB ${r} ${g} ${b}</small><small>${x[3]} · ${x[2]}%</small></label>`;}).join("")}</div></div>
+       <div class="chips">${c.colors.map(x=>{const hx=c.pal[x[1]], [r,g,b]=rgbOf(hx); return `<label class="chip2"><input type="color" data-k="${x[1]}" value="${hx}"><span class="cc" style="background:${hx}"></span><b>${x[0]}</b><small class="hx">${hx.toUpperCase()} · RGB ${r} ${g} ${b} · LRV ${lrv(hx)}</small><small>${x[3]} · ${x[2]}%</small></label>`;}).join("")}</div></div>
      <div class="sec"><span class="lbl">LIGHTING</span>
        <table class="spec"><thead><tr><th>구역</th><th>색온도</th><th>연색성</th><th>조도</th><th>기구</th></tr></thead><tbody>${c.light.map(l=>`<tr><td>${l[0]}</td><td><i class="kdot" style="background:${kelvinColor(+l[1].replace(/\D/g,"")||3000)}"></i>${l[1]}</td><td>${l[2]}</td><td>${l[3]}</td><td>${l[4]}</td></tr>`).join("")}</tbody></table>
        <span class="lbl" style="margin-top:14px">EQUIPMENT FINISH</span><ul class="eq">${c.equip.map(e=>`<li>${e}</li>`).join("")}</ul>
-       <span class="lbl" style="margin-top:14px">NOTE</span><ul class="eq warnl">${c.tips.map(e=>`<li>${e}</li>`).join("")}</ul></div>
+       <span class="lbl" style="margin-top:14px">FF&amp;E <em>가구 · 조명 · 소품</em></span><ul class="eq">${c.ff.map(e=>`<li>${e}</li>`).join("")}</ul>
+       <span class="lbl" style="margin-top:14px">NOTE</span><ul class="eq warnl">${conceptChecks(c).map(e=>`<li class="${e[0]}">${e[1]}</li>`).join("")}${c.tips.map(e=>`<li>${e}</li>`).join("")}</ul></div>
    </div>
    <div class="tblock"><span><em>PROJECT</em>${CPROJ||"—"}</span><span><em>CONCEPT</em>${c.name}</span><span><em>DATE</em>${ds}</span><span><em>REV</em>v1</span><span><em>BY</em>원클리어 · 장비찾기</span></div>
   </div>
@@ -1413,6 +1559,14 @@ function renderConcept(){
   document.getElementById("cpng").onclick=saveBoardPng;
   document.getElementById("cprint").onclick=()=>{try{window.print()}catch(e){cMsg("인쇄가 막혀 있어요. 브라우저 메뉴에서 인쇄해 주세요.")}};
 }
+function conceptChecks(c){
+  const out=[], L=k=>lrv(c.pal[k]);
+  const ff=Math.abs(L("front")-L("floor")), tf=Math.abs(L("top")-L("front"));
+  out.push(ff>=30?["ok",`카운터 전면과 바닥의 밝기 차이(LRV ${ff})가 충분해 카운터 경계가 잘 보여요.`]:["warn",`카운터 전면과 바닥의 밝기 차이가 LRV ${ff}로 작아요(권장 30 이상). 시니어·저시력 손님을 위해 걸레받이를 대비색으로 하세요.`]);
+  if(tf<15) out.push(["warn",`상판과 전면의 밝기 차이가 LRV ${tf}로 작아 경계가 흐려요. 상판 엣지에 대비 라인을 넣으세요.`]);
+  if(L("wall")<30) out.push(["warn",`벽 반사율이 LRV ${L("wall")}로 낮아 같은 밝기를 내려면 조명이 더 필요해요(작업면 조명 보강).`]);
+  return out;
+}
 function saveBoardPng(){
   if(!/github\.io$/.test(location.hostname)&&location.protocol!=="file:"){cMsg("이 화면에서는 파일 저장이 막혀 있어요. github.io 주소에서 저장하거나 화면을 캡처해 주세요.");return;}
   const sv=document.getElementById("conceptsvg"), img=new Image(); img.onload=()=>{const cv=document.createElement("canvas"); cv.width=1600; cv.height=900; cv.getContext("2d").drawImage(img,0,0); cv.toBlob(b=>{try{const a=document.createElement("a");a.href=URL.createObjectURL(b);a.download=`컨셉보드_${CONCEPT.name}.png`;document.body.appendChild(a);a.click();a.remove();cMsg("바 정면 이미지를 PNG로 저장했어요. 보드 전체는 인쇄(PDF 저장)를 이용하세요.");}catch(e){cMsg("저장이 막혀 있어요. 화면을 캡처해 주세요.");}});}; img.src="data:image/svg+xml;charset=utf-8,"+encodeURIComponent(new XMLSerializer().serializeToString(sv));
@@ -1421,6 +1575,7 @@ function cMsg(t){const m=document.getElementById("cmsg"); if(!m) return; m.textC
 // 바 설계 색 (콘셉트 적용 시)
 function barColors(){ if(!(CONCEPT&&CONCEPT_APPLIED)) return null; const c=CONCEPT, P=c.pal, fm=matOf(c,"카운터 전면"), tm=matOf(c,"상판");
   return {top:matColor(c,tm),front:matColor(c,fm),frontFill:"url(#bx-front)",wall:P.wall,floor:P.floor,accent:P.accent,defs:texture("bx-front",fm[3],matColor(c,fm),3)}; }
+document.getElementById("cq").oninput=e=>{CQ=e.target.value; renderConceptList();};
 renderConceptList(); renderConcept();
 </script>
 </body>
