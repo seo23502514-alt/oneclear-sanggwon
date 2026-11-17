@@ -248,7 +248,7 @@ ul.eq{margin:0;padding-left:16px;font-size:13px;line-height:1.7}ul.warnl li::mar
 table.fs td{font-size:12.5px}
 ul.warnl li.ok::marker{color:var(--ok)}
 .hviewbtns{display:flex;gap:4px;margin-bottom:8px}.hviewbtns button{font:inherit;font-size:12px;letter-spacing:.04em;padding:5px 10px;border:1px solid var(--line);background:#fff;border-radius:2px;cursor:pointer}.hviewbtns button.on{background:var(--ink);color:#fff;border-color:var(--ink)}
-.r3d{position:relative;width:100%;aspect-ratio:16/9;background:#1a1a1a;border-radius:2px;overflow:hidden;cursor:grab}.r3d canvas{display:block;width:100%!important;height:auto!important}
+.r3d{position:relative;width:100%;aspect-ratio:4/3;background:#1a1a1a;border-radius:2px;overflow:hidden;cursor:grab}.r3d canvas{display:block;width:100%!important;height:auto!important}
 .r3dload,.r3dfail{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;color:#ccc;font-size:13px}
 .hero .cap{bottom:8px}
 .ccard .rec{font-style:normal;color:var(--accent);font-weight:700;letter-spacing:0}
@@ -1435,7 +1435,7 @@ const CGROUPS=["전체","미니멀","내추럴","인더스트리얼·모던","�
 let CFILT="전체", CQ="";
 function lrv(hex){ return Math.round(rgbOf(hex).map(v=>{v/=255; return v<=0.04045?v/12.92:Math.pow((v+0.055)/1.055,2.4);}).reduce((a,v,i)=>a+v*[0.2126,0.7152,0.0722][i],0)*100); }
 let CONCEPT=null, CONCEPT_APPLIED=false, CPROJ="", HV="3d";
-window.CONCEPT_REF=()=>CONCEPT; window.BAR_REF=()=>(typeof BAR!=="undefined"?BAR:null); window.ELEV_REF=()=>elevOpts(); window.BAROPTS_REF=()=>barOpts(); window.FLEXW_REF=(l,len)=>flexW(l,len);
+window.CONCEPT_REF=()=>CONCEPT; window.BAR_REF=()=>(typeof BAR!=="undefined"?BAR:null); window.ELEV_REF=()=>elevOpts(); window.BAROPTS_REF=()=>barOpts(); window.FLEXW_REF=(l,len)=>flexW(l,len); window.CPROJ_REF=()=>CPROJ;
 function kelvinColor(k){ return k<=2700?"#FFC27A":k<=3000?"#FFD196":k<=3500?"#FFE2B8":"#FFF4DE"; }
 function shade(hex,amt){ const n=parseInt(hex.slice(1),16); let r=(n>>16)+amt,g=((n>>8)&255)+amt,b=(n&255)+amt; r=Math.max(0,Math.min(255,r));g=Math.max(0,Math.min(255,g));b=Math.max(0,Math.min(255,b)); return "#"+((1<<24)+(r<<16)+(g<<8)+b).toString(16).slice(1); }
 function rgbOf(hex){const n=parseInt(hex.slice(1),16); return [(n>>16)&255,(n>>8)&255,n&255];}
@@ -1566,7 +1566,7 @@ function renderConcept(){
    <div class="brow1">
      <div class="hero"><div class="hviewbtns"><button data-hv="3d" class="${HV==="3d"?"on":""}">실사 3D 렌더</button><button data-hv="il" class="${HV==="il"?"on":""}">일러스트 · 지시선</button></div>
        <div id="r3d" class="r3d" style="${HV==="3d"?"":"display:none"}"><div class="r3dload">3D 렌더 준비 중…</div></div><div id="ill" style="${HV==="il"?"":"display:none"}">${sceneSvg(c)}</div>
-       <span class="cap">${HV==="3d"?"3D RENDER · 드래그해서 돌려 보기 · 스크롤로 확대":"BAR ELEVATION"} · ${typeof BAR!=="undefined"&&BAR?"바 설계 치수 반영":"기본 배치 예시"}</span></div>
+       <span class="cap">${HV==="3d"?"STOREFRONT RENDER · 드래그해서 돌려 보기 · 스크롤로 확대":"BAR ELEVATION"} · ${typeof BAR!=="undefined"&&BAR?"바 설계 치수 반영":"기본 배치 예시"}</span></div>
      <div class="stmt"><span class="lbl">CONCEPT</span><p>${c.statement}</p>
        <span class="lbl">KEYWORDS</span><div class="kws">${c.kw.map(k=>`<span>${k}</span>`).join("")}</div>
        <span class="lbl">맞는 매장</span><p class="fit">${c.fit}</p>
@@ -1630,6 +1630,7 @@ import * as THREE from "three";
 import { OrbitControls } from "three/addons/controls/OrbitControls.js";
 import { RoomEnvironment } from "three/addons/environments/RoomEnvironment.js";
 import { RoundedBoxGeometry } from "three/addons/geometries/RoundedBoxGeometry.js";
+import { RectAreaLightUniformsLib } from "three/addons/lights/RectAreaLightUniformsLib.js";
 
 // ---------- 절차적 질감 ----------
 function hash(x,y,s){ let h=x*374761393+y*668265263+s*1442695040; h=(h^(h>>>13))*1274126177; return ((h^(h>>>16))>>>0)/4294967295; }
@@ -1643,7 +1644,7 @@ function makeTex(kind,color,alt){
   const N=512, cv=document.createElement("canvas"); cv.width=cv.height=N; const g=cv.getContext("2d"); const [R,G,B]=hexRGB(color);
   const px=(fn)=>{ const im=g.createImageData(N,N), d=im.data; for(let y=0;y<N;y++) for(let x=0;x<N;x++){ const m=fn(x,y), i=(y*N+x)*4; d[i]=Math.max(0,Math.min(255,R*m[0])); d[i+1]=Math.max(0,Math.min(255,G*m[1])); d[i+2]=Math.max(0,Math.min(255,B*m[2])); d[i+3]=255; } g.putImageData(im,0,0); };
   const k=(v)=>[v,v,v];
-  if(kind==="wood"||kind==="oak"){ px((x,y)=>{ const n=fbm(x/180,y/18,3,4); const ring=Math.sin((y/N*40+n*9)*Math.PI); const v=0.86+0.1*ring+0.12*(fbm(x/40,y/4,5,3)-0.5); return k(v); }); }
+  if(kind==="wood"||kind==="oak"){ px((x,y)=>{ const n=fbm(x/180,y/18,3,4); const ring=Math.sin((y/N*40+n*9)*Math.PI); const v=0.9+0.07*ring+0.08*(fbm(x/40,y/4,5,3)-0.5); return k(v); }); }
   else if(kind==="marble"){ px((x,y)=>{ const n=fbm(x/90,y/90,7,5); const vein=Math.pow(1-Math.abs(Math.sin((x+y)/N*6+n*8)),18); return k(1-0.45*vein-0.05*fbm(x/30,y/30,2,3)); }); }
   else if(kind==="concrete"){ px((x,y)=>{ const v=0.88+0.18*(fbm(x/60,y/60,11,5)-0.5)+0.08*(hash(x,y,3)-0.5); return k(v); }); for(let i=0;i<180;i++){ g.fillStyle=`rgba(0,0,0,${0.08+Math.random()*0.1})`; g.beginPath(); g.arc(Math.random()*N,Math.random()*N,0.6+Math.random()*1.6,0,7); g.fill(); } }
   else if(kind==="steel"||kind==="brass"){ const rows=new Float32Array(N).map((_,y)=>0.92+0.12*(hash(0,y,9)-0.5)); px((x,y)=>{ const v=rows[y]+0.05*(fbm(x/200,y/2,4,2)-0.5)+0.06*Math.sin(x/N*Math.PI); return kind==="brass"?[v*1.05,v,v*0.85]:k(v); }); }
@@ -1682,96 +1683,174 @@ const HH={espresso:540,grinder:600,autosteam:455,autotamp:286,hotwater:450,blend
 const DD={espresso:560,grinder:320,autosteam:370,autotamp:200,hotwater:420,blender:230,pos:300,drip:350,showcase:600,dispenser:400,coldbrew:350,induction:450,oven:500,waffle:400,sterilizer:450,ice:600,freezer:650};
 const FLOOR_H={ice:840,freezer:1850};
 function kColor(k){ const t=k/100; let r,g,b; if(t<=66){r=255; g=99.47*Math.log(t)-161.12; b=t<=19?0:138.52*Math.log(t-10)-305.04;} else {r=329.7*Math.pow(t-60,-0.133); g=288.1*Math.pow(t-60,-0.0755); b=255;} return new THREE.Color(Math.min(255,Math.max(0,r))/255,Math.min(255,Math.max(0,g))/255,Math.min(255,Math.max(0,b))/255); }
+function lumHex(h){ const [r,g,b]=hexRGB(h); return (0.299*r+0.587*g+0.114*b)/255; }
+function signTex(text,color){ const cv=document.createElement("canvas"); cv.width=1024; cv.height=256; const g=cv.getContext("2d"); g.clearRect(0,0,1024,256); g.fillStyle=color; g.font='600 120px "Noto Sans KR", "Apple SD Gothic Neo", sans-serif'; g.textBaseline="middle"; g.fillText(text,20,128); const t=new THREE.CanvasTexture(cv); t.colorSpace=THREE.SRGBColorSpace; t.anisotropy=8; return t; }
 
 function build(host){
   if(R){ R.dispose(); R=null; }
   const c=window.CONCEPT_REF&&window.CONCEPT_REF(); if(!c||!host) return;
   const bar=window.BAR_REF&&window.BAR_REF();
   const eo=window.ELEV_REF?window.ELEV_REF():{ch:850,lh:1100}, o=window.BAROPTS_REF?window.BAROPTS_REF():{fd:700,bd:600,aisle:1000};
+  const proj=(window.CPROJ_REF&&window.CPROJ_REF())||"";
   const mm=v=>v/1000;
-  const flen=mm(bar?bar.flen:4000)||4, blen=mm(bar?bar.blen:3500)||3.5, fd=mm(o.fd||700), bd=mm(o.bd||600), aisle=mm(o.aisle||1000), ch=mm(eo.ch||850), lh=mm(eo.lh||0);
-  const W=host.clientWidth||900, H=Math.round(W*9/16);
+  const flen=Math.max(1.5,mm(bar?bar.flen:4000)||4), blen=Math.max(1.5,mm(bar?bar.blen:3500)||3.5), fd=Math.max(0.45,mm(o.fd||700)), bd=Math.max(0.45,mm(o.bd||600)), aisle=Math.max(0.7,mm(o.aisle||1000)), ch=Math.max(0.7,mm(eo.ch||850));
+  const W=host.clientWidth||900, H=Math.round(W*3/4);
   const renderer=new THREE.WebGLRenderer({antialias:true,preserveDrawingBuffer:true});
   renderer.setPixelRatio(Math.min(2,window.devicePixelRatio||1)); renderer.setSize(W,H);
-  renderer.toneMapping=THREE.ACESFilmicToneMapping; renderer.outputColorSpace=THREE.SRGBColorSpace;
+  renderer.toneMapping=THREE.ACESFilmicToneMapping; renderer.outputColorSpace=THREE.SRGBColorSpace; renderer.toneMappingExposure=1.05;
   renderer.shadowMap.enabled=true; renderer.shadowMap.type=THREE.PCFSoftShadowMap;
-  const dark=["dark","bookcafe","brutal"].includes(c.id);
-  renderer.toneMappingExposure=dark?1.25:1.0;
   host.innerHTML=""; host.appendChild(renderer.domElement);
-  const scene=new THREE.Scene(); scene.background=new THREE.Color(0x111111);
-  const pm=new THREE.PMREMGenerator(renderer); scene.environment=pm.fromScene(new RoomEnvironment(),0.04).texture; scene.environmentIntensity=dark?0.45:0.55;
+  RectAreaLightUniformsLib.init();
+  const scene=new THREE.Scene(); scene.background=new THREE.Color(0x202124);
+  const pm=new THREE.PMREMGenerator(renderer); scene.environment=pm.fromScene(new RoomEnvironment(),0.04).texture; scene.environmentIntensity=0.5;
   const mats=c.mats, role=r=>mats.find(m=>m[1]===r), col=m=>c.pal[m[4]]||m[4];
   const topM=role("상판")||mats[0], frontM=role("카운터 전면")||mats[1], floorM=role("바닥")||mats[3], wallM=role("벽")||["","","","paint","wall"];
-  const roomW=Math.max(flen,blen)+3.2, frontZ=bd+aisle, roomD=frontZ+fd+4.5, roomH=3.0;
-  const add=(m)=>{ m.castShadow=true; m.receiveShadow=true; scene.add(m); return m; };
+  const woodM=mats.find(m=>["oak","wood"].includes(m[3])&&m[1]!=="바닥");
+  const add=(m,cast=true)=>{ m.castShadow=cast; m.receiveShadow=true; scene.add(m); return m; };
   const box=(w,h,d,mat,x,y,z,round=0)=>{ const geo=round?new RoundedBoxGeometry(w,h,d,4,round):new THREE.BoxGeometry(w,h,d); const m=new THREE.Mesh(geo,mat); m.position.set(x,y,z); return add(m); };
-  // 방
-  const floor=new THREE.Mesh(new THREE.PlaneGeometry(roomW,roomD),matFor(floorM[3],col(floorM),roomW,roomD,c.pal.wall)); floor.rotation.x=-Math.PI/2; floor.position.set(0,0,roomD/2-0.3); floor.receiveShadow=true; scene.add(floor);
-  const wallMat=matFor(wallM[3],col(wallM),roomW,roomH);
-  const back=new THREE.Mesh(new THREE.PlaneGeometry(roomW,roomH),wallMat); back.position.set(0,roomH/2,-0.3); back.receiveShadow=true; scene.add(back);
-  [-1,1].forEach(sd=>{ const w=new THREE.Mesh(new THREE.PlaneGeometry(roomD,roomH),matFor(wallM[3],col(wallM),roomD,roomH)); w.rotation.y=-sd*Math.PI/2; w.position.set(sd*roomW/2,roomH/2,roomD/2-0.3); w.receiveShadow=true; scene.add(w); });
-  const ceil=new THREE.Mesh(new THREE.PlaneGeometry(roomW,roomD),new THREE.MeshStandardMaterial({color:new THREE.Color(c.pal.wall).multiplyScalar(dark?0.5:0.85),roughness:1})); ceil.rotation.x=Math.PI/2; ceil.position.set(0,roomH,roomD/2-0.3); scene.add(ceil);
-  // 포인트 벽 (백스플래시)
-  const accentM=mats.find(m=>["tile","brick"].includes(m[3])&&m[1]!=="바닥");
-  if(accentM){ const bw=Math.min(blen,roomW-0.6), bs=new THREE.Mesh(new THREE.PlaneGeometry(bw,0.7),matFor(accentM[3],col(accentM),bw,0.7)); bs.position.set(0,ch+0.4,-0.29); bs.receiveShadow=true; scene.add(bs); }
-  const topMat=(w,d)=>matFor(topM[3],col(topM),w,d), frontMat=(w,h)=>matFor(frontM[3],col(frontM),w,h);
-  // 백 카운터
-  box(blen,ch-0.04,bd,frontMat(blen,ch),0,(ch-0.04)/2,bd/2-0.3);
-  box(blen+0.02,0.04,bd+0.02,topMat(blen,bd),0,ch-0.02,bd/2-0.3);
-  // 선반 + 컵
-  const shelfMat=matFor(topM[3]==="steel"?"steel":"oak",topM[3]==="steel"?"#B9BCBF":(c.pal.top||"#C89C6D"),1.2,0.2);
-  [1.45,1.8].forEach((y,si)=>{ box(blen*0.85,0.03,0.24,shelfMat,0,y,-0.18); for(let i=0;i<Math.floor(blen*0.85/0.16);i++){ const cup=new THREE.Mesh(new THREE.CylinderGeometry(0.04,0.035,si?0.11:0.09,24),new THREE.MeshStandardMaterial({color:i%5===2?new THREE.Color(c.pal.accent):new THREE.Color(si?"#f4f2ee":"#ffffff"),roughness:0.25})); cup.position.set(-blen*0.85/2+0.1+i*0.16,y+0.015+(si?0.055:0.045),-0.18); add(cup);} });
-  // 앞 카운터
-  const fz=frontZ+fd/2-0.3;
-  box(flen,ch-0.04,fd,frontMat(flen,ch),0,(ch-0.04)/2,fz);
-  box(flen+0.03,0.04,fd+0.03,topMat(flen,fd),0,ch-0.02,fz);
-  if(lh>ch+0.05){ box(flen+0.03,lh-ch,0.06,frontMat(flen,lh-ch),0,ch+(lh-ch)/2,fz+fd/2-0.03); box(flen+0.06,0.035,0.32,topMat(flen,0.32),0,lh+0.0175,fz+fd/2+0.1); }
-  // 하부 걸레받이
-  box(flen,0.1,0.01,new THREE.MeshStandardMaterial({color:new THREE.Color(c.pal.front).multiplyScalar(0.6),roughness:0.8}),0,0.05,fz+fd/2+0.005);
+  const plain=(hex,rough=0.85,metal=0)=>new THREE.MeshStandardMaterial({color:new THREE.Color(hex),roughness:rough,metalness:metal});
+  const k=parseInt(String((c.light[0]||[])[1]||"3000").replace(/\D/g,""))||3000, lc=kColor(k), lcWarm=kColor(Math.min(k,3000));
+
+  // 치수
+  const openW=Math.max(flen,blen)+1.0, inH=2.7, outH=3.6, depth=bd+aisle+fd;  // 부스 내부 깊이
+  const zBack=0, zCounterF=depth, zFacade=bd+aisle+0.15;              // 파사드는 앞 카운터 뒤쪽
+  const facadeW=openW+5.0;
+  const accent=c.pal.accent, innerHex=lumHex(accent)<0.82?accent:c.pal.front;
+  const innerMat=matFor("paint",innerHex,3,3);
+  const facadeMat=woodM?matFor(woodM[3],col(woodM),facadeW/1.2,outH/1.2):matFor(wallM[3],col(wallM),facadeW,outH);
+
+  // 바닥 (몰 바닥 + 부스 안)
+  const floor=new THREE.Mesh(new THREE.PlaneGeometry(facadeW+6,depth+12),matFor(floorM[3],col(floorM),(facadeW+6)/1.2,(depth+12)/1.2,c.pal.wall)); floor.rotation.x=-Math.PI/2; floor.position.set(0,0,(depth+12)/2-1); floor.receiveShadow=true; scene.add(floor);
+  // 몰 천장 + 트랙
+  const ceil=new THREE.Mesh(new THREE.PlaneGeometry(facadeW+6,depth+12),plain("#f4f3f0",0.95)); ceil.rotation.x=Math.PI/2; ceil.position.set(0,outH+0.6,(depth+12)/2-1); scene.add(ceil);
+  const ceilDark=new THREE.Mesh(new THREE.PlaneGeometry(facadeW+6,6),plain("#1c1d20",1)); ceilDark.rotation.x=Math.PI/2; ceilDark.position.set(0,outH+0.59,zFacade+6); scene.add(ceilDark);
+  const blackMat=plain("#1b1b1b",0.5), whiteMetal=plain("#f2f2f2",0.35,0.2);
+  [-1,0,1].forEach(i=>{ const x=i*openW*0.36; box(0.035,0.035,2.0,blackMat,x,outH+0.57,zFacade+1.2);
+    const head=new THREE.Mesh(new THREE.CylinderGeometry(0.045,0.05,0.16,20),whiteMetal); head.position.set(x,outH+0.45,zFacade+0.9); head.rotation.x=0.6; add(head);
+    const sp=new THREE.SpotLight(lc,14,9,Math.PI/7,0.6,1.4); sp.position.set(x,outH+0.4,zFacade+0.9); sp.target.position.set(x*0.8,0.9,zCounterF-0.2); sp.castShadow=true; sp.shadow.mapSize.set(1024,1024); sp.shadow.bias=-0.0004; scene.add(sp,sp.target);
+    const lens=new THREE.Mesh(new THREE.CircleGeometry(0.035,16),new THREE.MeshStandardMaterial({emissive:lc,emissiveIntensity:5,color:0xffffff})); lens.position.set(x,outH+0.37,zFacade+0.95); lens.rotation.x=Math.PI/2+0.6; scene.add(lens); });
+
+  // 파사드 (둥근 포털 개구부)
+  const shape=new THREE.Shape(); shape.moveTo(-facadeW/2,0); shape.lineTo(facadeW/2,0); shape.lineTo(facadeW/2,outH); shape.lineTo(-facadeW/2,outH); shape.closePath();
+  const r=0.75, hx=openW/2; const hole=new THREE.Path(); hole.moveTo(-hx,0.0001); hole.lineTo(hx,0.0001); hole.lineTo(hx,inH-r); hole.absarc(hx-r,inH-r,r,0,Math.PI/2,false); hole.lineTo(-hx+r,inH); hole.absarc(-hx+r,inH-r,r,Math.PI/2,Math.PI,false); hole.closePath(); shape.holes.push(hole);
+  const fgeo=new THREE.ExtrudeGeometry(shape,{depth:0.28,bevelEnabled:true,bevelThickness:0.02,bevelSize:0.02,bevelSegments:3,curveSegments:24});
+  const uvs=fgeo.attributes.uv; for(let i=0;i<uvs.count;i++){ uvs.setXY(i,uvs.getX(i)/1.2,uvs.getY(i)/1.2); }
+  const fmat=facadeMat.clone(); fmat.map=facadeMat.map.clone(); fmat.map.repeat.set(1,1); if(woodM){ fmat.map.center.set(0.5,0.5); fmat.map.rotation=Math.PI/2; } fmat.map.needsUpdate=true;
+  const facade=new THREE.Mesh(fgeo,fmat); facade.position.set(0,0,zFacade); add(facade);
+  // 패널 줄눈
+  for(let i=-6;i<=6;i++){ const x=i*1.2; if(Math.abs(x)<hx+0.05) continue; box(0.008,outH,0.01,plain("#000000",1),x,outH/2,zFacade+0.30,0).material.opacity=1; }
+  box(facadeW,0.008,0.01,plain("#000",1),0,outH*0.62,zFacade+0.30);
+  // 사인
+  const signTxt=("Café "+(proj||c.name)).slice(0,18);
+  const sgn=new THREE.Mesh(new THREE.PlaneGeometry(2.0,0.5),new THREE.MeshStandardMaterial({map:signTex(signTxt,lumHex(woodM?col(woodM):col(wallM))<0.5?"#ffffff":"#1c1c1c"),transparent:true,roughness:0.5}));
+  // 안쪽 부스 (포인트 컬러)
+  const inner=plain(innerHex,0.9);
+  const backWall=new THREE.Mesh(new THREE.PlaneGeometry(openW,inH),innerMat); backWall.position.set(0,inH/2,zBack); backWall.receiveShadow=true; scene.add(backWall);
+  [-1,1].forEach(sd=>{ const w=new THREE.Mesh(new THREE.PlaneGeometry(zFacade+0.02,inH),innerMat); w.rotation.y=-sd*Math.PI/2; w.position.set(sd*openW/2,inH/2,zFacade/2); w.receiveShadow=true; scene.add(w); });
+  const ic=new THREE.Mesh(new THREE.PlaneGeometry(openW,zFacade+0.3),inner); ic.rotation.x=Math.PI/2; ic.position.set(0,inH,zFacade/2); scene.add(ic);
+  sgn.scale.set(1.3,1.3,1); sgn.position.set(0.25,inH+0.5,zFacade+0.31); scene.add(sgn);
+  const sgn2=sgn.clone(); sgn2.material=sgn.material.clone(); sgn2.material.map=signTex(signTxt,"#ffffff"); sgn2.scale.set(0.8,0.8,1); sgn2.position.set(-openW/2+0.02,1.75,zFacade*0.55); sgn2.rotation.y=Math.PI/2; scene.add(sgn2);
+  // 매입 조명 (부스 천장)
+  const dl=Math.max(2,Math.round(openW/1.4));
+  for(let i=0;i<dl;i++){ const x=-openW/2+openW*(i+0.5)/dl; [bd*0.6, bd+aisle*0.6].forEach(z=>{ const ring=new THREE.Mesh(new THREE.CircleGeometry(0.06,24),new THREE.MeshStandardMaterial({emissive:lcWarm,emissiveIntensity:4,color:0xffffff})); ring.rotation.x=Math.PI/2; ring.position.set(x,inH-0.002,z); scene.add(ring);
+    const sp=new THREE.SpotLight(lcWarm,5,5,Math.PI/3.2,0.8,1.6); sp.position.set(x,inH-0.02,z); sp.target.position.set(x,0,z); sp.castShadow=false; scene.add(sp,sp.target); }); }
+  // 에어컨 (천장 카세트)
+  box(0.84,0.04,0.84,plain("#f5f5f5",0.6),openW*0.15,inH-0.02,bd+aisle*0.5);
+  for(let i=0;i<6;i++) box(0.5,0.004,0.012,plain("#b8b8b8",0.6),openW*0.15,inH-0.042,bd+aisle*0.5-0.15+i*0.06);
+
+  // 뒷벽: 하부장 + 상판 + 백스플래시 + 상부장 + 오픈 선반
+  const cabHex=lumHex(c.pal.wall)>0.6?new THREE.Color(c.pal.wall).lerp(new THREE.Color("#b9b2a6"),0.25):new THREE.Color("#3a3a3c");
+  const cabMat=new THREE.MeshStandardMaterial({color:cabHex,roughness:0.6});
+  const bw=Math.min(blen,openW-0.2);
+  box(bw,ch-0.12,bd-0.04,cabMat,0,0.1+(ch-0.12)/2,bd/2+0.02);
+  box(bw,0.1,bd-0.1,plain("#2a2a2a",0.9),0,0.05,bd/2-0.02);
+  const nd=Math.max(2,Math.round(bw/0.6)); for(let i=1;i<nd;i++) box(0.006,ch-0.16,0.005,plain("#000",1),-bw/2+bw*i/nd,0.1+(ch-0.12)/2,bd+0.003);
+  const topMatB=matFor(topM[3],col(topM),bw,bd); box(bw+0.02,0.04,bd+0.02,topMatB,0,ch-0.02,bd/2);
+  const splashM=mats.find(m=>["tile","brick"].includes(m[3])&&m[1]!=="바닥");
+  const splHex="#"+new THREE.Color(c.pal.wall).lerp(new THREE.Color("#e8e2d8"),0.5).getHexString(); const spl=new THREE.Mesh(new THREE.PlaneGeometry(bw,0.6),splashM?matFor(splashM[3],col(splashM),bw,0.6):matFor("concrete",splHex,bw,0.6)); spl.position.set(0,ch+0.3,0.005); spl.receiveShadow=true; scene.add(spl);
+  const upW=bw*0.74, upY=ch+0.62, upH=Math.min(0.85,inH-upY-0.15);
+  box(upW,upH,0.36,cabMat,-bw/2+upW/2,upY+upH/2,0.18,0.005);
+  const ud=Math.max(2,Math.round(upW/0.5)); for(let i=1;i<ud;i++) box(0.006,upH-0.02,0.004,plain("#000",1),-bw/2+upW*i/ud,upY+upH/2,0.362);
+  // 장 밑 조명
+  const strip=new THREE.Mesh(new THREE.BoxGeometry(upW-0.04,0.01,0.02),new THREE.MeshStandardMaterial({emissive:lcWarm,emissiveIntensity:8,color:0xffffff})); strip.position.set(-bw/2+upW/2,upY-0.006,0.3); scene.add(strip);
+  const ra=new THREE.RectAreaLight(lcWarm,6,upW-0.04,0.05); ra.position.set(-bw/2+upW/2,upY-0.02,0.3); ra.lookAt(-bw/2+upW/2,0,0.3); scene.add(ra);
+  // 오픈 선반 니치
+  const nW=bw-upW-0.05, nx=bw/2-nW/2; const shelfMat=woodM?matFor(woodM[3],col(woodM),nW,0.3):plain(c.pal.top,0.6);
+  box(nW,0.025,0.32,shelfMat,nx,upY,0.16); box(nW,0.025,0.32,shelfMat,nx,upY+upH*0.5,0.16); box(nW,0.025,0.32,shelfMat,nx,upY+upH,0.16); box(0.025,upH,0.32,shelfMat,nx-nW/2,upY+upH/2,0.16); box(0.025,upH,0.32,shelfMat,nx+nW/2,upY+upH/2,0.16);
+  const nl=new THREE.RectAreaLight(lcWarm,5,nW-0.06,0.2); nl.position.set(nx,upY+upH-0.02,0.16); nl.lookAt(nx,0,0.16); scene.add(nl);
+  for(let i=0;i<3;i++){ const cup=new THREE.Mesh(new THREE.CylinderGeometry(0.045,0.04,0.09,24),plain("#fafafa",0.2)); cup.position.set(nx-nW/3+i*nW/3,upY+0.0575,0.18); add(cup); }
+  plantAt(nx,upY+upH*0.5+0.0125,0.16,0.55);
+
   // 장비
   const eqColor=new THREE.Color(EQC[c.id]||"#B7BBBF"), eqMetal=(EQC[c.id]||"#B7BBBF")==="#B7BBBF";
   const bodyMat=new THREE.MeshStandardMaterial({color:eqColor,roughness:eqMetal?0.28:0.35,metalness:eqMetal?0.9:0.15});
-  const steel=new THREE.MeshStandardMaterial({color:0xcfd3d6,roughness:0.25,metalness:1});
-  const blackMat=new THREE.MeshStandardMaterial({color:0x1b1b1b,roughness:0.5});
-  const glass=new THREE.MeshPhysicalMaterial({color:0xffffff,roughness:0.05,transmission:0.9,thickness:0.01,transparent:true,opacity:0.5});
-  const placeRow=(list,len,zc,depth,flipFace)=>{
+  const steel=new THREE.MeshStandardMaterial({color:0xd4d7da,roughness:0.22,metalness:1});
+  const glass=new THREE.MeshPhysicalMaterial({color:0xffffff,roughness:0.03,transmission:0.92,thickness:0.01,transparent:true,opacity:0.35});
+  const placeRow=(list,len,zc,depthC,faceSign)=>{
     if(!list) return; let t=0;
     list.forEach(b=>{ const L=mm(b.id==="WORK"?(window.FLEXW_REF?window.FLEXW_REF(list,len*1000):0):b.w); const x=-len/2+t+L/2; t+=L; if(L<=0) return;
-      const id=b.id; const hgt=mm(b.h||HH[id]||0), dep=Math.min(depth-0.05,mm(b.d||DD[id]||400)), w=Math.max(0.08,L*0.9);
-      if(FLOOR_H[id]){ const hh=mm(b.h||FLOOR_H[id]); box(L-0.01,hh,depth-0.02,id==="ice"?steel:new THREE.MeshStandardMaterial({color:0xe8e8e8,roughness:0.3,metalness:0.4}),x,hh/2,zc,0.01); return; }
-      if(!hgt) return;
-      const y=ch;
-      if(id==="espresso"){ box(w,hgt*0.78,dep,bodyMat,x,y+hgt*0.39+0.06,zc,0.03); box(w*1.0,0.06,dep*0.95,blackMat,x,y+0.03,zc,0.01); box(w*0.92,0.02,dep*0.8,steel,x,y+hgt*0.78+0.07,zc); const n=Math.max(1,Math.round(L/0.3)); for(let i=0;i<n;i++){ const gx=x-w/2+w*(i+0.5)/n; const gh=new THREE.Mesh(new THREE.CylinderGeometry(0.035,0.04,0.08,24),steel); gh.position.set(gx,y+hgt*0.42,zc-(flipFace?-1:1)*(dep/2+0.03)); add(gh); const h=new THREE.Mesh(new THREE.CylinderGeometry(0.012,0.012,0.16,12),blackMat); h.rotation.x=Math.PI/2; h.position.set(gx,y+hgt*0.36,zc-(flipFace?-1:1)*(dep/2+0.11)); add(h);} for(let i=0;i<Math.floor(w/0.12);i++){ const cup=new THREE.Mesh(new THREE.CylinderGeometry(0.035,0.03,0.07,20),new THREE.MeshStandardMaterial({color:0xffffff,roughness:0.2})); cup.position.set(x-w/2+0.08+i*0.12,y+hgt*0.78+0.115,zc); add(cup);} return; }
-      if(id==="grinder"){ box(w,hgt*0.65,dep,bodyMat,x,y+hgt*0.325,zc,0.02); const hop=new THREE.Mesh(new THREE.CylinderGeometry(w*0.45,w*0.18,hgt*0.35,24),glass); hop.position.set(x,y+hgt*0.65+hgt*0.175,zc); add(hop); const beans=new THREE.Mesh(new THREE.CylinderGeometry(w*0.3,w*0.17,hgt*0.18,24),new THREE.MeshStandardMaterial({color:0x3b2416,roughness:0.9})); beans.position.set(x,y+hgt*0.65+hgt*0.09,zc); add(beans); return; }
+      const id=b.id, hgt=mm(b.h||HH[id]||0), dep=Math.min(depthC-0.06,mm(b.d||DD[id]||400)), w=Math.max(0.08,L*0.9), y=ch;
+      if(FLOOR_H[id]){ const hh=mm(b.h||FLOOR_H[id]); box(L-0.02,Math.min(hh,ch-0.02),depthC-0.04,steel,x,Math.min(hh,ch-0.02)/2,zc,0.01); return; }
+      if(id==="espresso"){ box(w,hgt*0.78,dep,bodyMat,x,y+hgt*0.39+0.06,zc,0.03); box(w,0.06,dep*0.95,blackMat,x,y+0.03,zc,0.01); box(w*0.92,0.02,dep*0.8,steel,x,y+hgt*0.78+0.07,zc);
+        const n=Math.max(1,Math.round(L/0.3)); for(let i=0;i<n;i++){ const gx=x-w/2+w*(i+0.5)/n; const gh=new THREE.Mesh(new THREE.CylinderGeometry(0.035,0.04,0.08,24),steel); gh.position.set(gx,y+hgt*0.42,zc+faceSign*(dep/2+0.03)); add(gh); const h=new THREE.Mesh(new THREE.CylinderGeometry(0.012,0.012,0.16,12),blackMat); h.rotation.x=Math.PI/2; h.position.set(gx,y+hgt*0.36,zc+faceSign*(dep/2+0.11)); add(h);
+          const wand=new THREE.Mesh(new THREE.CylinderGeometry(0.006,0.006,0.22,8),steel); wand.position.set(x+(i?1:-1)*(w/2-0.04),y+hgt*0.4,zc+faceSign*(dep/2+0.04)); add(wand); }
+        for(let i=0;i<Math.floor(w/0.11);i++){ const cup=new THREE.Mesh(new THREE.CylinderGeometry(0.035,0.03,0.07,20),plain("#ffffff",0.2)); cup.position.set(x-w/2+0.07+i*0.11,y+hgt*0.78+0.115,zc); add(cup);} return; }
+      if(id==="grinder"){ box(w,hgt*0.62,dep,bodyMat,x,y+hgt*0.31,zc,0.02); const hop=new THREE.Mesh(new THREE.CylinderGeometry(w*0.45,w*0.16,hgt*0.36,24),glass); hop.position.set(x,y+hgt*0.62+hgt*0.18,zc); add(hop); const beans=new THREE.Mesh(new THREE.CylinderGeometry(w*0.3,w*0.15,hgt*0.18,24),plain("#3b2416",0.9)); beans.position.set(x,y+hgt*0.62+hgt*0.09,zc); add(beans); return; }
       if(id==="blender"){ box(w,hgt*0.3,dep,blackMat,x,y+hgt*0.15,zc,0.02); const jar=new THREE.Mesh(new THREE.CylinderGeometry(w*0.4,w*0.32,hgt*0.7,24),glass); jar.position.set(x,y+hgt*0.65,zc); add(jar); return; }
-      if(id==="pos"){ box(w*0.5,0.06,0.2,blackMat,x,y+0.03,zc); const sc=box(w*0.9,hgt*0.7,0.03,blackMat,x,y+hgt*0.5,zc+0.02); sc.rotation.x=-0.25; return; }
-      if(id==="showcase"){ box(w,hgt*0.25,dep,bodyMat,x,y+hgt*0.125,zc,0.01); box(w,hgt*0.75,dep,glass,x,y+hgt*0.25+hgt*0.375,zc); return; }
-      const mat=["autosteam","autotamp","hotwater"].includes(id)?(eqMetal?steel:bodyMat):new THREE.MeshStandardMaterial({color:0xdedede,roughness:0.35,metalness:0.3});
+      if(id==="pos"){ box(0.18,0.05,0.18,blackMat,x,y+0.025,zc); const st=box(0.03,0.22,0.03,blackMat,x,y+0.14,zc); const sc=box(0.36,0.26,0.03,blackMat,x,y+0.33,zc+faceSign*0.02); sc.rotation.x=faceSign*0.18; box(0.08,0.03,0.12,plain("#e9e9e9",0.4),x+0.26,y+0.015,zc); return; }
+      if(id==="showcase"){ box(w,0.12,dep,blackMat,x,y+0.06,zc); box(w,hgt*0.8,dep,glass,x,y+0.12+hgt*0.4,zc); [0.25,0.55].forEach(f=>{ box(w-0.04,0.008,dep-0.04,glass,x,y+0.12+hgt*0.8*f,zc); for(let i=0;i<Math.floor((w-0.1)/0.09);i++){ const pst=new THREE.Mesh(new THREE.SphereGeometry(0.035,12,8),plain(i%3?"#d39a52":"#e8c27c",0.7)); pst.scale.set(1.2,0.6,1); pst.position.set(x-w/2+0.08+i*0.09,y+0.12+hgt*0.8*f+0.025,zc); add(pst);} }); return; }
+      if(!hgt) return;
+      const mat=["autosteam","autotamp","hotwater"].includes(id)?(eqMetal?steel:bodyMat):plain("#dcdcdc",0.35,0.3);
       box(w,hgt,dep,mat,x,y+hgt/2,zc,Math.min(0.02,w/8));
     });
   };
-  if(bar){ placeRow(bar.front,flen,fz-0.05,fd,false); placeRow([...bar.back,...(bar.side||[]).filter(b=>b.id!=="WORK")],blen,bd/2-0.3,bd,true); }
-  // 조명
-  const k=parseInt(String((c.light[1]||[])[1]||"3000").replace(/\D/g,""))||3000, lc=kColor(k);
-  scene.add(new THREE.HemisphereLight(0xffffff,new THREE.Color(c.pal.floor),dark?0.15:0.35));
-  const n=Math.max(2,Math.min(5,Math.round(flen/1.2)));
-  const shadeMat=c.mats.find(m=>m[3]==="rattan")?matFor("rattan",c.pal.front,0.4,0.4):new THREE.MeshStandardMaterial({color:new THREE.Color(["dark","bistro","bookcafe","midcentury"].includes(c.id)?c.pal.accent:["industrial","brutal","japandi","korean","wood"].includes(c.id)?"#1d1d1d":"#f2f0ec"),roughness:0.4,metalness:["dark","bistro","bookcafe"].includes(c.id)?0.8:0.1,side:THREE.DoubleSide});
-  for(let i=0;i<n;i++){ const x=-flen/2+flen*(i+0.5)/n, yL=ch+1.0;
-    const cord=new THREE.Mesh(new THREE.CylinderGeometry(0.004,0.004,roomH-yL,6),blackMat); cord.position.set(x,yL+(roomH-yL)/2,fz); scene.add(cord);
-    const sh=new THREE.Mesh(new THREE.SphereGeometry(0.17,32,16,0,Math.PI*2,0,Math.PI/2),shadeMat); sh.position.set(x,yL,fz); sh.castShadow=true; scene.add(sh);
-    const bulb=new THREE.Mesh(new THREE.SphereGeometry(0.035,16,12),new THREE.MeshStandardMaterial({emissive:lc,emissiveIntensity:6,color:0xffffff})); bulb.position.set(x,yL-0.02,fz); scene.add(bulb);
-    const sp=new THREE.SpotLight(lc,dark?9:7,6,Math.PI/3.2,0.7,1.6); sp.position.set(x,yL-0.03,fz); sp.target.position.set(x,0,fz); sp.castShadow=true; sp.shadow.mapSize.set(1024,1024); sp.shadow.bias=-0.0004; sp.shadow.radius=4; scene.add(sp); scene.add(sp.target);
+  if(bar){ placeRow([...bar.back,...(bar.side||[]).filter(b=>b.id!=="WORK")],bw,bd/2,bd,1); }
+
+  // 앞 카운터: 골 패널 몸체 + 오른쪽 둥근 끝 + 하부 간접조명
+  const rr=fd/2, straight=flen-rr, cz=zCounterF-fd/2, cx0=-flen/2+straight/2;
+  const fbody=matFor(frontM[3],col(frontM),straight/0.9,ch/0.9);
+  box(straight,ch-0.16,fd,fbody,cx0,0.12+(ch-0.16)/2,cz);
+  const cyl=new THREE.Mesh(new THREE.CylinderGeometry(rr,rr,ch-0.16,48,1,false,0,Math.PI),matFor(frontM[3],col(frontM),Math.PI*rr/0.9,ch/0.9)); cyl.position.set(-flen/2+straight,0.12+(ch-0.16)/2,cz); add(cyl);
+  // 걸레받이(들어간 부분)
+  box(straight,0.1,fd-0.12,plain("#1e1e1e",0.9),cx0,0.05,cz-0.03);
+  const cylb=new THREE.Mesh(new THREE.CylinderGeometry(rr-0.06,rr-0.06,0.1,40,1,false,0,Math.PI),plain("#1e1e1e",0.9)); cylb.position.set(-flen/2+straight,0.05,cz-0.03); add(cylb);
+  // 하부 LED
+  const led=new THREE.MeshStandardMaterial({emissive:lcWarm,emissiveIntensity:10,color:0xffffff});
+  const ls=new THREE.Mesh(new THREE.BoxGeometry(straight,0.012,0.02),led); ls.position.set(cx0,0.115,cz+fd/2-0.07); scene.add(ls);
+  const ra2=new THREE.RectAreaLight(lcWarm,9,straight,0.08); ra2.position.set(cx0,0.11,cz+fd/2-0.02); ra2.lookAt(cx0,0,cz+fd/2+0.25); scene.add(ra2);
+  // 상판 (오버행)
+  const topMatF=matFor(topM[3],col(topM),flen,fd);
+  box(straight+0.03,0.04,fd+0.05,topMatF,cx0-0.015,ch-0.02,cz+0.01);
+  const ctop=new THREE.Mesh(new THREE.CylinderGeometry(rr+0.025,rr+0.025,0.04,48,1,false,0,Math.PI),topMatF); ctop.position.set(-flen/2+straight,ch-0.02,cz+0.01); add(ctop);
+  // 상판 아래 그림자 라인
+  box(flen-0.02,0.02,fd-0.02,plain("#000",1),cx0+rr/2-0.01,ch-0.05,cz).material.transparent=false;
+  if(bar) placeRow(bar.front,flen,cz-0.02,fd,-1);
+  // 소품: 식물, 컵 스택, 메뉴 스탠드
+  plantAt(-flen/2+0.2,ch,cz+0.05,0.9); plantAt(flen/2-rr*0.6,ch,cz,0.75);
+  for(let i=0;i<3;i++){ for(let j=0;j<5;j++){ const pc=new THREE.Mesh(new THREE.CylinderGeometry(0.042,0.033,0.11,20,1,true),plain(i===1?"#cfa97a":"#e9dcc6",0.8)); pc.material.side=THREE.DoubleSide; pc.position.set(-flen/2+0.5+i*0.11,ch+0.055+j*0.035,cz+0.15); add(pc);} }
+  const menu=box(0.16,0.22,0.01,plain("#f3ece0",0.8),flen/2-rr-0.55,ch+0.12,cz+0.18); menu.rotation.x=-0.25; box(0.18,0.24,0.008,plain("#8a6a50",0.6),flen/2-rr-0.55,ch+0.12,cz+0.172).rotation.x=-0.25;
+
+  function plantAt(x,y,z,sc){
+    const potMat=plain(c.id==="botanical"||c.id==="terracotta"?"#b07d5b":"#efefec",0.5);
+    const pot=new THREE.Mesh(new THREE.CylinderGeometry(0.08*sc,0.065*sc,0.16*sc,24),potMat); pot.position.set(x,y+0.08*sc,z); add(pot);
+    const leaf=new THREE.MeshStandardMaterial({color:0x4f7a3f,roughness:0.6,side:THREE.DoubleSide});
+    const g=new THREE.Group(); g.position.set(x,y+0.16*sc,z);
+    for(let i=0;i<26;i++){ const st=new THREE.Mesh(new THREE.CylinderGeometry(0.003,0.003,0.25*sc,4),plain("#5a6b3a",0.8)); const a=i*2.39, tilt=0.35+0.25*Math.sin(i); st.position.set(Math.cos(a)*0.03*sc,0.12*sc,Math.sin(a)*0.03*sc); st.rotation.set(Math.sin(a)*tilt,0,Math.cos(a)*tilt); g.add(st);
+      const lf=new THREE.Mesh(new THREE.CircleGeometry(0.035*sc,8),leaf); lf.scale.set(0.6,1.4,1); lf.position.set(Math.cos(a)*(0.05+0.06*Math.abs(Math.sin(i*1.7)))*sc,(0.12+0.18*((i%7)/7))*sc,Math.sin(a)*(0.05+0.06*Math.abs(Math.cos(i*1.3)))*sc); lf.rotation.set(Math.random()*1.5,a,Math.random()); lf.castShadow=true; g.add(lf); }
+    scene.add(g);
   }
-  // 선반 하부 라인 조명
-  const strip=new THREE.RectAreaLight?null:null;
-  const sl=new THREE.PointLight(lc,dark?2.2:1.4,3,1.5); sl.position.set(0,1.4,0.05); scene.add(sl);
+  // 조명 보조
+  scene.add(new THREE.HemisphereLight(0xffffff,new THREE.Color(c.pal.floor),0.45));
+  const fill=new THREE.DirectionalLight(0xffffff,0.35); fill.position.set(-3,5,zFacade+6); scene.add(fill);
   // 카메라
-  const cam=new THREE.PerspectiveCamera(38,W/H,0.05,50);
-  cam.position.set(flen*0.32,1.8,fz+fd/2+Math.max(3.4,flen*0.85)); const tgt=new THREE.Vector3(0,0.95,fz-0.9);
-  const ctl=new OrbitControls(cam,renderer.domElement); ctl.target.copy(tgt); ctl.enableDamping=true; ctl.minDistance=1.5; ctl.maxDistance=Math.max(6,flen*1.5); ctl.maxPolarAngle=Math.PI*0.52; ctl.minPolarAngle=Math.PI*0.25; ctl.update();
-  let raf=0, alive=true; const loop=()=>{ if(!alive) return; ctl.update(); renderer.render(scene,cam); raf=requestAnimationFrame(loop); }; loop();
-  const ro=new ResizeObserver(()=>{ const w=host.clientWidth; if(!w) return; const h=Math.round(w*9/16); renderer.setSize(w,h); cam.aspect=w/h; cam.updateProjectionMatrix(); }); ro.observe(host);
-  R={ dispose(){ alive=false; cancelAnimationFrame(raf); ro.disconnect(); ctl.dispose(); scene.traverse(o=>{ if(o.geometry) o.geometry.dispose(); }); renderer.dispose(); renderer.forceContextLoss&&renderer.forceContextLoss(); }, canvas:renderer.domElement, renderer, scene, cam };
+  const cam=new THREE.PerspectiveCamera(46,W/H,0.05,60);
+  const dist=Math.max(5.2,openW*1.25);
+  cam.position.set(openW*0.04,1.55,zCounterF+dist); const tgt=new THREE.Vector3(0,1.45,zFacade-0.4);
+  const ctl=new OrbitControls(cam,renderer.domElement); ctl.target.copy(tgt); ctl.enableDamping=false; ctl.minDistance=2; ctl.maxDistance=dist*1.6; ctl.maxPolarAngle=Math.PI*0.53; ctl.minPolarAngle=Math.PI*0.28; ctl.maxAzimuthAngle=1.0; ctl.minAzimuthAngle=-1.0; ctl.update();
+  let raf=0, alive=true; const draw=()=>{ if(!alive||raf) return; raf=requestAnimationFrame(()=>{ raf=0; if(alive) renderer.render(scene,cam); }); };
+  ctl.addEventListener("change",draw); setTimeout(draw,0);
+  const ro=new ResizeObserver(()=>{ const w=host.clientWidth; if(!w) return; const h=Math.round(w*3/4); renderer.setSize(w,h); cam.aspect=w/h; cam.updateProjectionMatrix(); draw(); }); ro.observe(host);
+  R={ dispose(){ alive=false; cancelAnimationFrame(raf); ro.disconnect(); ctl.dispose(); scene.traverse(o=>{ if(o.geometry) o.geometry.dispose(); }); renderer.dispose(); renderer.forceContextLoss&&renderer.forceContextLoss(); }, renderer };
 }
 window.render3D=(host)=>{ try{ build(host); return true; }catch(e){ console.error(e); if(host) host.innerHTML=`<div class="r3dfail">3D 렌더를 불러오지 못했어요. 일러스트 보기를 이용하세요.</div>`; return false; } };
 window.render3DPng=()=>R?R.renderer.domElement.toDataURL("image/png"):null;
