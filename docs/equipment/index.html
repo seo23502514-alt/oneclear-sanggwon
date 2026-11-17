@@ -228,6 +228,14 @@ td a{color:var(--brand);font-weight:700;font-size:12.5px;white-space:nowrap}
 @media(max-width:900px){.mats{grid-template-columns:repeat(3,minmax(0,1fr))}}
 .mat .mimg svg{width:100%;aspect-ratio:1;display:block;border-radius:2px;box-shadow:0 2px 6px rgba(0,0,0,.12)}
 .mat .code{display:block;font-size:10.5px;letter-spacing:.12em;color:#8a8580;margin-top:8px}
+.mat{position:relative}.mat .mimg{display:block;position:relative;cursor:pointer}.mat .mimg input{position:absolute;inset:0;width:100%;height:100%;opacity:0;cursor:pointer;border:0;padding:0}
+.mat .mpick{position:absolute;left:50%;bottom:8px;transform:translateX(-50%);font-size:11px;background:#000a;color:#fff;padding:3px 8px;border-radius:2px;opacity:0;transition:opacity .15s;pointer-events:none;white-space:nowrap}.mat .mimg:hover .mpick{opacity:1}
+.matdel{position:absolute;top:5px;right:5px;width:24px;height:24px;border-radius:50%;border:0;background:#fffe;color:#333;font-size:15px;line-height:1;cursor:pointer;box-shadow:0 1px 4px #0003;opacity:.85}.matdel:hover{background:#c0392b;color:#fff;opacity:1}
+.mat .mhex{color:#a29d96;font-size:10.5px;letter-spacing:.04em;margin-top:2px}
+.matadd .maplus{width:100%;aspect-ratio:1;border:1.5px dashed #c9bdae;background:#faf7f2;border-radius:2px;cursor:pointer;font:inherit;font-size:12.5px;color:#7a6f63;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px}.matadd .maplus span{font-size:30px;line-height:1}.matadd .maplus:hover{border-color:#8a7a68;color:#333}
+.maf{display:grid;gap:5px;font-size:11.5px;background:#faf7f2;border:1px solid #e5dccf;padding:8px;border-radius:2px}.maf b{font-size:12.5px}.maf label{display:grid;gap:2px;color:#777}.maf input,.maf select{font:inherit;font-size:12px;padding:4px 6px;border:1px solid #d9d0c3;border-radius:2px;min-width:0;background:#fff}.maf input[type=color]{padding:0;height:26px}
+.mabtn{display:flex;gap:4px}.mabtn button{flex:1;font:inherit;font-size:12px;padding:5px;border:1px solid #333;background:#fff;cursor:pointer;border-radius:2px}.mabtn button:first-child{background:#222;color:#fff}
+@media print{.matdel,.matadd,.mpick{display:none!important}}
 .mat b{display:block;font-size:13.5px;margin:2px 0}.mat small{font-size:11.5px;color:#777;line-height:1.4;display:block}
 .brow3{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.25fr);gap:28px}
 .chips{display:grid;gap:8px}
@@ -1587,6 +1595,10 @@ function texture(id,kind,color,k=1){
   else { f=noise(0.9,0.9,2,0.3,-0.05); inner=base+over; }
   return `${f}<pattern id="${id}" width="${S}" height="${S}" patternUnits="userSpaceOnUse">${inner}</pattern>`;
 }
+const MATKIND={wood:"원목",oak:"오크",fluted:"슬랫·템바보드",marble:"대리석",terrazzo:"테라조",tile:"타일",brick:"벽돌",concrete:"콘크리트·시멘트",paint:"도장",checker:"체커 타일",rattan:"라탄",steel:"스테인리스",blacksteel:"블랙 스틸",brass:"브라스"};
+let MATADD=false;
+function hex6(h){ h=String(h||"#888888").trim(); if(/^#[0-9a-f]{3}$/i.test(h)) h="#"+h.slice(1).split("").map(x=>x+x).join(""); return /^#[0-9a-f]{6}$/i.test(h)?h.toLowerCase():"#888888"; }
+function renumMats(c){ c.mats.forEach((m,i)=>m[0]=`M-${String(i+1).padStart(2,"0")}`); }
 function matColor(c,m){ return c.pal[m[4]]||m[4]; }
 function matOf(c,role){ return c.mats.find(m=>m[1]===role)||c.mats[0]; }
 // 바 정면 이미지 (실제 바 설계 장비 순서·폭 반영)
@@ -1704,8 +1716,16 @@ function renderConcept(){
        <span class="lbl">COLOR RATIO</span><div class="ratio">${c.colors.map(x=>`<i style="background:${c.pal[x[1]]};flex:${x[2]}" title="${x[0]} ${x[2]}%"></i>`).join("")}</div>
        <div class="ratiolbl">${c.colors.map(x=>`<span>${x[2]}%</span>`).join("")}</div></div>
    </div>
-   <div class="sec"><span class="lbl">MATERIALS</span>
-     <div class="mats">${c.mats.map((m,i)=>`<div class="mat"><div class="mimg">${swatchSvg(c,m,i)}</div><span class="code">${m[0]} · ${m[1]}</span><b>${m[2]}</b><small>${m[5]}</small></div>`).join("")}</div></div>
+   <div class="sec"><span class="lbl">MATERIALS <em>칩을 눌러 색 변경 · × 빼기 · + 추가</em></span>
+     <div class="mats">${c.mats.map((m,i)=>{const hx=hex6(matColor(c,m)); return `<div class="mat"><label class="mimg" title="눌러서 색 바꾸기">${swatchSvg(c,m,i)}<input type="color" class="matcol" data-i="${i}" value="${hx}"><span class="mpick">색 변경</span></label>${c.mats.length>1?`<button class="matdel" data-i="${i}" title="이 마감재 빼기" aria-label="${m[2]} 빼기">×</button>`:""}<span class="code">${m[0]} · ${m[1]}</span><b>${m[2]}</b><small>${m[5]}</small><small class="mhex">${hx.toUpperCase()} · ${MATKIND[m[3]]||m[3]}</small></div>`;}).join("")}
+     <div class="mat matadd">${MATADD?`<div class="maf"><b>마감재 추가</b>
+       <label>위치<input id="ma_role" list="ma_roles" placeholder="예: 백스플래시"><datalist id="ma_roles">${["상판","카운터 전면","바닥","벽","포인트","백스플래시","가구","선반","천장","조명기구","의자","걸레받이"].map(r=>`<option value="${r}">`).join("")}</datalist></label>
+       <label>자재명<input id="ma_name" placeholder="예: 테라코타 타일"></label>
+       <label>재질<select id="ma_kind">${Object.entries(MATKIND).map(([k,t])=>`<option value="${k}">${t}</option>`).join("")}</select></label>
+       <label>색<input type="color" id="ma_col" value="#c8a27a"></label>
+       <label>규격·마감<input id="ma_spec" placeholder="예: 75×300 · 유광"></label>
+       <div class="mabtn"><button id="ma_ok">추가</button><button id="ma_no">취소</button></div></div>`
+       :`<button id="matadd" class="maplus"><span>+</span>마감재 추가</button>`}</div></div></div>
    <div class="sec"><span class="lbl">FINISH SCHEDULE <em>마감재 일람표</em></span>
      <table class="spec fs"><thead><tr><th>코드</th><th>위치</th><th>자재</th><th>규격 · 마감</th><th>색상</th><th>LRV</th></tr></thead><tbody>${c.mats.map(m=>{const col=matColor(c,m);return `<tr><td><b>${m[0]}</b></td><td>${m[1]}</td><td>${m[2]}</td><td>${m[5]}</td><td><i class="kdot" style="background:${col};border-radius:2px"></i>${col.toUpperCase()}</td><td>${lrv(col)}</td></tr>`;}).join("")}
      ${c.light.map((l,i)=>`<tr><td><b>L-0${i+1}</b></td><td>조명 · ${l[0]}</td><td>${l[4]}</td><td>${l[1]} · ${l[2]} · ${l[3]}</td><td><i class="kdot" style="background:${kelvinColor(+l[1].replace(/\D/g,"")||3000)}"></i>${l[1]}</td><td>—</td></tr>`).join("")}</tbody></table></div>
@@ -1731,6 +1751,13 @@ function renderConcept(){
   el.querySelectorAll(".r3dviews button").forEach(b=>b.onclick=()=>{ el.querySelectorAll(".r3dviews button").forEach(x=>x.classList.toggle("on",x===b)); window.r3dView&&window.r3dView(b.dataset.v3); });
   if(HV==="ph") bindPh(c); else arDispose();
   if(HV==="3d"){ const go=()=>window.render3D(document.getElementById("r3d")); if(window.render3D) setTimeout(go,30); else window.addEventListener("r3d-ready",go,{once:true}); }
+  const matChanged=(msg)=>{ renderConcept(); if(CONCEPT_APPLIED&&BAR) renderBar(); if(msg) cMsg(msg); };
+  el.querySelectorAll(".matcol").forEach(inp=>inp.addEventListener("change",()=>{ const m=c.mats[+inp.dataset.i]; m[4]=inp.value; matChanged(`${m[0]} ${m[2]} 색을 ${inp.value.toUpperCase()}로 바꿨어요.`); }));
+  el.querySelectorAll(".matdel").forEach(b=>b.onclick=ev=>{ ev.preventDefault(); const i=+b.dataset.i, m=c.mats[i]; c.mats.splice(i,1); renumMats(c); matChanged(`${m[2]}(${m[1]})를 뺐어요.`); });
+  const ma=document.getElementById("matadd"); if(ma) ma.onclick=()=>{ MATADD=true; renderConcept(); const r=document.getElementById("ma_role"); if(r) r.focus(); };
+  const mno=document.getElementById("ma_no"); if(mno) mno.onclick=()=>{ MATADD=false; renderConcept(); };
+  const mok=document.getElementById("ma_ok"); if(mok) mok.onclick=()=>{ const g=id=>document.getElementById(id).value.trim(); const role=g("ma_role")||"포인트", kind=document.getElementById("ma_kind").value, name=g("ma_name")||(MATKIND[kind]+" 마감");
+    c.mats.push(["",role,name,kind,document.getElementById("ma_col").value,g("ma_spec")||"—"]); renumMats(c); MATADD=false; matChanged(`${name}(${role})를 추가했어요.${["상판","카운터 전면","바닥","벽"].includes(role)?" 같은 위치의 첫 번째 마감재가 3D·바 설계에 쓰여요.":""}`); };
   el.querySelectorAll(".chip2 input").forEach(inp=>inp.addEventListener("change",()=>{c.pal[inp.dataset.k]=inp.value; renderConcept(); if(CONCEPT_APPLIED&&BAR) renderBar();}));
   document.getElementById("cproj").oninput=e=>{CPROJ=e.target.value; const t=document.querySelector(".tblock span"); if(t) t.innerHTML=`<em>PROJECT</em>${CPROJ.replace(/</g,"&lt;")||"—"}`;};
   document.getElementById("capply").onclick=()=>{ if(CONCEPT_APPLIED){document.querySelector('nav button[data-v="bar"]').click(); return;} CONCEPT_APPLIED=true; if(!BAR) buildBar(); else renderBar(); renderConcept(); cMsg("바 설계 평면도·입면도에 이 콘셉트의 마감재 색과 질감을 입혔어요."); };
@@ -1967,7 +1994,7 @@ function build(host,ar){
   const scene=new THREE.Scene(); if(!ar) scene.background=new THREE.Color(0x202124);
   const pm=new THREE.PMREMGenerator(renderer); scene.environment=pm.fromScene(new RoomEnvironment(),0.04).texture; scene.environmentIntensity=0.5;
   const mats=c.mats, role=r=>mats.find(m=>m[1]===r), col=m=>c.pal[m[4]]||m[4];
-  const topM=role("상판")||mats[0], frontM=role("카운터 전면")||mats[1], floorM=role("바닥")||mats[3], wallM=role("벽")||["","","","paint","wall"];
+  const topM=role("상판")||mats[0]||["","","","paint","#eeeeee"], frontM=role("카운터 전면")||mats[1]||topM, floorM=role("바닥")||mats[3]||["","","","concrete","#cfcac2"], wallM=role("벽")||["","","","paint","wall"];
   const woodM=mats.find(m=>["oak","wood"].includes(m[3])&&m[1]!=="바닥");
   const add=(m,cast=true)=>{ m.castShadow=cast; m.receiveShadow=true; scene.add(m); return m; };
   const box=(w,h,d,mat,x,y,z,round=0)=>{ const geo=round?new RoundedBoxGeometry(w,h,d,4,round):new THREE.BoxGeometry(w,h,d); const m=new THREE.Mesh(geo,mat); m.position.set(x,y,z); return add(m); };
