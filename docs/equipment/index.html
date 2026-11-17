@@ -153,7 +153,7 @@ td a{color:var(--brand);font-weight:700;font-size:12.5px;white-space:nowrap}
 .bargrid{display:grid;grid-template-columns:minmax(0,1fr) 340px;gap:16px;align-items:start}
 @media(max-width:1000px){.bargrid{grid-template-columns:minmax(0,1fr)}}
 .barcv h3 small{font-weight:400;color:var(--muted);font-size:12px;margin-left:6px}
-#barcanvas svg{width:100%;height:auto;display:block;touch-action:none;user-select:none;border-radius:10px;border:1px solid var(--line)}
+#barcanvas{position:relative}#barcanvas svg{width:100%;height:auto;display:block;touch-action:none;user-select:none;border-radius:10px;border:1px solid var(--line)}
 #barside{display:grid;gap:12px}
 .selp{border-color:var(--ink)}
 .selbtn{display:flex;gap:6px;flex-wrap:wrap;margin:6px 0}
@@ -276,6 +276,11 @@ ul.warnl li.ok::marker{color:var(--ok)}
 .artip{position:absolute;left:10px;right:10px;top:10px;background:#111d;color:#fff;padding:10px 14px;border-radius:2px;font-size:12.5px;line-height:1.55;display:grid;gap:2px;pointer-events:none}.artip b{font-size:13.5px}.artip span{color:#f3c79c;font-weight:700}.artip small{color:#ccc}
 .phstage.calib{cursor:copy}.arbar{align-items:center}.arbar small{color:var(--muted);font-size:12px}.phact button.pri{background:var(--ink);color:#fff}.arop{display:flex;align-items:center;gap:6px;font-size:12.5px}
 @media print{.arh,.arsvg,.artip{display:none}}
+.bartot{width:max-content;max-width:100%;margin:8px 0 0 auto;background:#fff;border:1px solid var(--line);border-radius:10px;padding:10px 14px;font-size:12.5px;min-width:240px;box-shadow:0 2px 10px #0001}
+.bartot>b{display:block;font-size:12px;color:var(--muted);margin-bottom:4px}.btrow{display:flex;justify-content:space-between;gap:14px;align-items:baseline}.btrow strong{font-size:17px}.btsub{color:var(--muted);font-size:11.5px;margin:1px 0 6px}.btsub em{font-style:normal;font-weight:700;color:#2e7d4f}.btsub em.tight{color:#b7791f}.btsub em.over{color:#c0392b}.btnote{color:#999;font-size:10.5px}
+.selstat{display:grid;grid-template-columns:repeat(auto-fit,minmax(90px,1fr));gap:6px;margin:8px 0}.selstat>div{background:#f6f3ee;border-radius:8px;padding:7px 9px}.selstat em{display:block;font-style:normal;font-size:11.5px;color:var(--muted)}.selstat b{display:block;font-size:16px}.selstat small{font-size:11px;color:var(--muted)}
+.selnum{display:flex;gap:8px;flex-wrap:wrap}.selnum .wlab input{width:90px}
+@media(max-width:640px){.bartot{width:auto;margin-left:0}}
 </style>
 <script type="importmap">{"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.165.0/build/three.module.js","three/addons/":"https://cdn.jsdelivr.net/npm/three@0.165.0/examples/jsm/"}}</script>
 </head>
@@ -905,7 +910,15 @@ function findProducts(q,type){
 }
 function prodLine(p){return `${p.w}×${p.d}${p.h?"×H"+p.h:""}mm${p.kw?` · ${p.kw}kW`:""}${p.generic?" · 일반 규격":p.mine?" · 내가 입력":""}`;}
 // 블록에 제품 적용
-function applyProduct(block,p){ block.w=p.w; block.d=p.d; block.h=p.h; block.model=p.n; block.kw=p.kw; block.src=p.src||""; }
+function applyProduct(block,p){ block.w=p.w; block.d=p.d; block.h=p.h; block.model=p.n; block.kw=p.kw; block.src=p.src||""; if(p.kg) block.kg=p.kg; else delete block.kg; }
+// 장비 무게 (빈 상태, 물·얼음·재료 제외) — 같은 종류 업소용 장비의 일반적인 값. 제품 무게를 알면 선택 패널에서 고칠 수 있음
+const EQ_KG={espresso:w=>w<=600?45:w<=900?70:90,grinder:18,drip:15,coldbrew:12,showcase:w=>Math.max(60,Math.round(w/900*110)),ice:w=>w>=700?80:55,freezer:85,blender:6,hotwater:14,dispenser:12,
+  dishwasher:60,sterilizer:25,sink:w=>Math.max(12,Math.round(w/600*18)),induction:8,oven:45,waffle:9,pos:7,knock:2,autosteam:12,autotamp:11,tablefridge:w=>Math.max(60,Math.round(w/1500*95)),tablefreezer:w=>Math.max(60,Math.round(w/1200*85)),fridge25:110,fridge45:165};
+function blockKw(b){ if(!b||b.id==="WORK"||b.id==="PICKUP") return 0; if(b.kw!==undefined&&b.kw!==null&&b.kw!=="") return +b.kw||0; const sk=SPEC[b.id]?SPEC[b.id].kw:0; if(typeof sk==="object") return sk[b.w<=600?1:b.w<=900?2:3]||0; return +sk||0; }
+function blockKg(b){ if(!b||b.id==="WORK"||b.id==="PICKUP") return 0; if(b.kg!==undefined&&b.kg!==null&&b.kg!=="") return +b.kg||0; const f=EQ_KG[b.id]; return typeof f==="function"?f(b.w):(f||0); }
+const fmtKw=v=>v>=10?v.toFixed(1):v>=0.1?v.toFixed(2).replace(/0$/,""):v.toFixed(2);
+function barTotals(){ const all=[], by={}; [["front","프론트"],["back","백"],["side","옆"],["uf","프론트 하부"],["ub","백 하부"]].forEach(([k,n])=>listOf(k).forEach(b=>{ if(b.id==="WORK"||b.id==="PICKUP") return; all.push(b); by[n]=(by[n]||{kw:0,kg:0,n:0}); by[n].kw+=blockKw(b); by[n].kg+=blockKg(b); by[n].n++; }));
+  return {n:all.length, kw:all.reduce((a,b)=>a+blockKw(b),0), kg:all.reduce((a,b)=>a+blockKg(b),0), by}; }
 // 바 설계에 넣기 (상단 제품 검색에서)
 function putProductInBar(p){
   if(!BAR) buildBar();
@@ -1171,7 +1184,13 @@ function renderBar(){
   const legX=sh==="Lfront"?(right?M+fl-o.fd:M+o.fd):null;
   steps.forEach(([id,t])=>{const p0=find(id); if(!p0) return; const p={cx:legX===null?p0.cx:(right?Math.min(p0.cx,legX-180):Math.max(p0.cx,legX+180))}; svg+=`<g pointer-events="none"><circle cx="${p.cx}" cy="${FY-260}" r="65" fill="#6b4226"/><text x="${p.cx}" y="${FY-236}" font-size="70" fill="#fff" text-anchor="middle" font-weight="700">${t[0]}</text><text x="${p.cx}" y="${FY-355}" font-size="62" fill="#6b4226" text-anchor="middle" font-weight="700">${t.slice(2)}</text></g>`;});
   svg+=`</svg>`;
-  document.getElementById("barcanvas").innerHTML=svg;
+  const TT=barTotals(), pw=LAST&&LAST.power?LAST.power:+((document.getElementById("power")||{}).value||0);
+  document.getElementById("barcanvas").innerHTML=svg+`<div class="bartot"><b>배치 장비 ${TT.n}대 합계</b>
+    <div class="btrow"><span>총 전력</span><strong>${fmtKw(TT.kw)} kW</strong></div>
+    <div class="btsub">동시 사용(70%) 약 ${fmtKw(TT.kw*0.7)} kW${pw?` · 계약 ${pw}kW의 <em class="${TT.kw*0.7>pw?"over":TT.kw*0.7>pw*0.75?"tight":""}">${Math.round(TT.kw*0.7/pw*100)}%</em>`:""}</div>
+    <div class="btrow"><span>총 무게</span><strong>약 ${Math.round(TT.kg).toLocaleString()} kg</strong></div>
+    <div class="btsub">${Object.entries(TT.by).map(([k,v])=>`${k} ${Math.round(v.kg)}kg`).join(" · ")}</div>
+    <div class="btnote">무게는 빈 상태 추정치 (물·얼음·재료 제외)</div></div>`;
   bindDrag();
   renderElev(counters);
   renderBarSide(counters,pos,o);
@@ -1212,6 +1231,8 @@ function renderBarSide(counters,pos,o){
     ${sel?`<div class="panel selp"><h3>선택: ${nameOf(sel.b)}</h3><p class="desc">${sel.b.id==="WORK"?"남는 길이가 자동으로 작업대가 됩니다.":`${sel.b.model?`<b style="color:var(--ink)">${sel.b.model}</b><br>`:""}폭 ${sel.b.w}mm${sel.b.d?` × 깊이 ${sel.b.d}mm`:" (깊이 미지정)"}${sel.b.h?` × 높이 ${sel.b.h}mm`:""}${sel.b.kw?` · ${sel.b.kw}kW`:""}${sel.b.src?` · <a href="${sel.b.src}" target="_blank" rel="noopener">사양 출처</a>`:""}`}</p>
       <div class="selbtn"><button data-a="left">← 왼쪽</button><button data-a="right">오른쪽 →</button>${o.shape!=="line"?`${["uf","ub"].includes(sel.key)?`<button data-a="swap">${sel.key==="uf"?"백 카운터 아래로":"프론트 아래로"}</button>`:counters.filter(c=>c.key!==sel.key&&!(o.shape==="line")).map(c=>`<button data-a="to:${c.key}">→ ${c.name.replace(/ \(.*\)/,"")}</button>`).join("")}`:""}${sel.b.id!=="WORK"?`<button data-a="del">빼기</button>`:""}</div>
       ${sel.b.id!=="WORK"?(()=>{const n=sameGroup(sel.b).length;return `<div class="qtyrow"><span>수량</span><button data-q="-1" aria-label="한 대 빼기">−</button><b>${n}</b><button data-q="1" aria-label="한 대 더">+</button><small>${n>1?`같은 장비 ${n}대 배치됨`:"+를 누르면 바로 옆에 한 대 더 놓아요"}</small></div>`;})():""}
+      ${sel.b.id!=="WORK"&&sel.b.id!=="PICKUP"?(()=>{const kw=blockKw(sel.b), kg=blockKg(sel.b), n=sameGroup(sel.b).length; return `<div class="selstat"><div><em>전력</em><b>${fmtKw(kw)} kW</b><small>${kw>=3?"전용 회로 권장":kw>0?"일반 콘센트 가능 여부 확인":"전기 안 씀"}</small></div><div><em>무게</em><b>약 ${Math.round(kg)} kg</b><small>${sel.b.kg?"직접 입력값":"같은 종류 일반값"}</small></div>${n>1?`<div><em>${n}대 합계</em><b>${fmtKw(kw*n)} kW</b><small>약 ${Math.round(kg*n)} kg</small></div>`:""}</div>
+      <div class="selnum"><label class="wlab">전력(kW) <input type="number" min="0" step="0.05" inputmode="decimal" id="selKw" value="${+kw.toFixed(2)}"></label><label class="wlab">무게(kg) <input type="number" min="0" step="1" inputmode="numeric" id="selKg" value="${Math.round(kg)}"></label></div>`;})():""}
       ${sel.b.id!=="WORK"?`<label class="wlab">폭(mm) <input type="number" min="0" inputmode="numeric" id="selW" value="${sel.b.w}" step="10"></label>`:""}
       ${sel.b.id!=="WORK"&&sel.b.id!=="PICKUP"?prodPickerHtml(sel):""}</div>`
      :`<div class="panel"><p class="desc" style="margin:0">평면도의 장비를 <b>끌어서</b> 순서를 바꾸거나 다른 카운터로 옮길 수 있어요. 눌러서 선택하면 폭을 바꾸거나 뺄 수 있습니다.</p></div>`}
@@ -1224,6 +1245,8 @@ function renderBarSide(counters,pos,o){
   document.querySelectorAll(".qstep button").forEach(b=>b.onclick=()=>recQty(+b.parentNode.dataset.ri,+b.dataset.q));
   document.querySelectorAll(".qtyrow button").forEach(b=>b.onclick=()=>changeQty(+b.dataset.q));
   document.querySelectorAll(".blist li.u").forEach(li=>li.onclick=()=>{selUid=+li.dataset.uid; renderBar();});
+  const skw=document.getElementById("selKw"); if(skw) skw.onchange=()=>{const s=findBlock(selUid); if(s){ s.b.kw=Math.max(0,+skw.value||0); renderBar(); }};
+  const skg=document.getElementById("selKg"); if(skg) skg.onchange=()=>{const s=findBlock(selUid); if(s){ s.b.kg=Math.max(0,+skg.value||0); renderBar(); }};
   const sw=document.getElementById("selW"); if(sw) sw.onchange=()=>{const s=findBlock(selUid); if(s){s.b.w=Math.max(0,+sw.value||0); renderBar();}};
   if(sel&&sel.b.id!=="WORK"&&sel.b.id!=="PICKUP") bindProdPicker(sel);
 }
@@ -1625,7 +1648,7 @@ function equipSchedule(c){
   ["front","back","side","uf","ub"].forEach(k=>listOf(k).forEach(b=>{ if(b.id==="WORK"||b.id==="PICKUP") return; n++;
     const e=E.find(x=>x.id===b.id), r=b.rec!==undefined&&LAST?LAST.rec[b.rec]:null;
     const main=["espresso","grinder","autosteam","autotamp"].includes(b.id);
-    const sk=SPEC[b.id]?SPEC[b.id].kw:0; const kw=b.kw!==undefined?b.kw:(typeof sk==="object"?(sk[(LAST&&LAST.groups)||2]||0):sk);
+    const kw=blockKw(b);
     rows.push({code:`E-${String(n).padStart(2,"0")}`,name:e?e.name:b.id,model:b.model||"",where:where[k],w:Math.round(b.w),d:b.d||EQ_DD[b.id]||"",h:b.h||EQ_HH[b.id]||"",kw:kw,must:r?r.must:null,fin:main?(EQ_FIN[c.id]||"스테인리스"):(["ice","freezer","dishwasher","tablefridge","sink"].includes(b.id)?"스테인리스":"—")});
   }));
   return rows;
