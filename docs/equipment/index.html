@@ -281,6 +281,9 @@ ul.warnl li.ok::marker{color:var(--ok)}
 .selstat{display:grid;grid-template-columns:repeat(auto-fit,minmax(90px,1fr));gap:6px;margin:8px 0}.selstat>div{background:#f6f3ee;border-radius:8px;padding:7px 9px}.selstat em{display:block;font-style:normal;font-size:11.5px;color:var(--muted)}.selstat b{display:block;font-size:16px}.selstat small{font-size:11px;color:var(--muted)}
 .selnum{display:flex;gap:8px;flex-wrap:wrap}.selnum .wlab input{width:90px}
 @media(max-width:640px){.bartot{width:auto;margin-left:0}}
+.uxbox{background:#f6f3ee;border-radius:10px;padding:10px 12px;margin:8px 0;display:grid;gap:7px}.uxbox>b{font-size:13.5px}.uxbox>small{color:var(--muted);font-size:12px}
+.uxbar{position:relative;height:14px;background:#fff;border:1px solid var(--line);border-radius:4px;overflow:hidden}.uxbar i{position:absolute;top:0;bottom:0;background:#2b6f9e55;border-left:2px solid #2b6f9e;border-right:2px solid #2b6f9e}
+.uxbox .selbtn button{font-size:12.5px;padding:7px 10px}
 </style>
 <script type="importmap">{"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.165.0/build/three.module.js","three/addons/":"https://cdn.jsdelivr.net/npm/three@0.165.0/examples/jsm/"}}</script>
 </head>
@@ -969,13 +972,17 @@ const MOUNT={espresso:["top",540],grinder:["top",600],drip:["top",450],coldbrew:
  ice:["floor",840],freezer:["floor",1850],blender:["top",450],hotwater:["top",450],dispenser:["top",600],
  sink:["sink",300],induction:["top",100],oven:["top",550],waffle:["top",250],sterilizer:["top",600],pos:["top",400],
  autosteam:["top",620],autotamp:["top",286],knock:["flush",0],PICKUP:["flush",0],WORK:["flush",0],tablefridge:["under",800],tablefreezer:["under",800],dishwasher:["under",720],fridge25:["floor",1900],fridge45:["floor",1900]};
+// 카운터 아래 장비 위치: ux(카운터 왼쪽 끝에서 mm)가 있으면 그 자리, 없으면 앞 장비 바로 옆
+function underPos(list,len){ let u=0; return list.map(b=>{ const w=b.w||0; let x=(b.ux!==undefined&&b.ux!==null)?+b.ux:u; x=Math.max(0,Math.min(Math.max(0,len-w),x)); u=x+w; return {b,x,w}; }); }
+let LASTC=[];
+function underCounterOf(uid){ return LASTC.find(c=>c.under.some(b=>b.uid===uid)); }
 function mountOf(b){const m=MOUNT[b.id]||["top",400]; return [m[0], b.h||m[1]];}
 function elevOpts(){return {ch:Math.max(0,+document.getElementById("bCh").value||0), lh:+document.getElementById("bLh").value||0};}
 function elevCounterItems(c){
   // 직원이 마주 보는 방향 기준 왼→오. 프론트(위가 손님)는 평면도와 같고, 아래쪽 백 카운터는 반대.
   const rev=c.key!=="front"&&c.dir==="h";
   let t=0; const items=c.list.map(b=>{const L=b.id==="WORK"?flexW(c.list,c.len):b.w; const it={b,x:t,w:L}; t+=L; return it;}).filter(i=>i.w>0);
-  let u=0; const under=c.under.map(b=>{const it={b,x:u,w:b.w}; u+=b.w; return it;});
+  const under=underPos(c.under,c.len);
   if(rev){ const T=Math.max(c.len,t); items.forEach(i=>i.x=T-i.x-i.w); const U=c.len; under.forEach(i=>i.x=U-i.x-i.w); }
   return {items,under,rev};
 }
@@ -1145,9 +1152,9 @@ function renderBar(){
     const W=c.dir==="h"?c.len:c.depth, H=c.dir==="h"?c.depth:c.len;
     const BCp=barColors(); svg+=`<rect x="${c.x}" y="${c.y}" width="${W}" height="${H}" fill="${BCp?BCp.top:"#fff"}" stroke="#3b3027" stroke-width="16"/>`;
     // under
-    let u=0; c.under.forEach(b=>{ const L=b.w; const r=c.dir==="h"?[c.x+u,c.y+c.depth*0.55,L,c.depth*0.42]:[c.x+c.depth*0.03,c.y+u,c.depth*0.42,L];
-      svg+=`<g class="ublk" data-uid="${b.uid}" style="cursor:pointer"><rect x="${r[0]}" y="${r[1]}" width="${r[2]}" height="${r[3]}" fill="${b.uid===selUid?"#00000010":"#ffffff01"}" stroke="${b.uid===selUid?"#111":colorOf(b)}" stroke-width="${b.uid===selUid?16:10}" stroke-dasharray="40 25"/></g>`;
-      const tx=r[0]+r[2]/2, ty=r[1]+r[3]/2, ufs=Math.min(70,L/11); svg+=`<text pointer-events="none" x="${tx}" y="${ty}" font-size="${ufs}" fill="${colorOf(b)}" text-anchor="middle" dominant-baseline="middle" ${c.dir==="v"?`transform="rotate(90 ${tx} ${ty})"`:""}>아래: ${b.model||nameOf(b)} ${L}${b.d?"×"+b.d:""}</text>`; u+=L; });
+    underPos(c.under,c.len).forEach(({b,x:u})=>{ const L=b.w; const r=c.dir==="h"?[c.x+u,c.y+c.depth*0.55,L,c.depth*0.42]:[c.x+c.depth*0.03,c.y+u,c.depth*0.42,L];
+      svg+=`<g class="ublk" data-uid="${b.uid}" data-v="${c.dir==="v"?1:0}" style="cursor:${c.dir==="v"?"ns-resize":"ew-resize"}"><rect x="${r[0]}" y="${r[1]}" width="${r[2]}" height="${r[3]}" fill="${b.uid===selUid?"#00000010":"#ffffff01"}" stroke="${b.uid===selUid?"#111":colorOf(b)}" stroke-width="${b.uid===selUid?16:10}" stroke-dasharray="40 25"/></g>`;
+      const tx=r[0]+r[2]/2, ty=r[1]+r[3]/2, ufs=Math.min(70,L/11); svg+=`<text pointer-events="none" x="${tx}" y="${ty}" font-size="${ufs}" fill="${colorOf(b)}" text-anchor="middle" dominant-baseline="middle" ${c.dir==="v"?`transform="rotate(90 ${tx} ${ty})"`:""}>아래: ${b.model||nameOf(b)} ${L}${b.d?"×"+b.d:""}</text>`; });
     let t=0;
     c.list.forEach(b=>{
       const L=b.id==="WORK"?flexW(c.list,c.len):b.w; if(L<=0){t+=0;return;}
@@ -1193,7 +1200,7 @@ function renderBar(){
     <div class="btnote">무게는 빈 상태 추정치 (물·얼음·재료 제외)</div></div>`;
   bindDrag();
   renderElev(counters);
-  renderBarSide(counters,pos,o);
+  LASTC=counters; renderBarSide(counters,pos,o);
 }
 function sumW(list,len){return list.filter(b=>b.id!=="WORK").reduce((a,b)=>a+b.w,0)+(list.some(b=>b.id==="WORK")?0:0);}
 
@@ -1213,6 +1220,8 @@ function renderBarSide(counters,pos,o){
   }
   counters.forEach(c=>{const u=sumW(c.list,c.len); if(u>c.len) chk.push(["bad",`${c.name}: 장비 폭 ${u.toLocaleString()}mm가 카운터 ${c.len.toLocaleString()}mm보다 ${(u-c.len).toLocaleString()}mm 깁니다. 빨간 점선 장비를 다른 카운터로 옮기거나 카운터를 늘리세요.`]);
     else { const w=c.len-u; if(c.key==="front"&&w<800) chk.push(["warn",`프론트 작업 공간이 ${w}mm뿐이에요. 음료를 만들려면 800mm 이상 남기는 게 좋아요.`]); }
+    const up2=underPos(c.under,c.len).slice().sort((a,b)=>a.x-b.x); for(let i=1;i<up2.length;i++){ const ov=up2[i-1].x+up2[i-1].w-up2[i].x; if(ov>0) chk.push(["bad",`${c.name} 아래 ${up2[i-1].b.model||nameOf(up2[i-1].b)}와 ${up2[i].b.model||nameOf(up2[i].b)}가 ${ov}mm 겹쳐요. 점선 상자를 끌어 떼어 놓으세요.`]); }
+    { const ec=elevCounterItems(c); ec.items.filter(i=>i.b.id==="sink").forEach(sk=>ec.under.forEach(u=>{ if(u.x<sk.x+sk.w&&sk.x<u.x+u.w) chk.push(["warn",`${c.name.replace(/ \(.*\)/,"")}의 싱크대 바로 아래에 ${u.b.model||nameOf(u.b)}가 있어요. 싱크 배수관·트랩 자리라 보통 들어가지 않아요. 옆으로 옮기세요.`]); })); }
     const ul=c.under.reduce((a,b)=>a+b.w,0); if(ul>c.len) chk.push(["warn",`${c.name} 아래 장비(${ul.toLocaleString()}mm)가 카운터보다 깁니다.`]);
     c.list.filter(b=>b.d&&b.d>c.depth&&(MOUNT[b.id]||[])[0]==="floor").forEach(b=>chk.push(["warn",`${b.model||nameOf(b)}는 바닥에 서는 스탠드형이라 ${c.name} 라인보다 ${b.d-c.depth}mm 앞으로 나와요. 통로 폭과 문 여는 공간(약 600mm)을 확인하세요.`]));
     c.list.filter(b=>b.d&&b.d>c.depth&&(MOUNT[b.id]||[])[0]!=="floor").forEach(b=>chk.push(["bad",`${b.model||nameOf(b)} 깊이 ${b.d}mm가 ${c.name} 깊이 ${c.depth}mm보다 깊어요. 카운터 깊이를 늘리거나 다른 카운터로 옮기세요.`]));
@@ -1233,6 +1242,10 @@ function renderBarSide(counters,pos,o){
       ${sel.b.id!=="WORK"?(()=>{const n=sameGroup(sel.b).length;return `<div class="qtyrow"><span>수량</span><button data-q="-1" aria-label="한 대 빼기">−</button><b>${n}</b><button data-q="1" aria-label="한 대 더">+</button><small>${n>1?`같은 장비 ${n}대 배치됨`:"+를 누르면 바로 옆에 한 대 더 놓아요"}</small></div>`;})():""}
       ${sel.b.id!=="WORK"&&sel.b.id!=="PICKUP"?(()=>{const kw=blockKw(sel.b), kg=blockKg(sel.b), n=sameGroup(sel.b).length; return `<div class="selstat"><div><em>전력</em><b>${fmtKw(kw)} kW</b><small>${kw>=3?"전용 회로 권장":kw>0?"일반 콘센트 가능 여부 확인":"전기 안 씀"}</small></div><div><em>무게</em><b>약 ${Math.round(kg)} kg</b><small>${sel.b.kg?"직접 입력값":"같은 종류 일반값"}</small></div>${n>1?`<div><em>${n}대 합계</em><b>${fmtKw(kw*n)} kW</b><small>약 ${Math.round(kg*n)} kg</small></div>`:""}</div>
       <div class="selnum"><label class="wlab">전력(kW) <input type="number" min="0" step="0.05" inputmode="decimal" id="selKw" value="${+kw.toFixed(2)}"></label><label class="wlab">무게(kg) <input type="number" min="0" step="1" inputmode="numeric" id="selKg" value="${Math.round(kg)}"></label></div>`;})():""}
+      ${["uf","ub"].includes(sel.key)?(()=>{const c=underCounterOf(sel.b.uid); if(!c) return ""; const it=underPos(c.under,c.len).find(i=>i.b.uid===sel.b.uid); return `<div class="uxbox"><b>카운터 아래 위치</b><small>평면도의 점선 상자를 좌우로 끌거나 아래에서 조절하세요. ${c.name.replace(/ \(.*\)/,"")} 길이 ${c.len.toLocaleString()}mm</small>
+        <div class="uxbar"><i style="left:${it.x/c.len*100}%;width:${Math.min(100,it.w/c.len*100)}%"></i></div>
+        <div class="selnum"><label class="wlab">왼쪽 끝에서(mm) <input type="number" min="0" step="10" inputmode="numeric" id="selUx" value="${Math.round(it.x)}"></label></div>
+        <div class="selbtn"><button data-ux="start">⇤ 왼쪽 끝</button><button data-ux="-100">◀ 100</button><button data-ux="100">100 ▶</button><button data-ux="end">오른쪽 끝 ⇥</button>${sel.b.ux!==undefined?`<button data-ux="auto">자동 정렬</button>`:""}</div></div>`;})():""}
       ${sel.b.id!=="WORK"?`<label class="wlab">폭(mm) <input type="number" min="0" inputmode="numeric" id="selW" value="${sel.b.w}" step="10"></label>`:""}
       ${sel.b.id!=="WORK"&&sel.b.id!=="PICKUP"?prodPickerHtml(sel):""}</div>`
      :`<div class="panel"><p class="desc" style="margin:0">평면도의 장비를 <b>끌어서</b> 순서를 바꾸거나 다른 카운터로 옮길 수 있어요. 눌러서 선택하면 폭을 바꾸거나 뺄 수 있습니다.</p></div>`}
@@ -1245,6 +1258,11 @@ function renderBarSide(counters,pos,o){
   document.querySelectorAll(".qstep button").forEach(b=>b.onclick=()=>recQty(+b.parentNode.dataset.ri,+b.dataset.q));
   document.querySelectorAll(".qtyrow button").forEach(b=>b.onclick=()=>changeQty(+b.dataset.q));
   document.querySelectorAll(".blist li.u").forEach(li=>li.onclick=()=>{selUid=+li.dataset.uid; renderBar();});
+  const uxSet=v=>{ const s=findBlock(selUid); const c=s&&underCounterOf(s.b.uid); if(!c) return; const it=underPos(c.under,c.len).find(i=>i.b.uid===s.b.uid);
+    if(v==="auto"){ delete s.b.ux; renderBar(); return; }
+    let nx=v==="start"?0:v==="end"?c.len-it.w:typeof v==="number"?v:it.x+(+v); s.b.ux=Math.round(Math.max(0,Math.min(c.len-it.w,nx))/10)*10; renderBar(); };
+  document.querySelectorAll("[data-ux]").forEach(b=>b.onclick=()=>uxSet(b.dataset.ux));
+  const sux=document.getElementById("selUx"); if(sux) sux.onchange=()=>uxSet(Math.max(0,+sux.value||0));
   const skw=document.getElementById("selKw"); if(skw) skw.onchange=()=>{const s=findBlock(selUid); if(s){ s.b.kw=Math.max(0,+skw.value||0); renderBar(); }};
   const skg=document.getElementById("selKg"); if(skg) skg.onchange=()=>{const s=findBlock(selUid); if(s){ s.b.kg=Math.max(0,+skg.value||0); renderBar(); }};
   const sw=document.getElementById("selW"); if(sw) sw.onchange=()=>{const s=findBlock(selUid); if(s){s.b.w=Math.max(0,+sw.value||0); renderBar();}};
@@ -1277,7 +1295,15 @@ function actSel(a){
 }
 function bindDrag(){
   const svg=document.getElementById("barsvg"); if(!svg) return;
-  svg.querySelectorAll(".ublk").forEach(g=>g.addEventListener("click",()=>{const u=+g.dataset.uid; selUid=selUid===u?null:u; renderBar();}));
+  svg.querySelectorAll(".ublk").forEach(g=>g.addEventListener("pointerdown",ev=>{
+    ev.preventDefault(); ev.stopPropagation(); const uid=+g.dataset.uid, v=g.dataset.v==="1", c=underCounterOf(uid); if(!c) return;
+    const it=underPos(c.under,c.len).find(i=>i.b.uid===uid), start=pt(ev); let moved=false, d=0;
+    g.setPointerCapture(ev.pointerId);
+    const mv=e=>{ const p=pt(e); d=v?p.y-start.y:p.x-start.x; if(Math.abs(d)>30) moved=true; const nx=Math.max(0,Math.min(c.len-it.w,it.x+d)); g.setAttribute("transform",v?`translate(0 ${nx-it.x})`:`translate(${nx-it.x} 0)`); g.style.opacity=.8; };
+    const up=()=>{ g.removeEventListener("pointermove",mv); g.removeEventListener("pointerup",up);
+      if(!moved){ selUid=selUid===uid?null:uid; renderBar(); return; }
+      it.b.ux=Math.round(Math.max(0,Math.min(c.len-it.w,it.x+d))/10)*10; selUid=uid; renderBar(); barMsg(`${it.b.model||nameOf(it.b)}를 ${c.name.replace(/ \(.*\)/,"")} 왼쪽 끝에서 ${it.b.ux.toLocaleString()}mm 자리로 옮겼어요.`); };
+    g.addEventListener("pointermove",mv); g.addEventListener("pointerup",up); }));
   const pt=ev=>{const p=svg.createSVGPoint();p.x=ev.clientX;p.y=ev.clientY;return p.matrixTransform(svg.getScreenCTM().inverse());};
   svg.querySelectorAll(".blk").forEach(g=>{
     g.addEventListener("pointerdown",ev=>{
@@ -2067,16 +2093,19 @@ function build(host,ar){
   };
   const woodTray=woodM?matFor(woodM[3],col(woodM),0.3,0.2):plain("#b08a5f",0.6);
   // 카운터 아래 장비 (테이블 냉장고·식기세척기 등): 직원 쪽으로 문이 보이게
-  const placeUnder=(list,len,zFace,faceSign)=>{
+  const placeUnder=(list,len,zFace,faceSign,fullMm)=>{
     if(!list||!list.length) return; const tot=list.reduce((a,b)=>a+mm(b.w),0), kf=tot>len-0.1?(len-0.1)/tot:1; let t=0;
-    list.forEach(b=>{ const L=mm(b.w)*kf, x=-len/2+0.05+t+L/2; t+=L; if(L<=0) return; const hh=Math.min(mm(b.h||(b.id==="dishwasher"?720:800)),ch-0.14), dp=0.5;
+    list.forEach(b=>{ const L=mm(b.w)*kf; let x;
+      if(b.ux!==undefined&&b.ux!==null&&fullMm){ const fr=Math.max(0,Math.min(1,b.ux/fullMm)); x=Math.max(-len/2+L/2,Math.min(len/2-L/2,-len/2+fr*len+L/2)); t=x+L/2+len/2; }
+      else { x=-len/2+0.05+t+L/2; t+=L; }
+      if(L<=0) return; const hh=Math.min(mm(b.h||(b.id==="dishwasher"?720:800)),ch-0.14), dp=0.5;
       const zc2=zFace-faceSign*(dp/2)+faceSign*0.006; box(L-0.01,hh,dp,steel,x,0.1+hh/2,zc2,0.006);
       const nDoor=b.id==="dishwasher"?1:Math.max(1,Math.round(L/0.6));
       for(let i=1;i<nDoor;i++) box(0.004,hh-0.04,0.004,plain("#6c7075",0.4,0.6),x-L/2+L*i/nDoor,0.1+hh/2,zFace+faceSign*0.008);
       for(let i=0;i<nDoor;i++){ const hx2=x-L/2+L*(i+0.5)/nDoor; box(Math.min(0.3,L/nDoor*0.6),0.016,0.02,steel,hx2,0.1+hh-0.06,zFace+faceSign*0.02,0.004); }
       box(L-0.03,0.04,0.004,plain("#202224",0.8),x,0.12,zFace+faceSign*0.008); });
   };
-  if(bar){ placeRow([...bar.back,...(bar.side||[]).filter(b=>b.id!=="WORK")],bw,bd/2,bd,1); placeUnder(bar.underB,bw,bd,1); }
+  if(bar){ placeRow([...bar.back,...(bar.side||[]).filter(b=>b.id!=="WORK")],bw,bd/2,bd,1); placeUnder(bar.underB,bw,bd,1,bar.blen); }
 
   // 앞 카운터: 골 패널 몸체 + 오른쪽 둥근 끝 + 하부 간접조명
   const rr=fd/2, straight=flen-rr, cz=zCounterF-fd/2, cx0=-flen/2+straight/2;
@@ -2096,7 +2125,7 @@ function build(host,ar){
   const ctop=new THREE.Mesh(new THREE.CylinderGeometry(rr+0.025,rr+0.025,0.04,48,1,false,0,Math.PI),topMatF); ctop.position.set(-flen/2+straight,ch-0.02,cz+0.01); add(ctop);
   // 상판 아래 그림자 라인
   box(flen-0.02,0.02,fd-0.02,plain("#000",1),cx0+rr/2-0.01,ch-0.05,cz).material.transparent=false;
-  if(bar){ placeRow(bar.front,flen,cz-0.02,fd,-1); placeUnder(bar.underF,straight,zCounterF-fd,-1); }
+  if(bar){ placeRow(bar.front,flen,cz-0.02,fd,-1); placeUnder(bar.underF,straight,zCounterF-fd,-1,bar.flen); }
   // 소품: 식물, 컵 스택, 메뉴 스탠드
   for(let i=0;i<3;i++){ for(let j=0;j<5;j++){ const pc=new THREE.Mesh(new THREE.CylinderGeometry(0.042,0.033,0.11,20,1,true),plain(i===1?"#cfa97a":"#e9dcc6",0.8)); pc.material.side=THREE.DoubleSide; pc.position.set(-flen/2+0.5+i*0.11,ch+0.055+j*0.035,cz+0.15); add(pc);} }
   const menu=box(0.16,0.22,0.01,plain("#f3ece0",0.8),flen/2-rr-0.55,ch+0.12,cz+0.18); menu.rotation.x=-0.25; box(0.18,0.24,0.008,plain("#8a6a50",0.6),flen/2-rr-0.55,ch+0.12,cz+0.172).rotation.x=-0.25;
