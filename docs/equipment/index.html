@@ -410,7 +410,7 @@ ul.warnl li.ok::marker{color:var(--ok)}
   <div class="grid" id="grid"></div>
 </div></section>
 <section class="view" id="v-manual"><div class="mwrap">
-  <div class="mhead"><div><h1>장비 매뉴얼 <small>에스프레소 머신 · 그라인더</small></h1><p id="mstat"></p>
+  <div class="mhead"><div><h1>장비 매뉴얼 <small>에스프레소 머신 · 그라인더 · 전자동</small></h1><p id="mstat"></p>
   <p class="mdisc">대 수입회사 › 중 수입제품(브랜드) › 소 제품명 › 소소 사용자 매뉴얼. 수입사는 각 회사 홈페이지·보도·박람회 소개의 자체 표기 기준(2026년 11월 조사)이며, 같은 브랜드를 여러 회사가 들여오는 경우도 있어요. 한글 매뉴얼이 없는 제품은 제조사 원문 링크와 함께 핵심 사용 요령을 한글로 정리했어요(원문 전체 번역이 아닌 요약).</p></div></div>
   <div class="mtools"><input id="mq" type="search" placeholder="수입사·브랜드·모델 검색 (예: 슬레이어, EK43, 에이덴)"><div id="mchips"><button class="on" data-c="all">전체</button><button data-c="m">에스프레소 머신</button><button data-c="g">그라인더</button></div></div>
   <div class="mgrid"><div id="mtree"></div><div id="mdetail"></div></div>
@@ -846,6 +846,13 @@ const MG={ // 소소: 사용자 매뉴얼 가이드 (원문 요약이 아닌 일
   ["청소",["매일 백플러시·샤워스크린 브러시, 상판 위 탭 주변 물기 제거.","하부 모듈 주변에 물이 고이지 않게 배수 상태를 주 1회 확인합니다."]],
   ["정기 교체·점검",["가스켓·스크린, 정수필터 교체는 일반 머신과 같고, 하부 모듈 점검은 수입사 기사에게."]],
   ["자주 생기는 문제",["탭에서 물이 약함 → 하부 모듈 급수·필터 확인."]]]},
+ lever:{t:"레버(스프링 피스톤) 머신",s:[
+  ["설치 전",["레버를 끝까지 내리고 올릴 공간(머신 위·앞)이 필요해요. 보일러가 커서 무게가 많이 나가니 받침대 하중을 확인합니다."]],
+  ["매일 시작",["보일러 압력이 올라올 때까지 충분히 예열하고, 그룹이 데워졌는지 플러시로 확인합니다."]],
+  ["추출",["포터필터 장착 → 레버를 끝까지 내려 프리인퓨전(몇 초) → 레버를 놓으면 스프링이 압력을 만들며 추출돼요.","레버가 올라가는 동안 손을 떼지 말고 천천히 따라가며, 추출 중 포터필터를 절대 빼지 마세요(압력이 남아 있어요)."]],
+  ["청소",["매일 샤워스크린 브러시와 그룹 주변 커피가루 제거. 레버 머신은 일반 백플러시가 안 되는 모델이 많으니 원문 매뉴얼의 세척 방법을 따르세요."]],
+  ["정기 교체·점검",["피스톤 가스켓·스프링은 사용량에 따라 교체 — 레버가 뻑뻑하거나 물이 새면 점검 신호.","보일러 스케일 관리(정수필터)가 특히 중요합니다."]],
+  ["자주 생기는 문제",["추출 압력이 약함 → 분쇄도, 피스톤 가스켓 마모.","레버가 튕겨 올라옴 → 추출 중 손을 떼지 말고, 분쇄가 너무 굵지 않은지 확인."]]]},
  g_od:{t:"상업용 온디맨드 그라인더",s:[
   ["설치 전",["단단하고 평평한 곳, 뒤쪽 통풍 공간을 둡니다. 호퍼 장착 후 셔터를 열어야 원두가 내려가요."]],
   ["매일 시작",["첫 몇 g은 버리고(시즈닝) 분쇄도·도징 시간 또는 무게를 확인합니다.","원두를 바꾸면 분쇄도를 조금씩 바꾸고, 바꾼 뒤엔 한 번 갈아 버린 다음 추출합니다."]],
@@ -903,6 +910,8 @@ const MANUAL_DATA=[
     {n:"E98 UP Premium",g:"hx",tag:"2·3그룹"}]},
    {b:"로켓 에스프레소 Rocket Espresso",c:"m",maker:"Rocket Espresso Milano (이탈리아)",models:[
     {n:"Appartamento",g:"home",tag:"1그룹 HX"},{n:"Boxer",g:"hx",tag:"1·2그룹"},{n:"R9 One",g:"profile",tag:"1그룹"}]},
+   {b:"키스반더웨스턴 Kees van der Westen",c:"m",maker:"Kees van der Westen (네덜란드)",models:[
+    {n:"Spiritello",g:"lever",tag:"1그룹 레버",pts:["두리트레이딩이 2023 서울카페쇼에서 공개한 브랜드 최초의 1그룹 레버 머신이에요."],src:[MS("2023 서울카페쇼 국내 첫 출시 신제품 (블랙워터이슈)","https://bwissue.com/expo/2246730","imp")]}]},
    {b:"모드바 Modbar",c:"m",maker:"Modbar (La Marzocco 그룹, 미국)",makerSrc:MS("Modbar 문서 모음 (La Marzocco USA)","https://lamarzoccousa.com/?p=3432","mfr"),models:[
     {n:"Espresso AV",g:"modular",tag:"언더카운터"},{n:"Steam",g:"modular",tag:"언더카운터 스팀"},{n:"Pour-Over",g:"modular",tag:"언더카운터 브루"}]},
    {b:"산레모 Sanremo",c:"m",maker:"Sanremo Coffee Machines (이탈리아 트레비소)",note:"두리트레이딩과 (주)에이덴이 모두 산레모 공식 수입원으로 표기하고 있어요. 구입처에 A/S 주체를 확인하세요.",models:[
@@ -952,7 +961,9 @@ const MANUAL_DATA=[
    {b:"산레모 Sanremo",c:"m",maker:"Sanremo Coffee Machines (이탈리아)",note:"두리트레이딩도 산레모 공식 수입원으로 표기해요.",makerSrc:MS("Sanremo 원문 매뉴얼 목록 (ManualsLib)","https://www.manualslib.com/brand/sanremo/coffee-maker.html","mir"),models:[
     {n:"Opera 2.0",g:"multi",tag:"2·3그룹"},{n:"Cafe Racer",g:"multi",tag:"2·3그룹"},{n:"X-One",g:"multi",tag:"1·2그룹"},
     {n:"YOU",g:"profile",tag:"1그룹",pts:["에이덴 매뉴얼 게시판에 'YOU 펌웨어 업데이트 안내(2026.03.30)'가 올라와 있어요 — 업데이트 전 내용을 확인하세요."],src:[MS("에이덴 매뉴얼 게시판 (YOU 펌웨어 안내)","https://eiden.co.kr/download-manual","imp")]}]},
-   {b:"씨메 CIME",c:"m",maker:"CIME (이탈리아)",makerSrc:MS("에이덴 매뉴얼 게시판 (CIME 가스켓 교체 영상 등)","https://eiden.co.kr/download-manual","imp"),models:[{n:"CO-03 NEO",g:"hx",tag:"1~3그룹"},{n:"CO-05 Signature",g:"multi",tag:"2그룹"},{n:"New Signature",g:"multi",tag:"2그룹"}]},
+   {b:"씨메 CIME",c:"m",maker:"CIME (이탈리아)",makerSrc:MS("에이덴 매뉴얼 게시판 (CIME 가스켓 교체 영상 등)","https://eiden.co.kr/download-manual","imp"),models:[{n:"CO-03 NEO",g:"hx",tag:"1~3그룹"},{n:"The New 05 PID",g:"multi",tag:"2그룹 (2026 신제품)",pts:["2017년 모델의 후속 기종으로, 스테인리스 '어드밴스드 보일러'를 탑재해 기존 대비 작동 성능을 30% 높였다고 에이덴이 밝혔어요(2026 서울카페쇼 공개)."],src:[MS("씨메 더 뉴 05 PID 공개 기사 (내외경제TV)","https://www.nbntv.co.kr/news/articleView.html?idxno=4026732","imp")]},{n:"CO-05 Signature",g:"multi",tag:"2그룹"},{n:"New Signature",g:"multi",tag:"2그룹"}]},
+   {b:"이쪼 IZZO",c:"m",maker:"IZZO (이탈리아 나폴리)",makerSrc:MS("이쪼 레버머신 사양 (에이덴, 한글)","https://www.eiden.co.kr/manual-izzo","ko"),models:[
+    {n:"IZZO 레버 (1~5그룹)",g:"lever",tag:"레버",pts:["전자 PID 온도 제어, 단열 처리된 온수·스팀 완드.","1그룹 보일러 5L·1,750W·64kg / 2그룹 12L·3,500W·77kg / 3그룹 18L·5,500W·88kg (에이덴 표기).","2그룹 이상은 220V/380V 선택."]}]},
    {b:"크렘 Crem",c:"m",maker:"Crem International (스페인)",models:[{n:"ONE",g:"home",tag:"1그룹"},{n:"Onyx Pro",g:"multi",tag:"2그룹"},{n:"EX3",g:"hx",tag:"2·3그룹"}]},
    {b:"라심발리 La Cimbali",c:"m",maker:"Gruppo Cimbali (이탈리아)",models:[
     {n:"S15",g:"superauto",tag:"전자동"},
@@ -973,23 +984,73 @@ const MANUAL_DATA=[
     {n:"EVO2",g:"multi",tag:"2~4그룹",pts:["그룹별 독립 보일러(멀티보일러) 구조 — 그룹마다 온도를 따로 맞출 수 있어요."]},
     {n:"XT (Barista·Classic)",g:"profile",tag:"2·3그룹"},{n:"Zero (Barista·Classic)",g:"multi",tag:"2·3그룹"},{n:"Studio / Studio Aqua",g:"home",tag:"1그룹"},{n:"Mina",g:"home",tag:"1그룹"}]},
    {b:"안핌 Anfim",c:"g",maker:"Anfim (이탈리아)",models:[{n:"SP2",g:"g_od",tag:"온디맨드"}]}]},
- {n:"(주)코디아",en:"CODIA",note:"경기 안산. 란실리오 한국 공식 수입(대행)사로 표기 — 실비아 프로 X 국내 정식 출시(2024).",site:"https://www.ranciliogroup.com/rancilio/silvia-pro-x/",basis:[MS("란실리오 실비아 프로 X 정식출시 기사 (글로벌이코노믹)","https://www.g-enews.com/article/ICT/2024/06/2024060509155360423b60030fa2_1")],
+ {n:"(주)코디아 · 프레소",en:"CODIA / Presso",note:"경기 안산. 쇼핑몰 '프레소(presso.co.kr)'를 운영하며 가찌아·바라짜·ROK·말코닉 한국 공식 수입사로 표기. 란실리오 한국 공식 수입(대행)사, 베제라 가정용 판매. 대표전화 1644-7085.",site:"https://presso.co.kr/category/rok/877/",basis:[MS("란실리오 실비아 프로 X 정식출시 기사 (글로벌이코노믹)","https://www.g-enews.com/article/ICT/2024/06/2024060509155360423b60030fa2_1"),MS("프레소 베제라 카테고리 (회사명 (주)코디아)","https://presso.co.kr/category/베제라/644/")],
   brands:[{b:"란실리오 Rancilio",c:"m",maker:"Rancilio Group (이탈리아 파라비아고)",makerSrc:MS("Silvia Pro X 제조사 제품 페이지","https://www.ranciliogroup.com/rancilio/silvia-pro-x/","mfr"),models:[
     {n:"Silvia Pro X",g:"home",tag:"1그룹 듀얼보일러",pts:["두 개의 PID로 커피·스팀 보일러 온도를 따로 제어하고, 소프트 인퓨전 기능이 있어요.","세척 시기가 되면 화면이 백플러시 단계(CL1~CL3)를 안내합니다."]},
-    {n:"Silvia",g:"home",tag:"1그룹 싱글보일러",pts:["싱글 보일러라 추출 후 스팀을 쓰려면 스팀 스위치를 켜고 온도가 오를 때까지 기다려야 해요."]}]}]},
+    {n:"Silvia",g:"home",tag:"1그룹 싱글보일러",pts:["싱글 보일러라 추출 후 스팀을 쓰려면 스팀 스위치를 켜고 온도가 오를 때까지 기다려야 해요."]},
+    {n:"Rocky (도저리스)",g:"g_home",tag:"그라인더",pts:["에스프레소용, 40단계 분쇄도(판매처 표기)."]}]},
+   {b:"베제라 Bezzera (가정용)",c:"m",maker:"Bezzera (이탈리아 밀라노)",models:[{n:"BZ07 PM",g:"home",tag:"1그룹"}]},
+   {b:"말코닉 Mahlkönig (가정용)",c:"g",maker:"Mahlkönig (독일)",models:[{n:"X54",g:"g_home",tag:"가정용 올라운드",src:[MS("Mahlkönig 원문 매뉴얼 목록 (ManualsLib)","https://www.manualslib.com/brand/mahlkonig/grinder.html","mir")]},{n:"X64",g:"g_home",tag:"가정용 올라운드"}]},
+   {b:"ROK",c:"m",maker:"ROK (영국)",models:[{n:"GC MANO",g:"lever",tag:"수동 레버"},{n:"ROK PRESSO",g:"lever",tag:"수동"}]}]},
  {n:"주식회사 디브릿지 (시네소코리아)",en:"D-Bridge",note:"시네소 에스프레소 머신 한국 공식 수입원으로 표기(시네소코리아 공식 계정). 2022년 보도에서는 ES1의 국내 판매처가 기센코리아로 소개된 적이 있어요 — 구입 시 현재 수입원을 확인하세요.",site:"https://www.instagram.com/synessokorea/",basis:[MS("시네소코리아 공식 계정","https://www.instagram.com/synessokorea/"),MS("ES1 출시 소식 (블랙워터이슈, 2022)","https://bwissue.com/expo/1829154")],
   brands:[{b:"시네소 Synesso",c:"m",maker:"Synesso (미국 시애틀)",makerSrc:MS("Synesso 원문 매뉴얼 목록 (ManualsLib)","https://www.manualslib.com/brand/synesso/coffee-maker.html","mir"),models:[
     {n:"MVP Hydra",g:"profile",tag:"2·3그룹",pts:["그룹마다 펌프·모터가 따로 있어 그룹별로 다른 압력, 4단계 압력 램핑을 쓸 수 있어요."]},
     {n:"S200 / S300",g:"multi",tag:"2·3그룹",pts:["S 시리즈는 완전 볼류메트릭(설정 추출량 최대 6개)에 외장 펌프·모터 구조예요."]},
     {n:"ES1",g:"home",tag:"1그룹 프로슈머"}]}]},
  {n:"오진양행",en:"Ojin",note:"매니토웍 제빙기·서마플랜 등 프리미엄 장비 수입유통. 판매처 안내에서 유레카 한국 공식 수입사로 표기. (2019년엔 빅토리아 아르두이노 독점 수입 — 현재 수입원은 동현테크)",site:"https://unspecialty.com/product/%EC%83%81%EC%8B%9C-%ED%8C%90%EB%A7%A4-%EC%9C%A0%EB%A0%88%EC%B9%B4-%EB%AF%B8%EB%87%BD/194/",basis:[MS("유레카 미뇽 판매처 안내 (오진양행 공식 수입사 표기)","https://unspecialty.com/product/%EC%83%81%EC%8B%9C-%ED%8C%90%EB%A7%A4-%EC%9C%A0%EB%A0%88%EC%B9%B4-%EB%AF%B8%EB%87%BD/194/"),MS("오진양행 VA 독점 수입 기사 (2019)","https://news.bizwatch.co.kr/article/consumer/2019/08/06/0008")],
-  brands:[{b:"유레카 Eureka",c:"g",maker:"Eureka (이탈리아 피렌체)",note:"일부 판매처는 (주)뮤제오·엘로치오를 수입자로 표기한 상품도 있어요(병행 수입).",models:[{n:"Mignon (Specialita 등)",g:"g_home",tag:"소형 온디맨드"}]}]},
+  brands:[{b:"써모플랜 Thermoplan",c:"m",maker:"Thermoplan (스위스)",models:[{n:"Black&White4 CTS",g:"superauto",tag:"전자동",pts:["2024~2027 월드 라떼 아트 챔피언십(WLAC) 공식 머신 — 전자동 머신 최초(오진양행 발표).","모듈 구조라 사용·유지보수가 쉽고 밀크폼 품질이 강점이라고 소개해요."],src:[MS("오진양행 공지 — BW4 CTS WLAC 공식 머신","https://ohjin.co.kr/bbs/board.php?bo_table=notice&wr_id=21","imp")]}]},
+   {b:"유레카 Eureka",c:"g",maker:"Eureka (이탈리아 피렌체)",note:"일부 판매처는 (주)뮤제오·엘로치오를 수입자로 표기한 상품도 있어요(병행 수입).",models:[{n:"Mignon (Specialita 등)",g:"g_home",tag:"소형 온디맨드"}]}]},
  {n:"훼마코리아",en:"Faema Korea",note:"서울 중랑구. 홈페이지에 훼마 '한국공식수입원'·전국 지사 A/S로 표기. 두리트레이딩도 훼마 공식 수입원으로 표기하고 있어요.",site:"http://faemakorea.net/sub/teorema.php",basis:[MS("훼마코리아 제품소개","http://faemakorea.net/sub/teorema.php")],
   brands:[{b:"훼마 Faema",c:"m",maker:"Faema (Gruppo Cimbali)",models:[
-    {n:"E98 / E98 RE Tall",g:"hx",tag:"2·3그룹"},{n:"E61 Limited",g:"hx",tag:"2·3그룹"},{n:"E71",g:"multi",tag:"2·3그룹",src:[MS("E71 원문 매뉴얼 열람 (ManualsLib)","https://www.manualslib.com/products/Faema-E71-11806120.html","mir")]},{n:"Teorema",g:"hx",tag:"2·3그룹"}]}]},
- {n:"프레소 (Presso)",en:"Presso",note:"쇼핑몰에 가찌아·바라짜·ROK·말코닉 한국 공식 수입사로 표기(가정용 중심, A/S 접수).",site:"https://presso.co.kr/category/rok/877/",basis:[MS("프레소 공식몰","https://presso.co.kr/category/rok/877/")],
-  brands:[{b:"말코닉 Mahlkönig (가정용)",c:"g",maker:"Mahlkönig (독일)",models:[{n:"X54",g:"g_home",tag:"가정용 올라운드",src:[MS("Mahlkönig 원문 매뉴얼 목록 (ManualsLib)","https://www.manualslib.com/brand/mahlkonig/grinder.html","mir")]}]},
-   {b:"가찌아·바라짜·ROK",c:"g",maker:"Gaggia(이탈리아) · Baratza(미국) · ROK(영국)",note:"모델별 정리는 다음 업데이트에서 추가할 예정이에요.",models:[]}]}
+    {n:"E98 / E98 RE Tall",g:"hx",tag:"2·3그룹"},{n:"E61 Limited",g:"hx",tag:"2·3그룹"},{n:"E71",g:"multi",tag:"2·3그룹",src:[MS("E71 원문 매뉴얼 열람 (ManualsLib)","https://www.manualslib.com/products/Faema-E71-11806120.html","mir")]},{n:"Teorema",g:"hx",tag:"2·3그룹"}]}]}, {n:"베제라코리아",en:"Bezzera Korea",note:"홈페이지에 베제라 총판으로 설치부터 A/S까지 담당, 전국 지사 A/S 가능으로 표기. (가정용 BZ07은 (주)코디아·프레소에서도 판매)",site:"https://bezzera.co.kr/36/?bmode=view&idx=13258141",basis:[MS("베제라코리아 — B2016DE 소개","https://bezzera.co.kr/36/?bmode=view&idx=13258141")],
+  brands:[{b:"베제라 Bezzera",c:"m",maker:"Bezzera (이탈리아 밀라노, 1901~)",models:[
+   {n:"B2016 DE (1·2·3그룹)",g:"hx",tag:"반자동",pts:["베제라 인기 모델 엘리쎄(ELLISSE) 시리즈를 기반으로 만든 모델이라고 수입사가 소개해요."]},
+   {n:"B2016 DE PID",g:"hx",tag:"2그룹 PID"},{n:"B2016 Woody DE",g:"hx",tag:"2그룹 우드"},
+   {n:"New Ellisse DE PID",g:"hx",tag:"2그룹"},{n:"Galatea DE / MN",g:"hx",tag:"2그룹"},{n:"Galatea Domus",g:"home",tag:"1그룹"},
+   {n:"C2009",g:"hx",tag:"2그룹"},{n:"B2013",g:"hx",tag:"2그룹"}]}]},
+ {n:"(주)기정인터내셔날",en:"Kijeong International",note:"2000년 설립. 2001년부터 스위스 디팅 그라인더 독점 수입, 2020년 말코닉과 한국 공식 수입 계약. 메티큘러스 에스프레소 머신을 2023 서울카페쇼에서 국내 첫 공개. 문의 02-583-7471.",site:"http://www.kijeong.net",basis:[MS("말코닉의 새로운 한국 공식 파트너 (블랙워터이슈)","https://bwissue.com/news/1211423/comment/6946?listStyle=viewer&m=0&sort_index=comment_count&order_type=desc&category=53175&page=1"),MS("기정인터내셔날 연혁 (인크루트)","https://www.incruit.com/company/1682093267/")],
+  brands:[{b:"디팅 Ditting",c:"g",maker:"Ditting (스위스, Hemro 그룹)",models:[{n:"807 시리즈",g:"g_shop",tag:"드립·브루용"}]},
+   {b:"말코닉 Mahlkönig",c:"g",maker:"Mahlkönig (독일)",models:[{n:"E80",g:"g_gbw",tag:"80mm 플랫"},{n:"E65S GbW",g:"g_gbw",tag:"65mm 플랫",src:[MS("E65S GbW 사용설명서 (원문)","https://www.lamarzoccousa.com/documents/mahlkonig-e65s-grind-by-weight-operating-manual/","mfr")]}]},
+   {b:"메티큘러스 Meticulous",c:"m",maker:"Meticulous (미국)",models:[{n:"Meticulous Espresso",g:"profile",tag:"1그룹 프로파일링"}]}]},
+ {n:"BRG 그룹 (브레빌 코리아)",en:"Breville Korea",note:"브레빌이 국내에 직접 진출해 판매. 2026년 1월 바라짜 그라인더 5종을 BRG 그룹이 직접 국내 리런칭.",site:"https://www.breville.com/ko-kr/shop/coffee-grinders",basis:[MS("바라짜 국내 시장 복귀 기사 (서울경제TV)","https://www.sentv.co.kr/article/view/sentv202601220133")],
+  brands:[{b:"브레빌 Breville",c:"m",maker:"Breville (호주)",models:[
+    {n:"Bambino BES450",g:"home",tag:"가정용",pts:["ThermoJet 가열로 약 3초 만에 준비, 54mm 포터필터(18g), 저압 사전 주입 후 9바 추출(제조사 표기)."],src:[MS("Bambino 제품 페이지 (브레빌 한국)","https://www.breville.com/ko-kr/product/bes450?sku=BES450BSS5FSK1","ko")]},
+    {n:"Bambino Plus BES500",g:"home",tag:"가정용 자동 스팀",pts:["자동 스팀봉(Auto MilQ)으로 우유 온도 3가지·텍스처 3단계 선택(제조사 표기)."],src:[MS("Bambino Plus 제품 페이지 (브레빌 한국)","https://www.breville.com/ko-kr/product/bes500?sku=BES500BSS5SSK1","ko")]}]},
+   {b:"바라짜 Baratza",c:"g",maker:"Baratza (미국, BRG 그룹)",models:[{n:"Encore",g:"g_home",tag:"필터 입문"},{n:"Encore ESP",g:"g_home",tag:"에스프레소"},{n:"Vario+",g:"g_home",tag:"플랫 버"},{n:"Vario W+",g:"g_home",tag:"무게 도징"},{n:"Forte BG",g:"g_home",tag:"상위 모델"}]}]},
+ {n:"(주)HLI (유라코리아)",en:"JURA Korea",note:"유라 한국 공식 수입·유통사. 서울 강남 역삼동 유라코리아 본사. TEL 02-3452-2127.",site:"https://kr.jura.com/ko-KR/Professional/Machines/GIGA-X8c-G2-Aluminium-Black-14003",basis:[MS("유라 공식 수입원 표기 (유라코리아)","http://jura.co.kr/"),MS("유라 WE6 독점 공급 MOU 기사 (헤럴드경제)","https://biz.heraldcorp.com/article/10532033")],
+  brands:[{b:"유라 JURA",c:"m",maker:"JURA (스위스)",models:[
+    {n:"WE6",g:"superauto",tag:"상업용 소형",pts:["리스트레토·에스프레소·아메리카노 등 블랙커피 8가지 메뉴(보도 기준)."]},
+    {n:"X6",g:"superauto",tag:"상업용"},{n:"GIGA X3c",g:"superauto",tag:"상업용"},
+    {n:"GIGA X8c G2",g:"superauto",tag:"상업용 대용량",pts:["세라믹 디스크 그라인더 2개, 그라인더 자동 조절(A.G.A.), 4.3인치 터치 디스플레이, 식기세척기 가능한 드립 트레이(유라 한국 표기)."],src:[MS("GIGA X8c 제품 페이지 (유라 한국)","https://kr.jura.com/ko-KR/Professional/Machines/GIGA-X8c-G2-Aluminium-Black-14003","ko")]}]}]},
+ {n:"(주)원인터시스템",en:"One Intersystem",note:"2005년 설립. 스위스 프랑케 상업용 전자동 커피머신과 미국 번(BUNN) 배치브루어 공식 수입·유통사.",site:"https://edaily.co.kr/News/Read?mediaCodeNo=257&newsId=04582166645644736",basis:[MS("원인터시스템 2026 서울카페쇼 참가 기사 (이데일리)","https://edaily.co.kr/News/Read?mediaCodeNo=257&newsId=04582166645644736")],
+  brands:[{b:"프랑케 Franke",c:"m",maker:"Franke (스위스)",models:[
+    {n:"Mytico",g:"superauto",tag:"전자동 프리미엄",pts:["독자 유량제어 iQ flow와 4개의 독립 보일러로 정교한 추출 레시피를 구현(2023 서울카페쇼 소개)."]},
+    {n:"A400",g:"superauto",tag:"전자동 오피스"},
+    {n:"NEW A-Line",g:"superauto",tag:"전자동",pts:["그라인더를 최대 3개까지 장착할 수 있는 신규 라인(보도 기준)."]}]}]},
+ {n:"식스닥",en:"SixDot",note:"에버시스 공식 디스트리뷰터로 표기, 전국 서비스 인프라 운영.",site:"https://eversysbysixdot.co.kr/",basis:[MS("식스닥 Eversys 홈페이지","https://eversysbysixdot.co.kr/")],
+  brands:[{b:"에버시스 Eversys",c:"m",maker:"Eversys (스위스)",models:[{n:"Cameo",g:"superauto",tag:"전자동"},{n:"Shotmaster",g:"superauto",tag:"대용량 멀티샷"}]}]},
+ {n:"기센코리아",en:"Giesen Korea",note:"기센 로스터·지웨이·커피 장비 공식 수입사. 브라빌러 보나매트 스프레소(SPRSO)를 국내 처음 선보임.",site:"https://litt.ly/giesenkorea",basis:[MS("기센코리아 링크 페이지","https://litt.ly/giesenkorea"),MS("스프레소 독점 공급 기사 (유니콘팩토리)","https://www.unicornfactory.co.kr/article/2025101515264229287")],
+  brands:[{b:"브라빌러 보나매트 Bravilor Bonamat",c:"m",maker:"Bravilor Bonamat (네덜란드)",models:[{n:"Sprso",g:"superauto",tag:"소형 전자동",pts:["원두 분쇄부터 추출까지 자동(bean-to-cup), 9bar 추출, 별도 시스템으로 우유 음료 가능(보도 기준)."]}]}]},
+ {n:"대한통상(주)",en:"Daehan",note:"아스토리아·XLVI 공식 수입 업체로 표기. 카페 장비·원두 수입 판매(아스토리아·스톰은 이알코퍼레이션도 독점 수입 보도).",site:"http://daehanvm.co.kr/",basis:[MS("대한통상 커피머신 소개","https://xn--9m1by48b62bvxjse.com/%EC%BB%A4%ED%94%BC%EB%A8%B8%EC%8B%A0/")],
+  brands:[{b:"아스토리아 Astoria · XLVI",c:"m",maker:"CMA 그룹 (이탈리아)",note:"모델별 정리는 다음 업데이트에서 추가할 예정이에요.",models:[]}]},
+ {n:"비씨엠 (BCM 커피머신백화점)",en:"BCM",note:"부산. 프랑스 레네카(RENEKA) 공식 수입원으로 표기.",site:"https://xn--9w3b29j1pa.com/",basis:[MS("비씨엠 홈페이지","https://xn--9w3b29j1pa.com/")],
+  brands:[{b:"레네카 Reneka",c:"g",maker:"Reneka (프랑스)",models:[{n:"RM60 Electronic",g:"g_od",tag:"그라인더",pts:["후면 쿨링팬으로 열 손실을 줄인다고 소개해요(판매처 표기)."]}]}]},
+ {n:"(주)아이스칸",en:"ICEKHAN",note:"경기 고양. 홈페이지 제목에 '업소용커피머신 수입총판'으로 표기 — 브랜드별 공식 수입 여부는 따로 확인이 필요해요(씨메 등 타사 독점 브랜드도 판매).",site:"https://www.icekhan.com/product/list.html?cate_no=693",basis:[MS("아이스칸 커피머신 목록","https://www.icekhan.com/product/list.html?cate_no=693")],
+  brands:[{b:"이쪼 IZZO",c:"m",maker:"IZZO (이탈리아)",models:[{n:"Valchiria (1·2·3그룹)",g:"lever",tag:"레버"},{n:"Nuova Pompei (2~5그룹)",g:"lever",tag:"레버"},{n:"Sorrento",g:"hx",tag:"3그룹 반자동"},{n:"Valexia Duetto",g:"home",tag:"1그룹"}]},
+   {b:"일렉트라 Elektra",c:"m",maker:"Elektra (이탈리아)",models:[{n:"K-Up",g:"hx",tag:"3그룹 반자동"}]},
+   {b:"에비에이터 · 갈릴레오",c:"m",maker:"Aviator · Galileo",models:[{n:"Aviator",g:"hx",tag:"2·3그룹"},{n:"Galileo",g:"hx",tag:"2그룹"}]},
+   {b:"칼렘 Kalerm",c:"m",maker:"Kalerm (중국)",models:[{n:"Quarza",g:"superauto",tag:"전자동"}]},
+   {b:"산토스 Santos",c:"g",maker:"Santos (프랑스)",models:[{n:"#04N / #43N / #63 / #018",g:"g_shop",tag:"매장용"}]}]},
+ {n:"(주)칼디커피랩",en:"Kaldi Coffee Lab",note:"서울 금천구. 쇼핑몰에 라파보니·일렉트라·마캅·리도 공식 쇼핑몰로 표기.",site:"https://homecaffe.net/category/elektra/231",basis:[MS("칼디커피랩 쇼핑몰","https://homecaffe.net/category/elektra/231")],
+  brands:[{b:"라파보니 La Pavoni · 일렉트라 Elektra",c:"m",maker:"La Pavoni (Smeg 그룹) · Elektra",note:"쇼핑몰에 등록된 모델이 없어 다음 업데이트에서 추가할 예정이에요.",models:[]}]},
+ {n:"ECM Korea (이씨엠코리아)",en:"ECM Korea",note:"서울 강남. 독일·이탈리아 ECM 한국 독점 수입으로 표기. TEL 02-517-4114.",site:"https://www.ecmkorea.kr/",basis:[MS("ECM Korea 홈페이지","https://www.ecmkorea.kr/")],
+  brands:[{b:"ECM",c:"m",maker:"ECM Manufacture (독일)",models:[{n:"Barista A2",g:"hx",tag:"반자동"},{n:"V-Titan",g:"g_od",tag:"그라인더"}]}]},
+ {n:"따벨라 (Tabella)",en:"Tabella",note:"서울 성수. 펠로우 수입원으로 표기(판매처 기준). 2025 서울카페쇼에서 펠로우 첫 에스프레소 머신 Espresso Series 1을 국내 첫 공개.",site:"https://bwissue.com/expo/2576914",basis:[MS("따벨라, 펠로우 ES1 국내 첫 공개 (블랙워터이슈)","https://bwissue.com/expo/2576914"),MS("펠로우 오드 판매처 수입원 표기","https://momos.co.kr/product/%EC%B6%94%EC%B6%9C%EA%B8%B0%EA%B5%AC-%ED%8E%A0%EB%A1%9C%EC%9A%B0-%EC%98%A4%EB%93%9C-%EB%B8%8C%EB%A3%A8-%EA%B7%B8%EB%9D%BC%EC%9D%B8%EB%8D%94-%EC%9B%90%EB%91%90%EC%B2%AD%EC%86%8C%EC%95%8C%EC%95%BD-%EC%A6%9D%EC%A0%95/848/")],
+  brands:[{b:"펠로우 Fellow",c:"g",maker:"Fellow (미국 샌프란시스코)",models:[{n:"Ode Brew Grinder Gen2",g:"g_home",tag:"브루용"},{n:"Espresso Series 1",g:"home",tag:"1그룹 (국내 출시 예정)"}]}]},
+ {n:"카페솔루션 (코만단테 코리아)",en:"Cafe Solution",note:"코만단테 한국 공식 수입원으로 표기.",site:"https://cafesolution.co.kr/",basis:[MS("카페솔루션 공식몰","https://cafesolution.co.kr/")],
+  brands:[{b:"코만단테 Comandante",c:"g",maker:"Comandante (독일)",models:[{n:"C40 / C60",g:"g_home",tag:"핸드 그라인더",pts:["핸드밀은 전원이 없으니 분쇄도는 클릭 수로 기록하고, 사용 후 마른 브러시로 버를 털어 주세요."]}]}]},
+ {n:"채운베스텍 (VBM Korea)",en:"VBM Korea",note:"2025 서울커피엑스포에서 VBM Black Moon을 국내 첫 공개.",site:"https://bwissue.com/expo/2511260",basis:[MS("2025 서울커피엑스포 에스프레소 머신편 (블랙워터이슈)","https://bwissue.com/expo/2511260")],
+  brands:[{b:"비비엠 VBM",c:"m",maker:"Vibiemme (이탈리아)",models:[{n:"Black Moon",g:"hx",tag:"HX",pts:["VBM 최초의 커버형 디자인, HX(열교환) 방식(보도 기준)."]}]}]}
 ];
 
 // ----- 장비 매뉴얼 화면 -----
