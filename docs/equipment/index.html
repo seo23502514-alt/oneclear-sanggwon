@@ -296,7 +296,7 @@ ul.warnl li.ok::marker{color:var(--ok)}
 .eqsw{display:flex;flex-wrap:wrap;gap:6px}.eqsw .sw{width:28px;height:28px;border-radius:50%;border:2px solid #fff;box-shadow:0 0 0 1px #0002;cursor:pointer;padding:0;position:relative}.eqsw .sw.on{box-shadow:0 0 0 2px var(--ink)}
 .eqsw .sw.custom input{position:absolute;inset:0;opacity:0;width:100%;height:100%;cursor:pointer;border:0;padding:0}.colall{font-size:12.5px;display:flex;gap:6px;align-items:center}
 .mwrap{max-width:1280px;margin:0 auto;padding:20px}.mhead h1{margin:0 0 4px;font-size:24px}.mhead h1 small{font-size:14px;color:var(--muted);font-weight:500;margin-left:6px}#mstat{margin:0 0 6px;font-size:13.5px}.mdisc{margin:0;font-size:12.5px;color:var(--muted);line-height:1.6;max-width:900px}
-.mtools{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin:14px 0}.mtools input{flex:1 1 280px;font:inherit;font-size:14px;padding:10px 12px;border:1px solid var(--line);border-radius:10px}#mchips{display:flex;gap:6px}#mchips button{font:inherit;font-size:13px;padding:8px 12px;border:1px solid var(--line);background:#fff;border-radius:999px;cursor:pointer}.mkc{width:100%;border-collapse:collapse;font-size:13px}.mkc th{width:110px;text-align:left;vertical-align:top;color:#6b5a4a;font-weight:600;padding:6px 8px;border-bottom:1px solid var(--line)}.mkc td{padding:6px 8px;border-bottom:1px solid var(--line)}.mkc .unk{color:#b3261e}.mkc a{margin-left:4px}.mdom{white-space:nowrap;font-size:11px;font-weight:700;color:#1f6f43;background:#e3f3e8;border-radius:6px;padding:2px 6px;margin-left:6px}.mdom.msel{color:#8a5a00;background:#fbefd5}.mdom.movs{color:#2d4a8a;background:#e4ebfa}#mchips{flex-wrap:wrap}#mchips button.on{background:var(--ink);color:#fff;border-color:var(--ink)}
+.mtools{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin:14px 0}.mtools input{flex:1 1 280px;font:inherit;font-size:14px;padding:10px 12px;border:1px solid var(--line);border-radius:10px}#mchips{display:flex;gap:6px}#mchips button{font:inherit;font-size:13px;padding:8px 12px;border:1px solid var(--line);background:#fff;border-radius:999px;cursor:pointer}.mkc{width:100%;border-collapse:collapse;font-size:13px}.mkc th{width:110px;text-align:left;vertical-align:top;color:#6b5a4a;font-weight:600;padding:6px 8px;border-bottom:1px solid var(--line)}.mkc td{padding:6px 8px;border-bottom:1px solid var(--line)}.mkc .unk{color:#b3261e}.mkc a{margin-left:4px}.mdom{white-space:nowrap;font-size:11px;font-weight:700;color:#1f6f43;background:#e3f3e8;border-radius:6px;padding:2px 6px;margin-left:6px}.mdom.msel{color:#8a5a00;background:#fbefd5}.mdom.movs{color:#2d4a8a;background:#e4ebfa}#mchips{flex-wrap:wrap}.mdlbtn{font:inherit;font-size:13px;padding:8px 14px;border-radius:999px;border:1px solid #6b4226;background:#6b4226;color:#fff;cursor:pointer;margin:0 6px 6px 0}.mdlbtn.ghost{background:#fff;color:#6b4226}#mchips button.on{background:var(--ink);color:#fff;border-color:var(--ink)}
 .mgrid{display:grid;grid-template-columns:minmax(0,380px) minmax(0,1fr);gap:18px;align-items:start}#mdetail{position:sticky;top:12px;background:#fff;border:1px solid var(--line);border-radius:14px;padding:20px 22px;min-height:300px}
 .mimp{background:#fff;border:1px solid var(--line);border-radius:12px;margin-bottom:8px;overflow:hidden}.mimph{width:100%;display:flex;align-items:center;gap:8px;padding:11px 12px;background:none;border:0;font:inherit;text-align:left;cursor:pointer}.mimph b{font-size:14.5px}.mimph small{color:var(--muted);font-size:11.5px}.mimph em{margin-left:auto;font-style:normal;font-size:12px;background:#f1ece4;border-radius:999px;padding:2px 8px}.mimp.open .mimph{border-bottom:1px solid var(--line);background:#faf8f4}
 .mlv{display:inline-flex;align-items:center;justify-content:center;width:20px;height:20px;border-radius:5px;background:var(--ink);color:#fff;font-size:11px;font-weight:700;flex:none}.mlv.mid{background:#8a6a4a}.mlv.sm{background:#c8b9a6;color:#3b3027;width:18px;height:18px;font-size:10.5px}
@@ -412,7 +412,7 @@ ul.warnl li.ok::marker{color:var(--ok)}
 <section class="view" id="v-manual"><div class="mwrap">
   <div class="mhead"><div><h1>장비 매뉴얼 <small>수입 · 국산 · 에스프레소 머신 · 그라인더 · 전자동</small></h1><p id="mstat"></p>
   <p class="mdisc">대 수입회사 › 중 수입제품(브랜드) › 소 제품명 › 소소 사용자 매뉴얼. 수입사는 각 회사 홈페이지·보도·박람회 소개의 자체 표기 기준(2026년 11월 조사)이며, 같은 브랜드를 여러 회사가 들여오는 경우도 있어요. 한글 매뉴얼이 없는 제품은 제조사 원문 링크와 함께 핵심 사용 요령을 한글로 정리했어요(원문 전체 번역이 아닌 요약). 국내 수입업체·KC 인증은 확인된 것만 적고, 확인하지 못한 것은 "모름"으로 표시했어요. KC 번호는 소비자24(국가기술표준원·국립전파연구원 연계) 공개 페이지와 판매처 상품정보고시 기준이며, 관세청 수입자별 통관 정보는 비공개라 확인할 수 없어요.</p></div></div>
-  <div class="mtools"><input id="mq" type="search" placeholder="수입사·브랜드·모델 검색 (예: 슬레이어, EK43, 에이덴)"><div id="mchips"><button class="on" data-c="all">전체</button><button data-c="m">에스프레소 머신</button><button data-c="g">그라인더</button><button data-c="auto">전자동</button><button data-c="dom">국산</button></div></div>
+  <div class="mtools"><input id="mq" type="search" placeholder="수입사·브랜드·모델 검색 (예: 슬레이어, EK43, 에이덴)"><div id="mchips"><button class="on" data-c="all">전체</button><button data-c="m">에스프레소 머신</button><button data-c="g">그라인더</button><button data-c="auto">전자동</button><button data-c="dom">국산</button></div><button id="mdlall" class="mdlbtn ghost">⬇ 목록 전체 한글 매뉴얼</button></div><p id="mdlallmsg" class="mnote" style="margin:-6px 0 8px"></p>
   <div class="mgrid"><div id="mtree"></div><div id="mdetail"></div></div>
 </div></section>
 
@@ -1161,6 +1161,14 @@ const MANUAL_DATA=[
     {n:"X-Ultra",g:"g_home",tag:"휴대용 올라운드"},{n:"Q2 S / Q Air",g:"g_home",tag:"초경량 휴대용"},{n:"Diamond A",g:"g_home",tag:"탁상형"}]}]}
 ];
 
+// ===== 파일 저장 공통 (Claude 아티팩트: downloads 권한 / 일반 브라우저: 링크 다운로드) =====
+let _DL=null; if(window.claude&&window.claude.use){ window.claude.use("downloads").then(d=>{_DL=d;}).catch(()=>{}); }
+async function saveFile(filename,data){
+  if(_DL){ try{ await _DL.save({filename,data}); return "saved"; }catch(e){ return (e&&e.code)||"error"; } }
+  try{ const b=data instanceof Blob?data:new Blob([data],{type:filename.endsWith(".html")?"text/html;charset=utf-8":"text/plain;charset=utf-8"});
+    const a=document.createElement("a"); a.href=URL.createObjectURL(b); a.download=filename; document.body.appendChild(a); a.click(); a.remove(); setTimeout(()=>URL.revokeObjectURL(a.href),4000); return "saved"; }catch(e){ return "error"; }
+}
+async function saveDataUrl(filename,u){ const b=await (await fetch(u)).blob(); return saveFile(filename,b); }
 // ----- 장비 매뉴얼 화면 -----
 let MQ="", MC="all", MSEL=null, MOPEN=new Set([0]);
 const MK_LABEL={ko:["한글","mk-ko"],imp:["수입사 자료","mk-imp"],mfr:["제조사 원문","mk-mfr"],mir:["원문 열람","mk-mir"]};
@@ -1183,6 +1191,35 @@ function renderManual(){
   el.querySelectorAll(".mmod").forEach(b=>b.onclick=()=>{ MSEL=b.dataset.k.split(",").map(Number); renderManual(); renderManualDetail(); if(window.innerWidth<900) document.getElementById("mdetail").scrollIntoView({behavior:"smooth"}); });
   if(!MSEL){ MSEL=[0,0,0]; renderManualDetail(); }
 }
+
+// ----- 한글 매뉴얼 파일 만들기 -----
+const _esc=t=>String(t==null?"":t).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
+const _strip=t=>String(t==null?"":t).replace(/<[^>]+>/g,"");
+function manualDocSection(im,br,m){
+  const G=MG[m.g], srcs=mSrcs(br,m), kc=m.kc||br.kc;
+  const imp=im.dom?"해당 없음 (국내 제조)":(im.seller||im.ovs)?"모름 — 공식 수입사 미확인"+(br.as?" (판매처 표기 A/S: "+br.as+")":""):im.n+" (회사 자체 표기·보도 기준)";
+  return `<section class="doc"><h2>${_esc(m.n)} <small>${_esc(br.b)}${m.tag?" · "+_esc(m.tag):""}</small></h2>
+  <table><tr><th>제조사</th><td>${_esc(br.maker)}</td></tr><tr><th>장비 유형</th><td>${G?_esc(G.t):"-"}</td></tr>
+  <tr><th>국내 수입업체</th><td>${_esc(imp)}</td></tr>
+  <tr><th>KC 전기안전</th><td>${kc?kc.map(k=>_esc(k.no+(k.st?" ("+k.st+")":"")+(k.who?" · 인증 주체 "+k.who:"")+(k.org?" · "+k.org:"")+(k.note?" · "+k.note:""))).join("<br>"):"모름 — 제품 라벨의 KC 번호를 제품안전정보센터(safetykorea.kr)에서 조회하세요."}</td></tr>
+  <tr><th>관세청 통관</th><td>확인 불가 (수입자별 통관 내역 비공개)</td></tr></table>
+  ${m.pts&&m.pts.length?`<h3>이 모델 포인트</h3><ul>${m.pts.map(p=>`<li>${_esc(_strip(p))}</li>`).join("")}</ul>`:""}
+  ${br.note?`<p class="note">${_esc(br.note)}</p>`:""}
+  ${G?`<h3>사용자 매뉴얼 (한글 요약 가이드)</h3><p class="note">${_esc(G.t)} 공통 운용 요령입니다. 수치·주기는 원문 매뉴얼과 수입사 지침이 우선입니다.</p>${G.s.map(x=>`<h4>${_esc(x[0])}</h4><ul>${x[1].map(t=>`<li>${_esc(_strip(t))}</li>`).join("")}</ul>`).join("")}`:""}
+  <h3>매뉴얼 원본 · 근거 자료</h3>${srcs.length?`<ul>${srcs.map(x=>`<li>[${MK_LABEL[x.k][0]}] <a href="${_esc(x.u)}">${_esc(x.t)}</a></li>`).join("")}</ul>`:"<p>공개된 원본 링크를 찾지 못했어요. 수입사·제조사에 요청하세요.</p>"}
+  <h3>${im.dom?"제조사 (국산)":im.seller?"판매처":im.ovs?"해외 브랜드 (국내 수입사 미확인)":"수입회사"}</h3><p><b>${_esc(im.n)}</b> ${_esc(im.en)}<br>${_esc(im.note)}</p>
+  ${(im.basis||[]).length?`<ul>${im.basis.map(x=>`<li><a href="${_esc(x.u)}">${_esc(x.t)}</a></li>`).join("")}</ul>`:""}</section>`;
+}
+function manualDocHtml(title,body){
+  return `<!DOCTYPE html><html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>${_esc(title)}</title>
+<style>body{font-family:"Pretendard","Apple SD Gothic Neo","Malgun Gothic",sans-serif;color:#2b2118;max-width:860px;margin:32px auto;padding:0 20px;line-height:1.6}h1{font-size:24px;border-bottom:3px solid #6b4226;padding-bottom:8px}h2{font-size:20px;margin-top:36px;color:#6b4226}h2 small{font-size:13px;color:#8a7a6a;font-weight:400}h3{font-size:15px;margin:20px 0 6px;color:#6b4226}h4{font-size:14px;margin:12px 0 4px}table{border-collapse:collapse;width:100%;font-size:13px}th{width:120px;text-align:left;background:#f6efe7;padding:6px 8px;border:1px solid #e5d8c8;vertical-align:top}td{padding:6px 8px;border:1px solid #e5d8c8}ul{margin:4px 0 8px;padding-left:20px}li{margin:2px 0}.note{font-size:12.5px;color:#7a6a5a}.doc{page-break-after:always}.disc{font-size:12px;color:#7a6a5a;background:#faf6f1;padding:10px 12px;border-radius:8px}@media print{body{margin:0}a{color:inherit}}</style></head><body>
+<h1>${_esc(title)}</h1><p class="disc">카페 장비 시각가이드 · 장비 매뉴얼에서 만든 한글 요약본입니다(${new Date().toLocaleDateString("ko-KR")}). 제조사 원문 매뉴얼의 전체 번역이 아니며, 안전·수치·교체 주기는 원문 매뉴얼과 수입사 안내가 우선합니다. 인쇄 메뉴에서 'PDF로 저장'하면 PDF로 보관할 수 있어요.</p>${body}</body></html>`;
+}
+async function downloadManual(list,title,fname,msgEl){
+  const html=manualDocHtml(title,list.map(x=>manualDocSection(x.im,x.br,x.m)).join(""));
+  const r=await saveFile(fname,html);
+  if(msgEl) msgEl.textContent=r==="saved"?"저장했어요. 파일을 열어 인쇄 → PDF로 저장도 할 수 있어요.":r==="declined"?"저장을 취소했어요.":"이 화면에서는 저장이 막혀 있어요.";
+}
 function renderManualDetail(){
   const d=document.getElementById("mdetail"); if(!MSEL){ d.innerHTML=""; return; }
   const [ii,bi,mi]=MSEL, im=MANUAL_DATA[ii], br=im.brands[bi], m=br.models[mi]; if(!m){ d.innerHTML=""; return; }
@@ -1203,11 +1240,15 @@ function renderManualDetail(){
     ${G.s.map((s,i)=>`<details ${i<3?"open":""}><summary>${s[0]}</summary><ul>${s[1].map(x=>`<li>${x}</li>`).join("")}</ul></details>`).join("")}</section>`:""}
    <section class="msec"><h3>${im.dom?"제조사 (국산)":im.seller?"판매처":im.ovs?"해외 브랜드 (국내 수입사 미확인)":"수입회사"}</h3><p><b>${im.n}</b> <small>${im.en}</small></p><p class="mnote">${im.note}</p>
     <ul class="msrc">${(im.basis||[]).map(s=>`<li><i class="mk mk-imp">근거</i><a href="${s.u}" target="_blank" rel="noopener">${s.t} ↗</a></li>`).join("")}${im.site?`<li><i class="mk mk-imp">자료실</i><a href="${im.site}" target="_blank" rel="noopener">수입사 자료·제품 페이지 ↗</a></li>`:""}</ul></section>
-   <div class="mfoot"><button id="mtodict">장비 사전에서 ${br.c==="m"?"에스프레소 머신":"그라인더"} 보기</button></div>`;
+   <div class="mfoot"><button id="mdl" class="mdlbtn">⬇ 한글 매뉴얼 다운로드 (.html)</button> <button id="mdlb" class="mdlbtn ghost">⬇ 이 브랜드 전체</button> <span id="mdlmsg" class="mnote"></span><br><button id="mtodict">장비 사전에서 ${br.c==="m"?"에스프레소 머신":"그라인더"} 보기</button></div>`;
+  const fn=t=>t.replace(/[\\/:*?"<>|]/g,"").replace(/\s+/g,"_");
+  document.getElementById("mdl").onclick=()=>downloadManual([{im,br,m}],`${m.n} 한글 매뉴얼`,fn(`${br.b}_${m.n}_한글매뉴얼.html`),document.getElementById("mdlmsg"));
+  document.getElementById("mdlb").onclick=()=>downloadManual(br.models.map(x=>({im,br,m:x})),`${br.b} 한글 매뉴얼 (${br.models.length}개 모델)`,fn(`${br.b}_한글매뉴얼_전체.html`),document.getElementById("mdlmsg"));
   document.getElementById("mtodict").onclick=()=>{ document.querySelector('nav button[data-v="dict"]').click(); const q=document.getElementById("q"); if(q){ q.value=br.c==="m"?"에스프레소":"그라인더"; q.dispatchEvent(new Event("input")); } };
 }
 (function(){ const q=document.getElementById("mq"); if(q) q.oninput=()=>{ MQ=q.value.trim(); renderManual(); };
   document.querySelectorAll("#mchips button").forEach(b=>b.onclick=()=>{ MC=b.dataset.c; document.querySelectorAll("#mchips button").forEach(x=>x.classList.toggle("on",x===b)); renderManual(); });
+  const all=document.getElementById("mdlall"); if(all) all.onclick=()=>{ const list=manualFlat().filter(x=>mMatch(x.im,x.br,x.m)); const lab=MC==="all"?"전체":({m:"에스프레소 머신",g:"그라인더",auto:"전자동",dom:"국산"})[MC]; downloadManual(list,`카페 장비 한글 매뉴얼 — ${lab}${MQ?" · 검색 '"+MQ+"'":""} (${list.length}개 제품)`,`카페장비_한글매뉴얼_${lab}${MQ?"_"+MQ.replace(/\s+/g,"_"):""}.html`,document.getElementById("mdlallmsg")); };
   renderManual(); })();
 
 // 장비 사전
@@ -1791,7 +1832,7 @@ function barSavePng(){
   Promise.all(svgs.map(sv=>new Promise(res=>{const img=new Image(); img.onload=()=>res({img,vb:sv.viewBox.baseVal}); img.src="data:image/svg+xml;charset=utf-8,"+encodeURIComponent(new XMLSerializer().serializeToString(sv));}))).then(arr=>{
     const hs=arr.map(a=>Math.round(a.vb.height*Wc/a.vb.width)); const c=document.createElement("canvas"); c.width=Wc; c.height=hs.reduce((x,y)=>x+y+gap,0);
     const g=c.getContext("2d"); g.fillStyle="#fff"; g.fillRect(0,0,c.width,c.height); let y=0; arr.forEach((a,i)=>{g.drawImage(a.img,0,y,Wc,hs[i]); y+=hs[i]+gap;});
-    c.toBlob(bl=>{try{const l=document.createElement("a");l.href=URL.createObjectURL(bl);l.download="바설계_평면도_입면도.png";document.body.appendChild(l);l.click();l.remove();barMsg("평면도와 입면도를 한 장의 PNG로 저장했어요.");}catch(e){barMsg("저장이 막혀 있어요. 화면을 캡처해 주세요.");}});
+    c.toBlob(bl=>{saveFile("바설계_평면도_입면도.png",bl).then(r=>barMsg(r==="saved"?"평면도와 입면도를 한 장의 PNG로 저장했어요.":r==="declined"?"저장을 취소했어요.":"저장이 막혀 있어요. 화면을 캡처해 주세요."));});
   });
 }
 function barMsg(t){const m=document.getElementById("barmsg"); m.textContent=t; setTimeout(()=>m.textContent="",4000);}
@@ -2241,8 +2282,8 @@ function conceptChecks(c){
 function saveBoardPng(){
   if(!/github\.io$/.test(location.hostname)&&location.protocol!=="file:"){cMsg("이 화면에서는 파일 저장이 막혀 있어요. github.io 주소에서 저장하거나 화면을 캡처해 주세요.");return;}
   if(HV==="ph"&&MYPH.length){ savePhPng(); return; }
-  if(HV==="3d"&&window.render3DPng){ const u=window.render3DPng(); if(u){ try{const a=document.createElement("a");a.href=u;a.download=`컨셉보드_${CONCEPT.name}_3D.png`;document.body.appendChild(a);a.click();a.remove();cMsg("지금 보이는 3D 렌더를 PNG로 저장했어요.");}catch(e){cMsg("저장이 막혀 있어요. 화면을 캡처해 주세요.");} return; } }
-  const sv=document.getElementById("conceptsvg"), img=new Image(); img.onload=()=>{const cv=document.createElement("canvas"); cv.width=1600; cv.height=900; cv.getContext("2d").drawImage(img,0,0); cv.toBlob(b=>{try{const a=document.createElement("a");a.href=URL.createObjectURL(b);a.download=`컨셉보드_${CONCEPT.name}.png`;document.body.appendChild(a);a.click();a.remove();cMsg("바 정면 이미지를 PNG로 저장했어요. 보드 전체는 인쇄(PDF 저장)를 이용하세요.");}catch(e){cMsg("저장이 막혀 있어요. 화면을 캡처해 주세요.");}});}; img.src="data:image/svg+xml;charset=utf-8,"+encodeURIComponent(new XMLSerializer().serializeToString(sv));
+  if(HV==="3d"&&window.render3DPng){ const u=window.render3DPng(); if(u){ saveDataUrl(`컨셉보드_${CONCEPT.name}_3D.png`,u).then(r=>cMsg(r==="saved"?"지금 보이는 3D 렌더를 PNG로 저장했어요.":r==="declined"?"저장을 취소했어요.":"저장이 막혀 있어요. 화면을 캡처해 주세요.")); return; } }
+  const sv=document.getElementById("conceptsvg"), img=new Image(); img.onload=()=>{const cv=document.createElement("canvas"); cv.width=1600; cv.height=900; cv.getContext("2d").drawImage(img,0,0); cv.toBlob(b=>{saveFile(`컨셉보드_${CONCEPT.name}.png`,b).then(r=>cMsg(r==="saved"?"바 정면 이미지를 PNG로 저장했어요. 보드 전체는 인쇄(PDF 저장)를 이용하세요.":r==="declined"?"저장을 취소했어요.":"저장이 막혀 있어요. 화면을 캡처해 주세요."));});}; img.src="data:image/svg+xml;charset=utf-8,"+encodeURIComponent(new XMLSerializer().serializeToString(sv));
 }
 // ---------- 내 매장 사진: 지시선 · 색 추출 ----------
 function phSave(){ try{ localStorage.setItem("cb_myphotos",JSON.stringify(MYPH)); return true; }catch(e){ return false; } }
@@ -2370,7 +2411,7 @@ function savePhPng(){
       g.strokeStyle="#111"; g.lineWidth=Math.max(2,f/7); g.beginPath(); g.moveTo(x,y); g.lineTo(lft?x-L:x+L,y); g.stroke();
       g.fillStyle="#fff"; g.fillRect(bx,by,tw+f*1.2,f*2.2); g.fillStyle=(CONCEPT&&CONCEPT.pal.accent)||"#c8742f"; g.fillRect(lft?bx+tw+f*1.2-f/4:bx,by,f/4,f*2.2); g.fillStyle="#111"; g.fillText(t,bx+f*0.6,y);
       g.beginPath(); g.arc(x,y,f*0.55,0,Math.PI*2); g.fillStyle="#fff"; g.fill(); g.lineWidth=f/4; g.stroke(); });
-    cv.toBlob(b=>{ try{ const a=document.createElement("a"); a.href=URL.createObjectURL(b); a.download=`컨셉보드_${CONCEPT.name}_매장사진.png`; document.body.appendChild(a); a.click(); a.remove(); cMsg("지시선을 붙인 매장 사진을 PNG로 저장했어요."); }catch(e){ cMsg("저장이 막혀 있어요. 화면을 캡처해 주세요."); } },"image/png"); };
+    cv.toBlob(b=>{ saveFile(`컨셉보드_${CONCEPT.name}_매장사진.png`,b).then(r=>cMsg(r==="saved"?"지시선을 붙인 매장 사진을 PNG로 저장했어요.":r==="declined"?"저장을 취소했어요.":"저장이 막혀 있어요. 화면을 캡처해 주세요.")); },"image/png"); };
   img.src=ph.src;
 }
 function cMsg(t){const m=document.getElementById("cmsg"); if(!m) return; m.textContent=t; setTimeout(()=>{if(m) m.textContent="";},5000);}
