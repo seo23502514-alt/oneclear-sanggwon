@@ -305,6 +305,7 @@ ul.warnl li.ok::marker{color:var(--ok)}
 .mk{font-style:normal;font-size:10.5px;font-weight:700;padding:2px 6px;border-radius:4px;flex:none}.mk-ko{background:#e3f1e7;color:#1f6b3a}.mk-imp{background:#eee6da;color:#6b4d2c}.mk-mfr{background:#e5ecf6;color:#2b4f7d}.mk-mir{background:#efefef;color:#555}
 .mnone{font-size:12.5px;color:var(--muted);margin:4px 0 4px 26px}
 .mcrumb{display:flex;flex-wrap:wrap;gap:6px;align-items:center;font-size:12px;color:var(--muted)}.mcrumb span{display:inline-flex;gap:4px;align-items:center}.mcrumb i{font-style:normal;background:#efe6d9;border-radius:4px;padding:0 5px;font-size:10.5px;color:#6b4d2c}
+.mact{display:flex;flex-wrap:wrap;gap:6px;align-items:center;margin:10px 0 4px}.mact .mdlbtn{margin:0}.mfoot .js-spec{background:#17324D;border-color:#17324D;color:#fff}.mact .js-spec{background:#17324D;border-color:#17324D}
 .mpages img{display:block;width:100%;border-radius:8px;margin:0 0 8px;background:#111}.mpages h3 small{font-weight:400;color:var(--muted);font-size:12px}
 #mdetail h2{margin:8px 0 4px;font-size:22px}#mdetail h2 small{font-size:13px;color:var(--muted);font-weight:500}.mmeta{display:flex;gap:10px;flex-wrap:wrap;font-size:12.5px;color:var(--muted)}.mmeta span{background:#f6f3ee;border-radius:6px;padding:3px 8px}
 .msec{margin-top:18px}.msec h3{font-size:13px;letter-spacing:.06em;color:#8a6a4a;margin:0 0 8px}.msrc{list-style:none;margin:0;padding:0;display:grid;gap:6px}.msrc li{display:flex;gap:8px;align-items:baseline;font-size:13.5px}.msrc a{color:var(--ink)}
@@ -1295,6 +1296,95 @@ async function saveFile(filename,data){
     const a=document.createElement("a"); a.href=URL.createObjectURL(b); a.download=filename; document.body.appendChild(a); a.click(); a.remove(); setTimeout(()=>URL.revokeObjectURL(a.href),4000); return "saved"; }catch(e){ return "error"; }
 }
 async function saveDataUrl(filename,u){ const b=await (await fetch(u)).blob(); return saveFile(filename,b); }
+// ===== 제품 사양서 (PPT) =====
+let _pptxReady=null;
+function loadPptx(){ if(window.PptxGenJS) return Promise.resolve(); if(_pptxReady) return _pptxReady;
+  _pptxReady=new Promise((ok,no)=>{ const sc=document.createElement("script"); sc.src="lib/pptxgen.bundle.js"; sc.onload=()=>ok(); sc.onerror=()=>{_pptxReady=null; no(new Error("lib"));}; document.head.appendChild(sc); }); return _pptxReady; }
+const SPEC_EN={m:"ESPRESSO MACHINE",g:"COFFEE GRINDER",ice:"ICE MAKER",fr:"REFRIGERATOR",fz:"FREEZER",rf:"REFRIGERATOR · FREEZER",sc_cake:"CAKE SHOWCASE",sc_bev:"BEVERAGE SHOWCASE",sc_frz:"FREEZER SHOWCASE",sc_open:"OPEN SHOWCASE",cold:"COLD EQUIPMENT",blend:"BLENDER",steam:"AUTO STEAMER",brew:"BATCH BREWER",wash:"WASHING · WATER",heat:"OVEN · GRILL",roast:"COFFEE ROASTER",shave:"SHAVED ICE MACHINE",tool:"BARISTA TOOL"};
+const SPEC_INST=(c,m)=>{ const cool=["fr","fz","rf","sc_cake","sc_bev","sc_frz","sc_open","cold"].includes(c);
+  if(c==="m") return [["전원","전용 회로 (220V 단상 또는 380V 3상 · 모델별 확인)"],["급수","직수 연결 (정수 필터 권장)"],["배수","배수구 연결 필요"]];
+  if(c==="g") return [["전원","220V 일반 콘센트"],["급수 · 배수","불필요"],["설치","작업대 상부 · 호퍼 높이 확보"]];
+  if(c==="ice") return [["전원","220V 전용 회로 권장"],["급수","직수 연결 (정수 필터 권장)"+(/수냉/.test(m.n+m.tag)?" · 수냉식 냉각수 포함":"")],["배수","배수구 연결 필요 (자연 배수 높이 확인)"]];
+  if(cool) return [["전원","220V 일반 콘센트 (단독 사용 권장)"],["급수 · 배수","불필요 (제상수 처리 방식 확인)"],["설치","후면·측면 통풍 공간, 도어 개방 공간 확보"]];
+  if(c==="blend"||c==="shave") return [["전원","220V 일반 콘센트"],["급수 · 배수","불필요"],["설치","작업대 하중·소음 고려"]];
+  if(c==="steam") return [["전원","220V 콘센트"],["급수","모델별 직수 또는 물탱크 확인"],["배수","모델별 확인"]];
+  if(c==="brew") return [["전원","220V 전용 회로 권장"],["급수","직수 연결 또는 수동 주입 (모델별)"],["배수","모델별 확인"]];
+  if(c==="wash") return [["전원","220V 또는 380V (모델별 확인)"],["급수","직수 연결"],["배수","배수구 연결 필요"]];
+  if(c==="heat") return [["전원","전용 회로 (용량 확인)"],["급수 · 배수","불필요 (스팀 기능 모델은 확인)"],["설치","상부·측면 열 배출 공간 확보"]];
+  if(c==="roast") return [["전원","전기·가스 방식 확인"],["배기","배기 덕트 · 연기 처리 필요"],["설치","환기 · 화재 안전 거리 확보"]];
+  return [["전원","모델별 확인"],["급수 · 배수","모델별 확인"],["설치","모델별 확인"]]; };
+function specParse(m){ const t=[m.n,m.tag||"",...(m.pts||[])].join(" ");
+  const dm=t.match(/(\d[\d,]{1,5})\s*[×xX*]\s*(\d[\d,]{1,5})\s*[×xX*]\s*(\d[\d,]{1,5})\s*mm/); 
+  const pw=t.match(/(\d[\d,.]*\s*k?W)\b/); const vt=t.match(/(\d{3})\s*V\b/);
+  const kg=t.match(/(\d[\d.]*)\s*kg/); const lt=t.match(/(\d[\d,.]*)\s*L\b/);
+  return {dim:dm?`${dm[1]} × ${dm[2]} × ${dm[3]}`:"", pow:[vt?vt[1]+"V":"",pw?pw[1].replace(/\s/g,""):""].filter(Boolean).join(" "), kg:kg?kg[1]+"kg":"", lt:lt?lt[1]+"L":""}; }
+function specRow(x){ const {im,br,m}=x, P=specParse(m), kc=(m.kc||br.kc), sup=_isGroup(im.n)?"국내 공급사 확인 필요":im.n;
+  return {x,P,kc,sup,brand:br.b,model:m.n,cat:CL[br.c]||"장비",en:SPEC_EN[br.c]||"EQUIPMENT"}; }
+const SC={navy:"17324D",blue:"2F6FA8",ink:"1F2933",mute:"6B7785",line:"D5DDE8",tint:"F2F5F9",white:"FFFFFF",warn:"A23B2A"};
+const SF="Malgun Gothic";
+function specFooter(sl,pres,pg,date){ sl.addText(`카페 장비 시각가이드 · 장비찾기  |  공개 자료 기준 정리 — 구매 전 공급사 사양서로 최종 확인하세요  |  ${date}`,{x:0.45,y:5.28,w:7.8,h:0.22,fontFace:SF,fontSize:7,color:SC.mute,margin:0,isTextBox:true});
+  if(pg) sl.addText(String(pg),{x:9.0,y:5.28,w:0.55,h:0.22,fontFace:SF,fontSize:7,color:SC.mute,align:"right",margin:0,isTextBox:true}); }
+function specProductSlide(pres,R,no,pg,date){ const {x:{br,m},P,kc,sup}=R; const sl=pres.addSlide(); sl.background={color:SC.white};
+  sl.addText(`${String(no).padStart(2,"0")}   ${R.en}`,{x:0.45,y:0.28,w:6,h:0.22,fontFace:SF,fontSize:9,bold:true,color:SC.blue,charSpacing:3,margin:0,isTextBox:true});
+  const _tt=`${R.brand}  ${R.model}`; sl.addText(_tt,{x:0.45,y:0.52,w:6.3,h:0.5,fontFace:SF,fontSize:_tt.length>52?11:_tt.length>40?13:_tt.length>28?15:18,bold:true,color:SC.navy,margin:0,fit:"shrink",valign:"middle",isTextBox:true});
+  const _bn=br.b.replace(/\s*\(.*\)$/,"").split(" · ")[0]; sl.addText(_bn,{x:6.8,y:0.45,w:2.75,h:0.55,fontFace:SF,fontSize:_bn.length>16?11:14,bold:true,color:SC.navy,align:"right",valign:"middle",margin:0,fit:"shrink",isTextBox:true});
+  // 사진 자리
+  sl.addShape(pres.shapes.ROUNDED_RECTANGLE,{x:0.45,y:1.15,w:4.35,h:2.05,fill:{color:SC.tint},line:{color:SC.line,width:0.75},rectRadius:0.08});
+  sl.addText([{text:"제품 사진",options:{fontSize:12,bold:true,color:SC.mute,breakLine:true}},{text:"공급사 이미지를 넣어 주세요",options:{fontSize:8,color:SC.mute}}],{x:0.45,y:1.15,w:4.35,h:2.05,fontFace:SF,align:"center",valign:"middle",isTextBox:true});
+  // 수치 카드
+  const k2=P.kg&&R.x.br.c==="ice"?["생산량",P.kg+" / 24h"]:P.lt?["용량",P.lt]:["구분",(m.tag||"-").split("·")[0].trim()];
+  [[0.45,1.42,"규격 (mm)",P.dim||"확인 필요",false],[1.92,1.42,k2[0],k2[1],false],[3.39,1.41,"수량","1 대",true]].forEach(([x,w,l,v,dk])=>{
+    sl.addShape(pres.shapes.RECTANGLE,{x,y:3.3,w,h:0.66,fill:{color:dk?SC.navy:SC.tint},line:{color:dk?SC.navy:SC.line,width:0.75}});
+    sl.addText(l,{x:x+0.1,y:3.34,w:w-0.2,h:0.2,fontFace:SF,fontSize:7.5,color:dk?"C9D6E6":SC.mute,margin:0,isTextBox:true});
+    sl.addText(v,{x:x+0.1,y:3.56,w:w-0.2,h:0.34,fontFace:SF,fontSize:String(v).length>16?8:String(v).length>11?9.5:11,bold:true,color:dk?SC.white:SC.navy,margin:0,fit:"shrink",valign:"middle",isTextBox:true}); });
+  // 주요 특징
+  const _fp=(m.pts||[]).filter(t=>!/매뉴얼|찾지|못했|못 함|자료실|요청하|문의|확인하지|단종 예정 안내/.test(t)); const feats=(_fp.length?_fp:[m.tag||"",`${R.cat} · 제조사 ${br.maker}`]).filter(Boolean).slice(0,4).map(s=>s.length>78?s.slice(0,76)+"…":s);
+  sl.addText("주요 특징",{x:0.45,y:4.06,w:4.35,h:0.22,fontFace:SF,fontSize:9.5,bold:true,color:SC.navy,margin:0,isTextBox:true});
+  sl.addText(feats.map((f,i)=>({text:f,options:{bullet:true,breakLine:i<feats.length-1}})),{x:0.45,y:4.3,w:4.35,h:0.9,fontFace:SF,fontSize:8,color:SC.ink,margin:0,valign:"top",paraSpaceAfter:2,fit:"shrink",isTextBox:true});
+  // 사양 표
+  const rows=[["제품명",R.cat],["브랜드",R.brand],["모델명",R.model],["제조사",br.maker],["국내 공급",sup],["구분",m.tag||"-"],["규격 (mm)",P.dim||"확인 필요"],["전원 · 소비전력",P.pow||"확인 필요"]];
+  if(P.kg&&br.c==="ice") rows.push(["일 생산량",P.kg]); if(P.lt) rows.push(["용량",P.lt]);
+  if(kc&&kc.length) rows.push(["KC 인증",kc.map(k=>k.no).join(", ")]);
+  rows.push(["수량","1 대"]);
+  const cell=(t,o)=>({text:t,options:Object.assign({fontFace:SF,fontSize:7.5,color:SC.ink,valign:"middle",margin:[1,4,1,5]},o||{})});
+  const body=rows.map(([a,b],i)=>[cell(a,{bold:true,color:SC.navy,fill:{color:i===rows.length-1?"E3EAF3":SC.tint}}),cell(b,{fill:{color:i===rows.length-1?"E3EAF3":SC.white},color:/확인 필요/.test(b)?SC.warn:SC.ink})]);
+  const rh=Math.min(0.235,2.45/(rows.length+1));
+  sl.addTable([[cell("제품 사양 정보",{bold:true,color:SC.white,fill:{color:SC.navy},colspan:2,fontSize:8.5})],...body],{x:5.05,y:1.15,w:4.5,colW:[1.25,3.25],rowH:rh,border:{type:"solid",pt:0.5,color:SC.line}});
+  // 설치 요건
+  const ins=SPEC_INST(br.c,m);
+  sl.addShape(pres.shapes.ROUNDED_RECTANGLE,{x:5.05,y:3.85,w:4.5,h:1.3,fill:{color:SC.tint},line:{color:SC.line,width:0.75},rectRadius:0.06});
+  sl.addText([{text:"설치 요건",options:{bold:true,color:SC.navy,fontSize:9.5}},{text:"  품목 일반 기준 · 모델별 확인",options:{color:SC.mute,fontSize:7}}],{x:5.2,y:3.92,w:4.2,h:0.24,fontFace:SF,margin:0,isTextBox:true});
+  ins.forEach(([a,b],i)=>{ sl.addText(a,{x:5.2,y:4.22+i*0.3,w:0.95,h:0.26,fontFace:SF,fontSize:8,bold:true,color:SC.navy,margin:0,valign:"middle",isTextBox:true});
+    sl.addText(b,{x:6.15,y:4.22+i*0.3,w:3.3,h:0.26,fontFace:SF,fontSize:8,color:SC.ink,margin:0,valign:"middle",fit:"shrink",isTextBox:true}); });
+  specFooter(sl,pres,pg,date); }
+async function downloadSpec(items,title,filename,msgEls){ const say=t=>msgEls.forEach(e=>e&&(e.textContent=t)); say("사양서를 만드는 중이에요…");
+  try{ await loadPptx(); }catch(e){ say("사양서 도구를 불러오지 못했어요. 새로고침 후 다시 눌러 주세요."); return; }
+  const pres=new PptxGenJS(); pres.layout="LAYOUT_16x9"; pres.title=title; pres.author="카페 장비 시각가이드"; pres.theme={headFontFace:SF,bodyFontFace:SF};
+  const d=new Date(), date=`${d.getFullYear()}. ${String(d.getMonth()+1).padStart(2,"0")}. ${String(d.getDate()).padStart(2,"0")}.`;
+  const R=items.map(specRow); let pg=1;
+  if(R.length>1){ // 표지
+    const c=pres.addSlide(); c.background={color:SC.navy};
+    c.addText("EQUIPMENT SPECIFICATION",{x:0.55,y:0.45,w:6,h:0.25,fontFace:SF,fontSize:9,bold:true,color:"9FB6D1",charSpacing:4,margin:0,isTextBox:true});
+    c.addText(title,{x:0.55,y:0.8,w:8.9,h:0.9,fontFace:SF,fontSize:26,bold:true,color:SC.white,margin:0,fit:"shrink",valign:"middle",isTextBox:true});
+    c.addText([{text:"작성일  ",options:{color:"9FB6D1"}},{text:date+"     ",options:{color:SC.white,bold:true}},{text:"구성  ",options:{color:"9FB6D1"}},{text:`${R.length}개 품목`,options:{color:SC.white,bold:true}}],{x:0.55,y:1.85,w:8,h:0.3,fontFace:SF,fontSize:10,margin:0,isTextBox:true});
+    const show=R.slice(0,10); show.forEach((r,i)=>{ const y=2.4+i*0.27; c.addText(String(i+1).padStart(2,"0"),{x:0.55,y,w:0.4,h:0.24,fontFace:SF,fontSize:9,color:"9FB6D1",margin:0,isTextBox:true});
+      c.addText(r.cat,{x:0.95,y,w:2.2,h:0.24,fontFace:SF,fontSize:9,bold:true,color:SC.white,margin:0,isTextBox:true});
+      c.addText(`${r.brand} ${r.model}`,{x:3.2,y,w:5.4,h:0.24,fontFace:SF,fontSize:9,color:"DCE5F0",margin:0,fit:"shrink",isTextBox:true});
+      c.addText("1 대",{x:8.7,y,w:0.75,h:0.24,fontFace:SF,fontSize:9,color:SC.white,align:"right",margin:0,isTextBox:true}); });
+    if(R.length>10) c.addText(`외 ${R.length-10}개 품목`,{x:0.95,y:2.4+10*0.27,w:4,h:0.24,fontFace:SF,fontSize:9,color:"9FB6D1",margin:0,isTextBox:true});
+    pg++;
+    // 요약표 (10행씩)
+    for(let s=0;s<R.length;s+=10){ const sl=pres.addSlide(); sl.background={color:SC.white};
+      sl.addText("00   SUMMARY",{x:0.45,y:0.28,w:6,h:0.22,fontFace:SF,fontSize:9,bold:true,color:SC.blue,charSpacing:3,margin:0,isTextBox:true});
+      sl.addText("품목 요약",{x:0.45,y:0.52,w:6,h:0.45,fontFace:SF,fontSize:18,bold:true,color:SC.navy,margin:0,isTextBox:true});
+      const h=(t)=>({text:t,options:{fontFace:SF,fontSize:8,bold:true,color:SC.white,fill:{color:SC.navy},align:"center",valign:"middle"}});
+      const cc=(t,o)=>({text:t,options:Object.assign({fontFace:SF,fontSize:7.5,color:/확인 필요/.test(t)?SC.warn:SC.ink,valign:"middle",margin:[1,4,1,4]},o||{})});
+      const rows=R.slice(s,s+10).map((r,i)=>[cc(String(s+i+1).padStart(2,"0"),{align:"center",color:SC.blue,bold:true}),cc(r.cat,{bold:true}),cc(`${r.brand} ${r.model}`),cc(r.P.dim||"확인 필요",{align:"center"}),cc(r.P.pow||"확인 필요",{align:"center"}),cc("1 대",{align:"center"})]);
+      sl.addTable([[h("No"),h("품목"),h("브랜드 · 모델"),h("규격 W×D×H (mm)"),h("전원"),h("수량")],...rows],{x:0.45,y:1.1,w:9.1,colW:[0.5,1.5,3.6,1.6,1.2,0.7],rowH:0.36,border:{type:"solid",pt:0.5,color:SC.line}});
+      specFooter(sl,pres,pg++,date); } }
+  R.forEach((r,i)=>specProductSlide(pres,r,i+1,R.length>1?pg++:0,date));
+  const blob=await pres.write({outputType:"blob"}); const r=await saveFile(filename,blob);
+  say(r==="saved"?`사양서(${R.length}개 품목, PPT)를 저장했어요.`:r==="declined"?"저장을 취소했어요.":"이 화면에서는 저장이 막혀 있어요."); }
 // ----- 장비 매뉴얼 화면 -----
 let MQ="", MC="all", MSEL=null, MOPEN=new Set([0]);
 const MK_LABEL={ko:["한글","mk-ko"],imp:["수입사 자료","mk-imp"],mfr:["제조사 원문","mk-mfr"],mir:["원문 열람","mk-mir"]};
@@ -1359,7 +1449,7 @@ function renderManualDetail(){
   const G=MG[m.g], srcs=mSrcs(br,m), hasKo=srcs.some(s=>s.k==="ko");
   d.innerHTML=`<div class="mcrumb"><span><i>대</i>${im.n}</span>›<span><i>중</i>${br.b}</span>›<span><i>소</i>${m.n}</span></div>
    <h2>${m.n} <small>${br.b.replace(/^[^A-Za-z]+/,"")} · ${m.tag||""}</small></h2>
-   <div class="mmeta"><span>제조사 ${br.maker}</span><span>${G?G.t:""}</span></div>${(()=>{const pg=srcs.map(x=>MAN_PAGES[x.u]).find(Boolean); return pg?`<section class="msec mpages"><h3>사용자 매뉴얼 <small>${pg.n}쪽 · 아래로 넘겨 보세요</small></h3>${Array.from({length:pg.n},(_,i)=>`<img loading="${i<2?"eager":"lazy"}" src="${pg.dir}${String(i+1).padStart(2,"0")}.jpg" alt="매뉴얼 ${i+1}쪽">`).join("")}</section>`:"";})()}
+   <div class="mmeta"><span>제조사 ${br.maker}</span><span>${G?G.t:""}</span></div><div class="mact"><button class="mdlbtn js-mdl">⬇ 한글 매뉴얼 (.html)</button><button class="mdlbtn js-spec">⬇ 사양서 (PPT)</button><button class="mdlbtn ghost js-specb">⬇ 이 브랜드 사양서 (PPT)</button><span class="mnote js-msg"></span></div>${(()=>{const pg=srcs.map(x=>MAN_PAGES[x.u]).find(Boolean); return pg?`<section class="msec mpages"><h3>사용자 매뉴얼 <small>${pg.n}쪽 · 아래로 넘겨 보세요</small></h3>${Array.from({length:pg.n},(_,i)=>`<img loading="${i<2?"eager":"lazy"}" src="${pg.dir}${String(i+1).padStart(2,"0")}.jpg" alt="매뉴얼 ${i+1}쪽">`).join("")}</section>`:"";})()}
    ${hasKo?`<section class="msec mko"><h3>한글 원본 매뉴얼 받기</h3><div class="mkobtns">${srcs.filter(x=>x.k==="ko").map(x=>(/^manuals\//.test(x.u)?`<button class="mdlbtn mlocal" data-u="${x.u}">⬇ ${x.t} · 바로 저장</button>`:`<a class="mdlbtn" href="${x.u}" target="_blank" rel="noopener" download>⬇ ${x.t}</a>`)).join("")}</div><p class="mnote">누르면 제조사·수입사 자료실의 원본(PDF 또는 게시글)이 새 창으로 열려요. 게시글로 열리면 첨부파일을 눌러 받으면 돼요.</p></section>`:""}<section class="msec"><h3>매뉴얼 원본</h3>
     ${srcs.length?`<ul class="msrc">${srcs.map(s=>`<li><i class="mk ${MK_LABEL[s.k][1]}">${MK_LABEL[s.k][0]}</i><a href="${s.u}" target="_blank" rel="noopener">${s.t} ↗</a></li>`).join("")}</ul>`:`<p class="mnote">공개된 매뉴얼 링크를 찾지 못했어요. 수입사(${im.n})에 요청하세요.</p>`}
     ${hasKo?"":`<p class="mnote">한글 매뉴얼은 확인되지 않아, 아래에 제조사 원문 기준의 핵심 사용 요령을 한글로 정리했어요. 원문 전체 번역본은 수입사 또는 제조사에 요청하세요.</p>`}
@@ -1373,9 +1463,13 @@ function renderManualDetail(){
     ${G.s.map((s,i)=>`<details ${i<3?"open":""}><summary>${s[0]}</summary><ul>${s[1].map(x=>`<li>${x}</li>`).join("")}</ul></details>`).join("")}</section>`:""}
    <section class="msec"><h3>${im.dom?"제조사 (국산)":im.seller?"판매처":im.ovs?"해외 브랜드 (국내 수입사 미확인)":"수입회사"}</h3><p><b>${im.n}</b> <small>${im.en}</small></p><p class="mnote">${im.note}</p>
     <ul class="msrc">${(im.basis||[]).map(s=>`<li><i class="mk mk-imp">근거</i><a href="${s.u}" target="_blank" rel="noopener">${s.t} ↗</a></li>`).join("")}${im.site?`<li><i class="mk mk-imp">자료실</i><a href="${im.site}" target="_blank" rel="noopener">수입사 자료·제품 페이지 ↗</a></li>`:""}</ul></section>
-   <div class="mfoot"><button id="mdl" class="mdlbtn">⬇ 한글 매뉴얼 다운로드 (.html)</button> <button id="mdlb" class="mdlbtn ghost">⬇ 이 브랜드 전체</button> <span id="mdlmsg" class="mnote"></span><br><button id="mtodict">장비 사전에서 ${CL[br.c]||"장비"} 보기</button></div>`;
+   <div class="mfoot"><button id="mdl" class="mdlbtn">⬇ 한글 매뉴얼 다운로드 (.html)</button> <button class="mdlbtn js-spec">⬇ 사양서 (PPT)</button> <button id="mdlb" class="mdlbtn ghost">⬇ 이 브랜드 전체</button> <span id="mdlmsg" class="mnote"></span><br><button id="mtodict">장비 사전에서 ${CL[br.c]||"장비"} 보기</button></div>`;
   const fn=t=>t.replace(/[\\/:*?"<>|]/g,"").replace(/\s+/g,"_");
   document.querySelectorAll(".mlocal").forEach(b=>b.onclick=async()=>{ const msg=document.getElementById("mdlmsg"); b.disabled=true; try{ const r=await saveDataUrl(b.dataset.u.split("/").pop(),b.dataset.u); if(msg) msg.textContent=r==="saved"?"PDF를 저장했어요.":r==="declined"?"저장을 취소했어요.":"이 화면에서는 저장이 막혀 있어요."; }catch(e){ window.open(b.dataset.u,"_blank"); } b.disabled=false; });
+  const _msgs=()=>[document.getElementById("mdlmsg"),...document.querySelectorAll(".js-msg")];
+  document.querySelectorAll(".js-mdl").forEach(b=>b.onclick=()=>document.getElementById("mdl").click());
+  document.querySelectorAll(".js-spec").forEach(b=>b.onclick=()=>downloadSpec([{im,br,m}],`${br.b} ${m.n} 사양서`,fn(`${br.b}_${m.n}_사양서.pptx`),_msgs()));
+  document.querySelectorAll(".js-specb").forEach(b=>b.onclick=()=>downloadSpec(br.models.map(x=>({im,br,m:x})),`${br.b} 장비 사양서`,fn(`${br.b}_사양서_${br.models.length}개모델.pptx`),_msgs()));
   document.getElementById("mdl").onclick=()=>downloadManual([{im,br,m}],`${m.n} 한글 매뉴얼`,fn(`${br.b}_${m.n}_한글매뉴얼.html`),document.getElementById("mdlmsg"));
   document.getElementById("mdlb").onclick=()=>downloadManual(br.models.map(x=>({im,br,m:x})),`${br.b} 한글 매뉴얼 (${br.models.length}개 모델)`,fn(`${br.b}_한글매뉴얼_전체.html`),document.getElementById("mdlmsg"));
   document.getElementById("mtodict").onclick=()=>{ document.querySelector('nav button[data-v="dict"]').click(); const q=document.getElementById("q"); if(q){ q.value=({m:"에스프레소",g:"그라인더",ice:"제빙기",fr:"냉장고",fz:"냉동고",rf:"냉장고",sc_cake:"쇼케이스",sc_bev:"쇼케이스",sc_frz:"쇼케이스",sc_open:"쇼케이스",cold:"기타 냉장",blend:"블렌더",steam:"오토스팀",brew:"배치브루",wash:"식기세척기",heat:"오븐·그릴·레인지",roast:"로스터",shave:"빙수기",tool:"탬퍼"})[br.c]||""; q.dispatchEvent(new Event("input")); } };
