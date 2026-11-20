@@ -1348,6 +1348,10 @@ async function downloadManual(list,title,fname,msgEl){
   const r=await saveFile(fname,html);
   if(msgEl) msgEl.textContent=r==="saved"?"저장했어요. 파일을 열어 인쇄 → PDF로 저장도 할 수 있어요.":r==="declined"?"저장을 취소했어요.":"이 화면에서는 저장이 막혀 있어요.";
 }
+const _coKey=n=>n.replace(/\(주\)|㈜|주식회사|\(유\)|유한회사/g,"").replace(/^[\s()·\-]+/,"").trim();
+(()=>{const seen={}; for(let i=MANUAL_DATA.length-1;i>=0;i--){const im=MANUAL_DATA[i]; const f=MANUAL_DATA.findIndex(x=>x.n===im.n); if(f!==i){ MANUAL_DATA[f].brands.push(...im.brands); MANUAL_DATA.splice(i,1);} }})();
+const _isGroup=n=>/^(기타|국산 |해외 |제빙기·|파니니|바리스타 도구|전자동·반자동)/.test(_coKey(n));
+MANUAL_DATA.sort((a,b)=>(_isGroup(a.n)-_isGroup(b.n))||_coKey(a.n).localeCompare(_coKey(b.n),"ko"));
 const MAN_PAGES={"manuals/ceado_rev_series_ko.pdf":{dir:"manuals/ceado_rev/",n:15}};
 function renderManualDetail(){
   const d=document.getElementById("mdetail"); if(!MSEL){ d.innerHTML=""; return; } d.scrollTop=0;
