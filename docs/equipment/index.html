@@ -296,7 +296,7 @@ ul.warnl li.ok::marker{color:var(--ok)}
 .eqsw{display:flex;flex-wrap:wrap;gap:6px}.eqsw .sw{width:28px;height:28px;border-radius:50%;border:2px solid #fff;box-shadow:0 0 0 1px #0002;cursor:pointer;padding:0;position:relative}.eqsw .sw.on{box-shadow:0 0 0 2px var(--ink)}
 .eqsw .sw.custom input{position:absolute;inset:0;opacity:0;width:100%;height:100%;cursor:pointer;border:0;padding:0}.colall{font-size:12.5px;display:flex;gap:6px;align-items:center}
 .mwrap{max-width:1280px;margin:0 auto;padding:20px}.mhead h1{margin:0 0 4px;font-size:24px}.mhead h1 small{font-size:14px;color:var(--muted);font-weight:500;margin-left:6px}#mstat{margin:0 0 6px;font-size:13.5px}.mdisc{margin:0;font-size:12.5px;color:var(--muted);line-height:1.6;max-width:900px}
-.mtools{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin:14px 0}.mtools input{flex:1 1 280px;font:inherit;font-size:14px;padding:10px 12px;border:1px solid var(--line);border-radius:10px}#mchips{display:flex;gap:6px}#mchips button{font:inherit;font-size:13px;padding:8px 12px;border:1px solid var(--line);background:#fff;border-radius:999px;cursor:pointer}#mchips button.on{background:var(--ink);color:#fff;border-color:var(--ink)}
+.mtools{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin:14px 0}.mtools input{flex:1 1 280px;font:inherit;font-size:14px;padding:10px 12px;border:1px solid var(--line);border-radius:10px}#mchips{display:flex;gap:6px}#mchips button{font:inherit;font-size:13px;padding:8px 12px;border:1px solid var(--line);background:#fff;border-radius:999px;cursor:pointer}.mdom{white-space:nowrap;font-size:11px;font-weight:700;color:#1f6f43;background:#e3f3e8;border-radius:6px;padding:2px 6px;margin-left:6px}.mdom.msel{color:#8a5a00;background:#fbefd5}#mchips{flex-wrap:wrap}#mchips button.on{background:var(--ink);color:#fff;border-color:var(--ink)}
 .mgrid{display:grid;grid-template-columns:minmax(0,380px) minmax(0,1fr);gap:18px;align-items:start}#mdetail{position:sticky;top:12px;background:#fff;border:1px solid var(--line);border-radius:14px;padding:20px 22px;min-height:300px}
 .mimp{background:#fff;border:1px solid var(--line);border-radius:12px;margin-bottom:8px;overflow:hidden}.mimph{width:100%;display:flex;align-items:center;gap:8px;padding:11px 12px;background:none;border:0;font:inherit;text-align:left;cursor:pointer}.mimph b{font-size:14.5px}.mimph small{color:var(--muted);font-size:11.5px}.mimph em{margin-left:auto;font-style:normal;font-size:12px;background:#f1ece4;border-radius:999px;padding:2px 8px}.mimp.open .mimph{border-bottom:1px solid var(--line);background:#faf8f4}
 .mlv{display:inline-flex;align-items:center;justify-content:center;width:20px;height:20px;border-radius:5px;background:var(--ink);color:#fff;font-size:11px;font-weight:700;flex:none}.mlv.mid{background:#8a6a4a}.mlv.sm{background:#c8b9a6;color:#3b3027;width:18px;height:18px;font-size:10.5px}
@@ -410,9 +410,9 @@ ul.warnl li.ok::marker{color:var(--ok)}
   <div class="grid" id="grid"></div>
 </div></section>
 <section class="view" id="v-manual"><div class="mwrap">
-  <div class="mhead"><div><h1>장비 매뉴얼 <small>에스프레소 머신 · 그라인더 · 전자동</small></h1><p id="mstat"></p>
+  <div class="mhead"><div><h1>장비 매뉴얼 <small>수입 · 국산 · 에스프레소 머신 · 그라인더 · 전자동</small></h1><p id="mstat"></p>
   <p class="mdisc">대 수입회사 › 중 수입제품(브랜드) › 소 제품명 › 소소 사용자 매뉴얼. 수입사는 각 회사 홈페이지·보도·박람회 소개의 자체 표기 기준(2026년 11월 조사)이며, 같은 브랜드를 여러 회사가 들여오는 경우도 있어요. 한글 매뉴얼이 없는 제품은 제조사 원문 링크와 함께 핵심 사용 요령을 한글로 정리했어요(원문 전체 번역이 아닌 요약).</p></div></div>
-  <div class="mtools"><input id="mq" type="search" placeholder="수입사·브랜드·모델 검색 (예: 슬레이어, EK43, 에이덴)"><div id="mchips"><button class="on" data-c="all">전체</button><button data-c="m">에스프레소 머신</button><button data-c="g">그라인더</button></div></div>
+  <div class="mtools"><input id="mq" type="search" placeholder="수입사·브랜드·모델 검색 (예: 슬레이어, EK43, 에이덴)"><div id="mchips"><button class="on" data-c="all">전체</button><button data-c="m">에스프레소 머신</button><button data-c="g">그라인더</button><button data-c="auto">전자동</button><button data-c="dom">국산</button></div></div>
   <div class="mgrid"><div id="mtree"></div><div id="mdetail"></div></div>
 </div></section>
 
@@ -825,6 +825,13 @@ const MG={ // 소소: 사용자 매뉴얼 가이드 (원문 요약이 아닌 일
   ["청소",["매일 백플러시·샤워스크린 브러시, 포터필터·바스켓 세제 불림.","유량 조절 밸브(니들 밸브)가 있는 모델은 스케일에 민감하니 정수 관리가 특히 중요해요."]],
   ["정기 교체·점검",["가스켓·스크린 6~12개월, 유량 밸브·펌프 점검은 수입사 정기점검으로."]],
   ["자주 생기는 문제",["프리브루가 너무 길어 퍽이 무너짐 → 분쇄도를 굵게 하거나 프리브루 단축.","그룹별 맛 차이 → 그룹 온도·유량 설정 비교."]]]},
+ brewer:{t:"자동 브루잉·배치브루 머신",s:[
+  ["설치 전",["급수 직결형인지 물탱크형인지 확인하고, 온수 탱크 예열 전력(전용 회로)을 확인합니다."]],
+  ["매일 시작",["전원 → 온수 온도 도달 확인 → 필터·바스켓 장착 → 첫 배치는 맛 확인용으로 소량 추출."]],
+  ["추출",["원두량·물량·뜸(블룸) 시간을 레시피로 저장해 두고, 원두를 바꾸면 분쇄도와 레시피를 함께 조정합니다.","배치브루는 보온 시간이 길어지면 맛이 떨어지니, 서버에 추출 시각을 적어 두세요."]],
+  ["청소",["매일: 바스켓·서버·스프레이 헤드 세척, 커피 오일 닦기.","주 1회: 전용 세제로 서버·추출부 담금 세척."]],
+  ["정기 교체·점검",["정수필터 교체, 온수 탱크 디스케일은 수입사·제조사 주기를 따르세요."]],
+  ["자주 생기는 문제",["추출이 넘침 → 분쇄가 너무 곱거나 필터가 두 장 겹침.","맛이 밍밍함 → 원두량·온도 설정, 스프레이 헤드 막힘 확인."]]]},
  superauto:{t:"전자동(슈퍼오토) 머신",s:[
   ["설치 전",["원두 호퍼·우유 냉장고 자리, 급수·배수(모델별 물탱크형 가능), 전용 회로를 확인합니다."]],
   ["매일 시작",["전원 → 자동 린스 진행 → 원두·우유 보충 → 첫 잔 맛 확인."]],
@@ -938,7 +945,7 @@ const MANUAL_DATA=[
     {n:"S-LITE",g:"superauto",tag:"전자동",pts:["자료실의 S-LITE 파일명은 이탈리아어/영어 원문으로 보여 한글 여부가 확실하지 않아요."]}]},
    {b:"바리스타 애티튜드 Storm",c:"m",maker:"CMA 그룹 (이탈리아)",models:[{n:"Storm",g:"profile",tag:"2·3그룹"}]},
    {b:"시모넬리 Nuova Simonelli",c:"m",maker:"Simonelli Group (이탈리아)",models:[{n:"Appia Life T / V",g:"hx",tag:"2·3그룹"},{n:"Aurelia Wave V",g:"hx",tag:"2·3그룹"}]},
-   {b:"닥터커피 Dr.Coffee",c:"m",maker:"Dr.Coffee (중국)",models:[{n:"F11 Plus",g:"superauto",tag:"전자동"},{n:"F2 / F4",g:"superauto",tag:"전자동 소형"}]},
+   {b:"닥터커피 Dr.Coffee",c:"m",maker:"Dr.Coffee (중국)",models:[{n:"F11 Plus",g:"superauto",tag:"전자동"},{n:"F2 / F4",g:"superauto",tag:"전자동 소형"},{n:"Coffee Master 100 / 200",g:"superauto",tag:"대용량"}]},
    {b:"메저 Mazzer",c:"g",maker:"Mazzer (이탈리아 베네치아)",makerSrc:MS("Mazzer 그라인더 문서 모음 (원문, La Marzocco USA 제공)","https://www.lamarzoccousa.com/commercial-products/mazzer-grinders/","mfr"),models:[
     {n:"Major V / Major VP",g:"g_od",tag:"83mm 플랫",pts:["제조사 표기 버 수명: 표준 151A 플랫 약 600kg, 티타늄 약 1,800kg."],src:[MS("Major V / VP 제품 페이지 (퀵스타트·FAQ)","https://mazzer.com/en/?p=19517","mfr")]},
     {n:"Super Jolly V Pro",g:"g_od",tag:"64mm 플랫",pts:["제조사 표기 버 수명: 233M 플랫 약 400kg, 티타늄 약 1,200kg.","제조사 FAQ의 에스프레소 기준점: 버 맞닿는 점에서 약 3과 1/2 눈금."],src:[MS("Super Jolly V Pro 제품 페이지 (퀵스타트·앱 연결)","https://www.mazzer.com/en/?p=19524","mfr")]},
@@ -968,7 +975,7 @@ const MANUAL_DATA=[
    {b:"라심발리 La Cimbali",c:"m",maker:"Gruppo Cimbali (이탈리아)",models:[
     {n:"S15",g:"superauto",tag:"전자동"},
     {n:"M100",g:"multi",tag:"2·3그룹",src:[MS("라심발리 M100 사용자 매뉴얼 (에이덴)","https://eiden.co.kr/download-manual/?bmode=view&idx=5375024","ko")]}]},
-   {b:"제티노 JETINNO",c:"m",maker:"Jetinno (중국)",makerSrc:MS("에이덴 매뉴얼 게시판 (JL05 PRO 사용자 매뉴얼, JL30 사용·세척 영상)","https://eiden.co.kr/download-manual","ko"),models:[{n:"JL05 PRO",g:"superauto",tag:"전자동"},{n:"JL29A",g:"superauto",tag:"전자동"},{n:"JL38",g:"superauto",tag:"전자동"}]},
+   {b:"제티노 JETINNO",c:"m",maker:"Jetinno (중국)",makerSrc:MS("에이덴 매뉴얼 게시판 (JL05 PRO 사용자 매뉴얼, JL30 사용·세척 영상)","https://eiden.co.kr/download-manual","ko"),models:[{n:"JL05 PRO",g:"superauto",tag:"오피스·라운지",pts:["64mm 특수강 플랫 버 그라인더, 최대 20g 브루어, 앱으로 음료 설정·레시피 저장 지원. 국내 공급형은 750g 원두 호퍼(에이덴 설명)."],src:[MS("에이덴 제티노 2026 서울카페쇼 기사 (시민일보)","https://www.siminilbo.co.kr/news/newsview.php?ncode=1160274856616015","imp")]},{n:"JL36B",g:"superauto",tag:"오피스"},{n:"JL29A / JL29B / JL31",g:"superauto",tag:"OCS(오피스)"},{n:"JL03 PRO",g:"superauto",tag:"OCS"},{n:"JL580",g:"superauto",tag:"무인카페"},{n:"JL60A",g:"superauto",tag:"유인 매장"},{n:"JL38",g:"superauto",tag:"유인 매장"},{n:"JL30",g:"superauto",tag:"전자동"}]},
    {b:"마캅 MACAP",c:"g",maker:"Macap (이탈리아)",makerSrc:MS("에이덴 매뉴얼 게시판 (MI40 Touch 사용자 매뉴얼)","https://eiden.co.kr/download-manual","ko"),models:[{n:"MI40 Touch",g:"g_od",tag:"온디맨드"},{n:"SUPRA 83",g:"g_od",tag:"83mm 플랫"}]},
    {b:"피오렌자또 Fiorenzato",c:"g",maker:"Fiorenzato (이탈리아)",makerSrc:MS("에이덴 매뉴얼 게시판 (F64E·F83E, PRO 라인 사용자 매뉴얼)","https://eiden.co.kr/download-manual","ko"),models:[{n:"F83E PRO Dark-T",g:"g_od",tag:"83mm 플랫"},{n:"All Ground",g:"g_shop",tag:"올라운드"}]}]},
  {n:"동현테크",en:"Donghyuntech",note:"경기 남양주. 2022년 빅토리아 아르두이노와 정식 수입 계약, 공식 수입사 홈페이지(정품등록·A/S) 운영. 대표전화 1577-6317.",site:"https://donghyun-victoriaarduino.kr/machines/espresso",basis:[MS("공식 수입원 동현테크 카페쇼 참가 기사 (이넷뉴스)","https://www.enetnews.co.kr/news/articleView.html?idxno=30708"),MS("빅토리아 아르두이노 코리아 홈페이지","https://donghyun-victoriaarduino.kr/machines/espresso")],
@@ -991,6 +998,8 @@ const MANUAL_DATA=[
     {n:"Rocky (도저리스)",g:"g_home",tag:"그라인더",pts:["에스프레소용, 40단계 분쇄도(판매처 표기)."]}]},
    {b:"베제라 Bezzera (가정용)",c:"m",maker:"Bezzera (이탈리아 밀라노)",models:[{n:"BZ07 PM",g:"home",tag:"1그룹"}]},
    {b:"말코닉 Mahlkönig (가정용)",c:"g",maker:"Mahlkönig (독일)",models:[{n:"X54",g:"g_home",tag:"가정용 올라운드",src:[MS("Mahlkönig 원문 매뉴얼 목록 (ManualsLib)","https://www.manualslib.com/brand/mahlkonig/grinder.html","mir")]},{n:"X64",g:"g_home",tag:"가정용 올라운드"}]},
+   {b:"넥타 NECTA",c:"m",maker:"Evoca 그룹 (이탈리아)",models:[{n:"Kalea Plus",g:"superauto",tag:"전자동 터치스크린"},{n:"Koro Prime",g:"superauto",tag:"소형 카페·오피스·무인"}]},
+   {b:"란실리오 업소용 (Classe 7 · RS-1 · Invicta)",c:"m",maker:"Rancilio (이탈리아)",models:[{n:"Classe 7 USB",g:"hx",tag:"반자동"},{n:"RS-1",g:"multi",tag:"하이엔드 멀티보일러"},{n:"Invicta",g:"multi",tag:"하이엔드"}]},
    {b:"ROK",c:"m",maker:"ROK (영국)",models:[{n:"GC MANO",g:"lever",tag:"수동 레버"},{n:"ROK PRESSO",g:"lever",tag:"수동"}]}]},
  {n:"주식회사 디브릿지 (시네소코리아)",en:"D-Bridge",note:"시네소 에스프레소 머신 한국 공식 수입원으로 표기(시네소코리아 공식 계정). 2022년 보도에서는 ES1의 국내 판매처가 기센코리아로 소개된 적이 있어요 — 구입 시 현재 수입원을 확인하세요.",site:"https://www.instagram.com/synessokorea/",basis:[MS("시네소코리아 공식 계정","https://www.instagram.com/synessokorea/"),MS("ES1 출시 소식 (블랙워터이슈, 2022)","https://bwissue.com/expo/1829154")],
   brands:[{b:"시네소 Synesso",c:"m",maker:"Synesso (미국 시애틀)",makerSrc:MS("Synesso 원문 매뉴얼 목록 (ManualsLib)","https://www.manualslib.com/brand/synesso/coffee-maker.html","mir"),models:[
@@ -1050,7 +1059,53 @@ const MANUAL_DATA=[
  {n:"카페솔루션 (코만단테 코리아)",en:"Cafe Solution",note:"코만단테 한국 공식 수입원으로 표기.",site:"https://cafesolution.co.kr/",basis:[MS("카페솔루션 공식몰","https://cafesolution.co.kr/")],
   brands:[{b:"코만단테 Comandante",c:"g",maker:"Comandante (독일)",models:[{n:"C40 / C60",g:"g_home",tag:"핸드 그라인더",pts:["핸드밀은 전원이 없으니 분쇄도는 클릭 수로 기록하고, 사용 후 마른 브러시로 버를 털어 주세요."]}]}]},
  {n:"채운베스텍 (VBM Korea)",en:"VBM Korea",note:"2025 서울커피엑스포에서 VBM Black Moon을 국내 첫 공개.",site:"https://bwissue.com/expo/2511260",basis:[MS("2025 서울커피엑스포 에스프레소 머신편 (블랙워터이슈)","https://bwissue.com/expo/2511260")],
-  brands:[{b:"비비엠 VBM",c:"m",maker:"Vibiemme (이탈리아)",models:[{n:"Black Moon",g:"hx",tag:"HX",pts:["VBM 최초의 커버형 디자인, HX(열교환) 방식(보도 기준)."]}]}]}
+  brands:[{b:"비비엠 VBM",c:"m",maker:"Vibiemme (이탈리아)",models:[{n:"Black Moon",g:"hx",tag:"HX",pts:["VBM 최초의 커버형 디자인, HX(열교환) 방식(보도 기준)."]}]}]},
+ {n:"드롱기코리아",en:"De'Longhi Korea",note:"이탈리아 드롱기의 한국 법인. 가정용 전자동·반자동 중심(소형 매장·오피스에서도 사용).",site:"https://www.delonghi.com/ko-kr",basis:[MS("드롱기 2026 서울카페쇼 참가 기사 (서울경제TV)","https://www.sentv.co.kr/article/view/sentv202611110088")],
+  brands:[{b:"드롱기 De'Longhi",c:"m",maker:"De'Longhi (이탈리아)",models:[
+   {n:"PrimaDonna Aromatic",g:"superauto",tag:"가정용 하이엔드 전자동",pts:["원두 로스팅 상태를 분석해 분쇄도·원두량·추출 온도를 자동으로 맞추는 Bean Adapt·Adaptive Grinding 탑재(보도 기준)."]},
+   {n:"Rivelia",g:"superauto",tag:"가정용 전자동",pts:["빈 스위치로 원두 교체가 쉽고 터치스크린으로 18가지 메뉴(보도 기준)."]},
+   {n:"Eletta (ECAM450)",g:"superauto",tag:"가정용 전자동"},{n:"Magnifica S (ECAM22.110)",g:"superauto",tag:"가정용 전자동"},
+   {n:"La Specialista Maestro / Touch / Arte Evo",g:"home",tag:"반자동(그라인더 내장)",pts:["La Specialista Touch는 3.5인치 터치스크린 단계별 가이드와 자동 스티밍(우유 온도 4단계·스팀 5단계)을 지원(보도 기준)."]}]}]},
+ {n:"(주)나이스코리아 (커피닷컴)",en:"Nice Korea",note:"카페 장비·원두·부자재 쇼핑몰 '커피닷컴' 운영사. BTB 전자동 머신을 국내 판매하며 2026 서울카페쇼에서 BTB 500을 처음 전시.",site:"https://bwissue.com/expo/2669870",basis:[MS("2026 서울카페쇼 기사 목록 (블랙워터이슈)","https://bwissue.com/expo/2669870")],
+  brands:[{b:"BTB",c:"m",maker:"Shanghai Baolutong (중국)",models:[{n:"BTB 500",g:"superauto",tag:"전자동 (2026 국내 첫 전시)"},{n:"BTB-1 / BTB-3",g:"superauto",tag:"오피스·상업용"}]}]},
+ {n:"전자동·반자동 판매처 (공식 수입사 미확인)",en:"Retail sellers",seller:1,note:"국내 여러 판매처에서 팔리지만, 한국 공식 수입사를 자료로 확인하지 못한 브랜드예요. 구매 시 A/S 담당 회사를 꼭 확인하세요. WMF는 제조사가 한국어 사용설명서를 직접 공개해요.",site:"https://blkorea.co.kr/category/%EC%BB%A4%ED%94%BC%EB%A8%B8%EC%8B%A0/29/",basis:[MS("비엘코리아 업소용 커피머신 목록","https://blkorea.co.kr/category/%EC%BB%A4%ED%94%BC%EB%A8%B8%EC%8B%A0/29/"),MS("세상컴퍼니 전자동 커피머신 (WMF·쉐러)","https://sesangcompany.com/category/wmf/354/"),MS("이탈리아커피 상업용 머신 목록","https://italycoffee.co.kr/category/%EC%83%81%EC%97%85%EC%9A%A9%EB%A8%B8%EC%8B%A0/118/")],
+  brands:[{b:"WMF",c:"m",maker:"WMF Professional Coffee Machines (독일)",models:[
+    {n:"WMF 950 S",g:"superauto",tag:"오피스·소형",src:[MS("WMF 950 S 사용 설명서 (한국어, 제조사)","https://a2.storyblok.com/f/267357/x/5d2b7e77e6/wmf-950s-operating-instructions-ko.pdf","ko")]},
+    {n:"WMF 1100 S (Basic · FM · Auto Steam)",g:"superauto",tag:"소형 매장·오피스",src:[MS("WMF 1100 S 사용 설명서 (한국어, 제조사)","https://a2.storyblok.com/f/267357/x/f390b950a5/wmf-1100s-operating-instructions-ko.pdf","ko")]},
+    {n:"WMF 1300 S",g:"superauto",tag:"일 평균 최대 120잔 권장",src:[MS("WMF 1300 S 사용 설명서 (한국어, 제조사)","https://a2.storyblok.com/f/267357/x/2849e68d07/wmf-1300s-operating-instructions-ko.pdf","ko")]},
+    {n:"WMF 1500 S+",g:"superauto",tag:"중대형"},{n:"WMF 5000 S+",g:"superauto",tag:"대용량"},{n:"WMF 9000 S+",g:"superauto",tag:"플래그십"},
+    {n:"WMF espresso NEXT",g:"multi",tag:"반자동(제조사 표기)",src:[MS("WMF espresso NEXT 사용 설명서 (한국어, 제조사)","https://a2.storyblok.com/f/267357/x/13ab40209a/wmf-espressonext-operating-instructions-ko.pdf","ko")]}]},
+   {b:"쉐러 Schaerer",c:"m",maker:"Schaerer AG (스위스)",models:[{n:"Coffee Club",g:"superauto",tag:"소형"},{n:"Coffee Art (Plus · Best Foam)",g:"superauto",tag:"중형"},{n:"Ambiente Plus",g:"superauto",tag:"중형"},{n:"Coffee Soul",g:"superauto",tag:"대용량"},{n:"Barista",g:"superauto",tag:"대용량"}]},
+   {b:"세코 Saeco",c:"m",maker:"Saeco (이탈리아, Evoca 그룹·필립스)",models:[{n:"SE 180",g:"superauto",tag:"오피스 50~100인(판매처 표기)"},{n:"Gran Idea",g:"superauto",tag:"대형 오피스"},{n:"GranBaristo (가정용)",g:"superauto",tag:"가정용",src:[MS("세코 GranBaristo 사용 설명서 (한국어, 필립스)","https://www.documents.philips.com/assets/20210504/d4535c29edbe474ebac6ad1e013c00ce.pdf","ko")]},{n:"Intelia Focus (가정용)",g:"superauto",tag:"가정용",src:[MS("세코 Intelia Focus 사용 설명서 (한국어, 필립스)","https://www.documents.philips.com/assets/20210513/13ed0feb31654d5f8f8aad27012cdd97.pdf","ko")]}]},
+   {b:"카예 CAYE",c:"m",maker:"Caye Technology (중국 쑤저우)",models:[{n:"Smart X / Smart X Master",g:"superauto",tag:"상업용 전자동"}]},
+   {b:"이베리탈 · 오띠마 · BFC",c:"m",maker:"Iberital (스페인) · BFC (이탈리아)",models:[{n:"Iberital Expression (2·3그룹)",g:"hx",tag:"반자동"},{n:"Ottima XL",g:"hx",tag:"2그룹 반자동"},{n:"BFC Galileo / Deluxe",g:"hx",tag:"2그룹 반자동"}]},
+   {b:"카페스타 Caffesta",c:"m",maker:"제조국 미확인",models:[{n:"K7 / T-100",g:"superauto",tag:"전자동"}]}]},
+ {n:"엘로치오 (EL ROCIO)",en:"El Rocio",dom:1,note:"대한민국에서 설계·생산하는 반자동 에스프레소 머신 제조사로, 미국·중국·유럽 등에 수출한다고 소개해요.",site:"https://elrocio.co.kr/",basis:[MS("엘로치오 공식 홈페이지","https://elrocio.co.kr/"),MS("한국의 커피 머신 제조사들 (디자인커피 블로그)","https://blog.designcoffee.com/725f3020-b55f-4aef-8f75-de7c5dfe4495")],
+  brands:[{b:"엘로치오 El Rocio",c:"m",maker:"엘로치오 (한국)",models:[
+   {n:"Zeta (제타)",g:"profile",tag:"가정·소형 매장 (2026 신제품)",pts:["패들로 추출 압력을 실시간 조절하고 저장해 다음 추출에 적용, 최대 6개 레시피·자동 추출, 듀얼 보일러, 물통·직수 겸용(보도 기준)."],src:[MS("엘로치오 제타 출시 (블랙워터이슈)","https://bwissue.com/expo/2669870","imp")]},
+   {n:"Manus S (마누스)",g:"home",tag:"가정용 E61",pts:["58mm E61 그룹헤드, 프리인퓨전 시간·유량 설정, 저소음 설계(판매처 표기)."]},
+   {n:"Lagen (라겐)",g:"profile",tag:"로터리 펌프·앱 연동",pts:["로터리 펌프, 바이패스 방식 가변압 제어, 애플리케이션 연동(에스콰이어 소개)."]},
+   {n:"Dignity (디그니티) 2·3그룹",g:"multi",tag:"업소용"},{n:"Moresto (모레스토)",g:"hx",tag:"업소용"},{n:"Jar (자르)",g:"home",tag:"소형"}]}]},
+ {n:"오월에 (OWOLLE)",en:"Owolle",dom:1,note:"경기 성남. 상업용 커피머신을 설계·제조·판매하는 국내 회사로, 국내 최초 레버식·대용량 에스프레소 머신을 개발했다고 소개. 커피·로스터 수입 판매도 함께 해요. 전화 031-723-0801, A/S 070-4405-2980.",site:"https://www.owolle.com/",basis:[MS("오월에 홈페이지","https://www.owolle.com/"),MS("한국의 커피 머신 제조사들 (디자인커피 블로그)","https://blog.designcoffee.com/725f3020-b55f-4aef-8f75-de7c5dfe4495")],
+  brands:[{b:"오월에 Owolle",c:"m",maker:"오월에 (한국)",models:[{n:"KOB (코브)",g:"lever",tag:"레버"},{n:"MIRINEA (미리내)",g:"hx",tag:"반자동"},{n:"동해 (911 프로젝트)",g:"hx",tag:"1그룹 (개발 중)"}]}]},
+ {n:"비다스테크 (모아이 바 시스템)",en:"Vidas Tech",dom:1,note:"2012년 국산화 모델 '레볼루션'을 출시했고, 에스프레소·워터·스팀 스테이션으로 나뉜 국내 최초 언더카운터 머신 '모아이 바 시스템'을 냈어요.",site:"https://blog.designcoffee.com/725f3020-b55f-4aef-8f75-de7c5dfe4495",basis:[MS("한국의 커피 머신 제조사들 (디자인커피 블로그)","https://blog.designcoffee.com/725f3020-b55f-4aef-8f75-de7c5dfe4495")],
+  brands:[{b:"모아이 MOAI",c:"m",maker:"비다스테크 (한국)",models:[{n:"모아이 바 시스템 (에스프레소·스팀·워터 스테이션)",g:"multi",tag:"언더카운터",pts:["카운터 아래 본체와 위쪽 탭이 분리된 구조라, 설치 전에 하부장 깊이·배수·환기 공간을 확인해야 해요."]},{n:"Hexagon (헥사곤)",g:"multi",tag:"1그룹"},{n:"Revolution (레볼루션)",g:"multi",tag:"2012 국산화 모델"}]}]},
+ {n:"진성 (코너스톤)",en:"Cornerstone",dom:1,note:"온수기 회사 진성이 론칭한 에스프레소 머신 브랜드.",site:"https://blog.designcoffee.com/725f3020-b55f-4aef-8f75-de7c5dfe4495",basis:[MS("한국의 커피 머신 제조사들 (디자인커피 블로그)","https://blog.designcoffee.com/725f3020-b55f-4aef-8f75-de7c5dfe4495")],
+  brands:[{b:"코너스톤 Cornerstone",c:"m",maker:"진성 (한국)",models:[{n:"Cornerstone 2그룹 언더카운터",g:"multi",tag:"언더카운터"}]}]},
+ {n:"제로쓰로 (0th law)",en:"0th law",dom:1,note:"보일러 없이 기계식으로 압력을 만드는 에스프레소 기기를 만드는 국내 브랜드.",site:"https://blog.designcoffee.com/725f3020-b55f-4aef-8f75-de7c5dfe4495",basis:[MS("한국의 커피 머신 제조사들 (디자인커피 블로그)","https://blog.designcoffee.com/725f3020-b55f-4aef-8f75-de7c5dfe4495")],
+  brands:[{b:"제로쓰로",c:"m",maker:"제로쓰로 (한국)",models:[{n:"Real9 (리얼9)",g:"lever",tag:"수동·기계식 압력"}]}]},
+ {n:"동구전자 (티타임)",en:"Donggu Electronics",dom:1,note:"국내 커피머신 제조기업. 무인카페 브랜드 '티타임A1'을 운영하며 전국 A/S망을 갖췄다고 소개해요.",site:"https://economist.co.kr/article/view/ecn202408230016",basis:[MS("동구전자 티타임A1 기사 (이코노미스트)","https://economist.co.kr/article/view/ecn202408230016"),MS("한국의 커피 머신 제조사들 (디자인커피 블로그)","https://blog.designcoffee.com/725f3020-b55f-4aef-8f75-de7c5dfe4495")],
+  brands:[{b:"티타임 · 동구전자",c:"m",maker:"동구전자 (한국)",models:[{n:"티타임 A1 / A1 C20",g:"superauto",tag:"무인카페 머신"},{n:"아이크레오",g:"superauto",tag:"전자동"},{n:"XO-9",g:"superauto",tag:"오피스 전자동"}]}]},
+ {n:"(주)미스터커피 (브루보이)",en:"Mr.Coffee Korea",dom:1,note:"국내 최초 국산 상업용 전자동 커피머신 '브루보이'를 개발·생산했다고 소개돼요.",site:"https://blog.designcoffee.com/725f3020-b55f-4aef-8f75-de7c5dfe4495",basis:[MS("한국의 커피 머신 제조사들 (디자인커피 블로그)","https://blog.designcoffee.com/725f3020-b55f-4aef-8f75-de7c5dfe4495")],
+  brands:[{b:"브루보이 Brewboy",c:"m",maker:"미스터커피 (한국)",models:[{n:"Brewboy",g:"superauto",tag:"상업용 전자동"}]}]},
+ {n:"커피팩토리(주)",en:"Coffee Factory",dom:1,note:"바리스타가 만든 전자동 에스프레소 머신을 제조·수입한다고 소개. OEM도 진행.",site:"https://www.cofactory.co.kr/",basis:[MS("커피팩토리 홈페이지","https://www.cofactory.co.kr/")],
+  brands:[{b:"커피팩토리",c:"m",maker:"커피팩토리 (한국)",models:[{n:"모나코",g:"superauto",tag:"전자동"},{n:"시애틀",g:"superauto",tag:"전자동"},{n:"밀라노",g:"superauto",tag:"전자동"},{n:"오피스",g:"superauto",tag:"오피스"},{n:"팬텀 시리즈",g:"superauto",tag:"전자동"}]}]},
+ {n:"커피챕스 (비섹전자)",en:"Coffee Chaps",dom:1,note:"LCD·카메라 모듈 기업 비섹전자가 론칭한 브랜드로 자동 브루잉 머신과 그라인더를 출시.",site:"https://blog.designcoffee.com/725f3020-b55f-4aef-8f75-de7c5dfe4495",basis:[MS("한국의 커피 머신 제조사들 (디자인커피 블로그)","https://blog.designcoffee.com/725f3020-b55f-4aef-8f75-de7c5dfe4495")],
+  brands:[{b:"커피챕스 Coffee Chaps",c:"m",maker:"비섹전자 (한국)",models:[{n:"Brewbe 사이폰",g:"brewer",tag:"자동 사이폰"},{n:"Brewbe 2",g:"brewer",tag:"자동 브루잉"}]}]},
+ {n:"노블트리",en:"Nobletree",dom:1,note:"국내 브루잉 머신 제조사.",site:"https://blog.designcoffee.com/725f3020-b55f-4aef-8f75-de7c5dfe4495",basis:[MS("한국의 커피 머신 제조사들 (디자인커피 블로그)","https://blog.designcoffee.com/725f3020-b55f-4aef-8f75-de7c5dfe4495")],
+  brands:[{b:"아이레아 iLea",c:"m",maker:"노블트리 (한국)",models:[{n:"iLea SF",g:"brewer",tag:"자동 브루잉"},{n:"iLea Multi",g:"brewer",tag:"멀티 브루잉"}]}]},
+ {n:"쿠쿠",en:"CUCKOO",dom:1,note:"2026 서울카페쇼에서 에스프레소 머신·원두 그라인더·커피 추출 기능 바리스타 정수기 등 카페용 제품을 선보였어요. 업소용 모델명은 아직 확인하지 못했어요.",site:"https://www.theguru.co.kr/news/article.html?no=109378",basis:[MS("쿠쿠 2026 서울카페쇼 참가 기사 (더구루)","https://www.theguru.co.kr/news/article.html?no=109378")],
+  brands:[{b:"쿠쿠 카페 라인",c:"m",maker:"쿠쿠 (한국)",note:"모델명을 확인하면 추가할 예정이에요.",models:[]}]}
 ];
 
 // ----- 장비 매뉴얼 화면 -----
@@ -1058,15 +1113,16 @@ let MQ="", MC="all", MSEL=null, MOPEN=new Set([0]);
 const MK_LABEL={ko:["한글","mk-ko"],imp:["수입사 자료","mk-imp"],mfr:["제조사 원문","mk-mfr"],mir:["원문 열람","mk-mir"]};
 function manualFlat(){ const out=[]; MANUAL_DATA.forEach((im,ii)=>im.brands.forEach((br,bi)=>br.models.forEach((m,mi)=>out.push({ii,bi,mi,im,br,m})))); return out; }
 function mSrcs(br,m){ const a=[...(m.src||[])]; if(br.makerSrc&&!a.some(s=>s.u===br.makerSrc.u)) a.push(br.makerSrc); return a; }
-function mMatch(im,br,m){ if(MC!=="all"&&br.c!==MC) return false; if(!MQ) return true; const hay=(im.n+" "+im.en+" "+br.b+" "+br.maker+" "+(m?m.n+" "+(m.tag||""):"")).toLowerCase(); return MQ.toLowerCase().split(/\s+/).every(w=>hay.includes(w)); }
+function brPass(im,br){ return MC==="all"||(MC==="dom"?!!im.dom:MC==="auto"?br.models.some(m=>m.g==="superauto"||m.g==="brewer"):br.c===MC); }
+function mMatch(im,br,m){ if(!brPass(im,br)) return false; if(MC==="auto"&&m&&!(m.g==="superauto"||m.g==="brewer")) return false; if(!MQ) return true; const hay=(im.n+" "+im.en+" "+br.b+" "+br.maker+" "+(m?m.n+" "+(m.tag||""):"")).toLowerCase(); return MQ.toLowerCase().split(/\s+/).every(w=>hay.includes(w)); }
 function renderManual(){
   const el=document.getElementById("mtree"); if(!el) return;
   const flat=manualFlat(), nImp=MANUAL_DATA.length, nBr=MANUAL_DATA.reduce((a,i)=>a+i.brands.length,0), nM=flat.length, nKo=flat.filter(x=>mSrcs(x.br,x.m).some(s=>s.k==="ko")).length;
   document.getElementById("mstat").innerHTML=`<b>${nImp}</b> 수입회사 · <b>${nBr}</b> 수입제품(브랜드) · <b>${nM}</b> 제품 · 한글 매뉴얼 확인 <b>${nKo}</b>개`;
   el.innerHTML=MANUAL_DATA.map((im,ii)=>{
-    const brs=im.brands.map((br,bi)=>({br,bi,ms:br.models.map((m,mi)=>({m,mi})).filter(x=>mMatch(im,br,x.m))})).filter(x=>x.ms.length||(!MQ&&(MC==="all"||x.br.c===MC)));
+    const brs=im.brands.map((br,bi)=>({br,bi,ms:br.models.map((m,mi)=>({m,mi})).filter(x=>mMatch(im,br,x.m))})).filter(x=>x.ms.length||(!MQ&&x.br.models.length===0&&brPass(im,x.br)));
     if(!brs.length) return ""; const open=MQ||MOPEN.has(ii);
-    return `<div class="mimp ${open?"open":""}"><button class="mimph" data-ii="${ii}"><span class="mlv">대</span><b>${im.n}</b><small>${im.en}</small><em>${brs.reduce((a,x)=>a+x.ms.length,0)}</em></button>
+    return `<div class="mimp ${open?"open":""}"><button class="mimph" data-ii="${ii}"><span class="mlv">대</span><b>${im.n}</b>${im.dom?'<span class="mdom">국산 제조</span>':im.seller?'<span class="mdom msel">판매처</span>':""}<small>${im.en}</small><em>${brs.reduce((a,x)=>a+x.ms.length,0)}</em></button>
       ${open?`<div class="mimpb">${brs.map(({br,bi,ms})=>`<div class="mbr"><div class="mbrh"><span class="mlv mid">중</span><b>${br.b}</b><small>${br.c==="m"?"머신":"그라인더"} · ${br.maker}</small></div>
         ${ms.length?`<ul>${ms.map(({m,mi})=>{const s=mSrcs(br,m); const sel=MSEL&&MSEL.join()===[ii,bi,mi].join(); return `<li><button class="mmod ${sel?"on":""}" data-k="${ii},${bi},${mi}"><span class="mlv sm">소</span>${m.n}<small>${m.tag||""}</small>${s.some(x=>x.k==="ko")?`<i class="mk mk-ko">한글</i>`:s.length?`<i class="mk mk-mfr">원문</i>`:""}</button></li>`;}).join("")}</ul>`:`<p class="mnone">${br.note||"모델 정리 예정"}</p>`}</div>`).join("")}</div>`:""}</div>`;
   }).join("")||`<p class="mnone">검색 결과가 없어요.</p>`;
@@ -1088,7 +1144,7 @@ function renderManualDetail(){
    ${m.pts&&m.pts.length?`<section class="msec"><h3>이 모델 포인트</h3><ul class="mpts">${m.pts.map(p=>`<li>${p}</li>`).join("")}</ul></section>`:""}
    ${G?`<section class="msec"><h3>사용자 매뉴얼 (한글 요약 가이드)</h3><p class="mnote">${G.t} 공통 운용 요령이에요. 수치·주기는 원문 매뉴얼과 수입사 지침이 우선입니다.</p>
     ${G.s.map((s,i)=>`<details ${i<3?"open":""}><summary>${s[0]}</summary><ul>${s[1].map(x=>`<li>${x}</li>`).join("")}</ul></details>`).join("")}</section>`:""}
-   <section class="msec"><h3>수입회사</h3><p><b>${im.n}</b> <small>${im.en}</small></p><p class="mnote">${im.note}</p>
+   <section class="msec"><h3>${im.dom?"제조사 (국산)":im.seller?"판매처":"수입회사"}</h3><p><b>${im.n}</b> <small>${im.en}</small></p><p class="mnote">${im.note}</p>
     <ul class="msrc">${(im.basis||[]).map(s=>`<li><i class="mk mk-imp">근거</i><a href="${s.u}" target="_blank" rel="noopener">${s.t} ↗</a></li>`).join("")}${im.site?`<li><i class="mk mk-imp">자료실</i><a href="${im.site}" target="_blank" rel="noopener">수입사 자료·제품 페이지 ↗</a></li>`:""}</ul></section>
    <div class="mfoot"><button id="mtodict">장비 사전에서 ${br.c==="m"?"에스프레소 머신":"그라인더"} 보기</button></div>`;
   document.getElementById("mtodict").onclick=()=>{ document.querySelector('nav button[data-v="dict"]').click(); const q=document.getElementById("q"); if(q){ q.value=br.c==="m"?"에스프레소":"그라인더"; q.dispatchEvent(new Event("input")); } };
