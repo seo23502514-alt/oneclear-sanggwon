@@ -412,7 +412,7 @@ ul.warnl li.ok::marker{color:var(--ok)}
 </div></section>
 <section class="view" id="v-manual"><div class="mwrap">
   <div class="mhead"><div><h1>장비 매뉴얼 <small>머신 · 그라인더 · 전자동 · 제빙기 · 냉장 · 블렌더 · 오토스팀 · 세척·정수 · 오븐 · 탬핑·저울</small></h1><p id="mstat"></p>
-  <p class="mdisc">대 수입회사 › 중 수입제품(브랜드) › 소 제품명 › 소소 사용자 매뉴얼. 수입사는 각 회사 홈페이지·보도·박람회 소개의 자체 표기 기준(2026년 11월 조사)이며, 같은 브랜드를 여러 회사가 들여오는 경우도 있어요. 한글 매뉴얼이 없는 제품은 제조사 원문 링크와 함께 핵심 사용 요령을 한글로 정리했어요(원문 전체 번역이 아닌 요약). 국내 수입업체·KC 인증은 확인된 것만 적고, 확인하지 못한 것은 "모름"으로 표시했어요. KC 번호는 소비자24(국가기술표준원·국립전파연구원 연계) 공개 페이지와 판매처 상품정보고시 기준이며, 관세청 수입자별 통관 정보는 비공개라 확인할 수 없어요.</p></div></div>
+  <p class="mdisc">대 수입회사 › 중 수입제품(브랜드) › 소 제품명 › 소소 사용자 매뉴얼. 수입사는 각 회사 홈페이지·보도·박람회 소개의 자체 표기 기준(2026년 11월 조사)이며, 같은 브랜드를 여러 회사가 들여오는 경우도 있어요. 한글 매뉴얼이 없는 제품은 제조사 원문 링크와 함께 핵심 사용 요령을 한글로 정리했어요(원문 전체 번역이 아닌 요약). 국내 수입업체·KC 인증은 확인된 것만 적고, 확인하지 못한 것은 "모름"으로 표시했어요. KC 번호는 소비자24(국가기술표준원·국립전파연구원 연계) 공개 페이지와 판매처 상품정보고시 기준이에요.</p></div></div>
   <div class="mtools"><input id="mq" type="search" placeholder="수입사·브랜드·모델 검색 (예: 슬레이어, EK43, 에이덴)"><div id="mchips"><button class="on" data-c="all">전체</button><button data-c="m">에스프레소 머신</button><button data-c="g">그라인더</button><button data-c="auto">전자동</button><button data-c="dom">국산</button><button data-c="ko">한글 원본 있음</button><button data-c="ice">제빙기</button><button data-c="fr">냉장고</button><button data-c="fz">냉동고</button><button data-c="rf">냉장·냉동 겸용</button><button data-c="sc_cake">제과·케이크 쇼케이스</button><button data-c="sc_bev">음료 쇼케이스</button><button data-c="sc_frz">냉동·아이스크림 쇼케이스</button><button data-c="sc_open">오픈·샌드위치 쇼케이스</button><button data-c="cold">기타 냉장</button><button data-c="blend">블렌더</button><button data-c="steam">오토스팀</button><button data-c="brew">배치브루</button><button data-c="wash">세척·정수</button><button data-c="heat">오븐·그릴·레인지</button><button data-c="roast">로스터</button><button data-c="shave">빙수기</button><button data-c="tool">탬핑·저울</button></div><button id="mdlall" class="mdlbtn ghost">⬇ 목록 전체 한글 매뉴얼</button> <button id="mkoall" class="mdlbtn">⬇ 한글 원본 매뉴얼 모음</button></div><p id="mdlallmsg" class="mnote" style="margin:-6px 0 8px"></p>
   <div class="mgrid"><div id="mtree"></div><div id="mdetail"></div></div>
 </div></section>
@@ -1329,8 +1329,8 @@ function manualDocSection(im,br,m){
   return `<section class="doc"><h2>${_esc(m.n)} <small>${_esc(br.b)}${m.tag?" · "+_esc(m.tag):""}</small></h2>
   <table><tr><th>제조사</th><td>${_esc(br.maker)}</td></tr><tr><th>장비 유형</th><td>${G?_esc(G.t):"-"}</td></tr>
   <tr><th>국내 수입업체</th><td>${_esc(imp)}</td></tr>
-  <tr><th>KC 전기안전</th><td>${kc?kc.map(k=>_esc(k.no+(k.st?" ("+k.st+")":"")+(k.who?" · 인증 주체 "+k.who:"")+(k.org?" · "+k.org:"")+(k.note?" · "+k.note:""))).join("<br>"):"모름 — 제품 라벨의 KC 번호를 제품안전정보센터(safetykorea.kr)에서 조회하세요."}</td></tr>
-  <tr><th>관세청 통관</th><td>확인 불가 (수입자별 통관 내역 비공개)</td></tr></table>
+  ${kc?`<tr><th>KC 전기안전</th><td>${kc.map(k=>_esc(k.no+(k.st?" ("+k.st+")":"")+(k.who?" · 인증 주체 "+k.who:"")+(k.org?" · "+k.org:"")+(k.note?" · "+k.note:""))).join("<br>")}</td></tr>`:""}
+  </table>
   ${m.pts&&m.pts.length?`<h3>이 모델 포인트</h3><ul>${m.pts.map(p=>`<li>${_esc(_strip(p))}</li>`).join("")}</ul>`:""}
   ${br.note?`<p class="note">${_esc(br.note)}</p>`:""}
   ${G?`<h3>사용자 매뉴얼 (한글 요약 가이드)</h3><p class="note">${_esc(G.t)} 공통 운용 요령입니다. 수치·주기는 원문 매뉴얼과 수입사 지침이 우선입니다.</p>${G.s.map(x=>`<h4>${_esc(x[0])}</h4><ul>${x[1].map(t=>`<li>${_esc(_strip(t))}</li>`).join("")}</ul>`).join("")}`:""}
@@ -1362,8 +1362,8 @@ function renderManualDetail(){
     ${br.note?`<p class="mnote warn">${br.note}</p>`:""}</section>
    <section class="msec"><h3>국내 유통 · KC 인증</h3>
     <table class="mkc"><tr><th>국내 수입업체</th><td>${im.dom?"해당 없음 (국내 제조)":(im.seller||im.ovs)?'<b class="unk">모름</b> — 공식 수입사를 자료로 확인하지 못했어요'+(br.as?` · 판매처 표기 A/S: ${br.as}`:""):`${im.n} <small>(회사 자체 표기·보도 기준)</small>`}</td></tr>
-    <tr><th>KC 전기안전</th><td>${(m.kc||br.kc)?(m.kc||br.kc).map(k=>`<div><b>${k.no}</b> ${k.st?`<small>(${k.st})</small>`:""} ${k.who?`· 인증 주체 ${k.who}`:""} ${k.org?`· ${k.org}`:""} <small>${k.note||""}</small> ${k.u?`<a href="${k.u}" target="_blank" rel="noopener">근거 ↗</a>`:""}</div>`).join(""):'<b class="unk">모름</b> — 공개 검색에서 인증번호를 찾지 못했어요. 구매 전 제품 라벨의 KC 번호를 제품안전정보센터(safetykorea.kr)에서 조회하세요.'}</td></tr>
-    <tr><th>관세청 통관</th><td><b class="unk">확인 불가</b> — 수입자별 통관 내역은 관세청이 공개하지 않아요(품목별 통계만 공개).</td></tr></table></section>
+    ${(m.kc||br.kc)?`<tr><th>KC 전기안전</th><td>${(m.kc||br.kc).map(k=>`<div><b>${k.no}</b> ${k.st?`<small>(${k.st})</small>`:""} ${k.who?`· 인증 주체 ${k.who}`:""} ${k.org?`· ${k.org}`:""} <small>${k.note||""}</small> ${k.u?`<a href="${k.u}" target="_blank" rel="noopener">근거 ↗</a>`:""}</div>`).join("")}</td></tr>`:""}
+    </table></section>
    ${m.pts&&m.pts.length?`<section class="msec"><h3>이 모델 포인트</h3><ul class="mpts">${m.pts.map(p=>`<li>${p}</li>`).join("")}</ul></section>`:""}
    ${G?`<section class="msec"><h3>사용자 매뉴얼 (한글 요약 가이드)</h3><p class="mnote">${G.t} 공통 운용 요령이에요. 수치·주기는 원문 매뉴얼과 수입사 지침이 우선입니다.</p>
     ${G.s.map((s,i)=>`<details ${i<3?"open":""}><summary>${s[0]}</summary><ul>${s[1].map(x=>`<li>${x}</li>`).join("")}</ul></details>`).join("")}</section>`:""}
