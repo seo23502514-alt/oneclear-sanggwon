@@ -297,7 +297,7 @@ ul.warnl li.ok::marker{color:var(--ok)}
 .eqsw .sw.custom input{position:absolute;inset:0;opacity:0;width:100%;height:100%;cursor:pointer;border:0;padding:0}.colall{font-size:12.5px;display:flex;gap:6px;align-items:center}
 .mwrap{max-width:1280px;margin:0 auto;padding:20px}.mhead h1{margin:0 0 4px;font-size:24px}.mhead h1 small{font-size:14px;color:var(--muted);font-weight:500;margin-left:6px}#mstat{margin:0 0 6px;font-size:13.5px}.mdisc{margin:0;font-size:12.5px;color:var(--muted);line-height:1.6;max-width:900px}
 .mtools{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin:14px 0}.mtools input{flex:1 1 280px;font:inherit;font-size:14px;padding:10px 12px;border:1px solid var(--line);border-radius:10px}#mchips{display:flex;gap:6px}#mchips button{font:inherit;font-size:13px;padding:8px 12px;border:1px solid var(--line);background:#fff;border-radius:999px;cursor:pointer}.mkc{width:100%;border-collapse:collapse;font-size:13px}.mkc th{width:110px;text-align:left;vertical-align:top;color:#6b5a4a;font-weight:600;padding:6px 8px;border-bottom:1px solid var(--line)}.mkc td{padding:6px 8px;border-bottom:1px solid var(--line)}.mkc .unk{color:#b3261e}.mkc a{margin-left:4px}.mdom{white-space:nowrap;font-size:11px;font-weight:700;color:#1f6f43;background:#e3f3e8;border-radius:6px;padding:2px 6px;margin-left:6px}.mdom.msel{color:#8a5a00;background:#fbefd5}.mdom.movs{color:#2d4a8a;background:#e4ebfa}#mchips{flex-wrap:wrap}.mkobtns{display:flex;flex-direction:column;gap:6px;margin:6px 0}.mkobtns .mdlbtn{text-decoration:none;text-align:left;display:block}.mdlbtn{font:inherit;font-size:13px;padding:8px 14px;border-radius:999px;border:1px solid #6b4226;background:#6b4226;color:#fff;cursor:pointer;margin:0 6px 6px 0}.mdlbtn.ghost{background:#fff;color:#6b4226}#mchips button.on{background:var(--ink);color:#fff;border-color:var(--ink)}
-.mgrid{display:grid;grid-template-columns:minmax(0,380px) minmax(0,1fr);gap:18px;align-items:start}#mdetail{position:sticky;top:12px;background:#fff;border:1px solid var(--line);border-radius:14px;padding:20px 22px;min-height:300px}
+.mgrid{display:grid;grid-template-columns:minmax(0,380px) minmax(0,1fr);gap:18px;align-items:start}#mdetail{position:sticky;top:12px;max-height:calc(100vh - 24px);overflow:auto;background:#fff;border:1px solid var(--line);border-radius:14px;padding:20px 22px;min-height:300px}
 .mimp{background:#fff;border:1px solid var(--line);border-radius:12px;margin-bottom:8px;overflow:hidden}.mimph{width:100%;display:flex;align-items:center;gap:8px;padding:11px 12px;background:none;border:0;font:inherit;text-align:left;cursor:pointer}.mimph b{font-size:14.5px}.mimph small{color:var(--muted);font-size:11.5px}.mimph em{margin-left:auto;font-style:normal;font-size:12px;background:#f1ece4;border-radius:999px;padding:2px 8px}.mimp.open .mimph{border-bottom:1px solid var(--line);background:#faf8f4}
 .mlv{display:inline-flex;align-items:center;justify-content:center;width:20px;height:20px;border-radius:5px;background:var(--ink);color:#fff;font-size:11px;font-weight:700;flex:none}.mlv.mid{background:#8a6a4a}.mlv.sm{background:#c8b9a6;color:#3b3027;width:18px;height:18px;font-size:10.5px}
 .mimpb{padding:6px 10px 10px}.mbr{margin-top:6px}.mbrh{display:flex;align-items:center;gap:6px;flex-wrap:wrap;padding:4px 2px}.mbrh b{font-size:13.5px}.mbrh small{color:var(--muted);font-size:11.5px;width:100%;padding-left:26px}.mbr ul{list-style:none;margin:2px 0 0;padding:0 0 0 18px}
@@ -305,13 +305,14 @@ ul.warnl li.ok::marker{color:var(--ok)}
 .mk{font-style:normal;font-size:10.5px;font-weight:700;padding:2px 6px;border-radius:4px;flex:none}.mk-ko{background:#e3f1e7;color:#1f6b3a}.mk-imp{background:#eee6da;color:#6b4d2c}.mk-mfr{background:#e5ecf6;color:#2b4f7d}.mk-mir{background:#efefef;color:#555}
 .mnone{font-size:12.5px;color:var(--muted);margin:4px 0 4px 26px}
 .mcrumb{display:flex;flex-wrap:wrap;gap:6px;align-items:center;font-size:12px;color:var(--muted)}.mcrumb span{display:inline-flex;gap:4px;align-items:center}.mcrumb i{font-style:normal;background:#efe6d9;border-radius:4px;padding:0 5px;font-size:10.5px;color:#6b4d2c}
+.mpages img{display:block;width:100%;border-radius:8px;margin:0 0 8px;background:#111}.mpages h3 small{font-weight:400;color:var(--muted);font-size:12px}
 #mdetail h2{margin:8px 0 4px;font-size:22px}#mdetail h2 small{font-size:13px;color:var(--muted);font-weight:500}.mmeta{display:flex;gap:10px;flex-wrap:wrap;font-size:12.5px;color:var(--muted)}.mmeta span{background:#f6f3ee;border-radius:6px;padding:3px 8px}
 .msec{margin-top:18px}.msec h3{font-size:13px;letter-spacing:.06em;color:#8a6a4a;margin:0 0 8px}.msrc{list-style:none;margin:0;padding:0;display:grid;gap:6px}.msrc li{display:flex;gap:8px;align-items:baseline;font-size:13.5px}.msrc a{color:var(--ink)}
 .mnote{font-size:12.5px;color:var(--muted);line-height:1.6;margin:6px 0}.mnote.warn{color:#8a5a1a;background:#fff6e6;border-radius:8px;padding:8px 10px}.mpts{margin:0;padding-left:18px;font-size:13.5px;line-height:1.7}
 .msec details{border:1px solid var(--line);border-radius:10px;padding:8px 12px;margin-bottom:6px}.msec summary{font-weight:700;font-size:14px;cursor:pointer}.msec details ul{margin:8px 0 2px;padding-left:18px;font-size:13.5px;line-height:1.75}
 .mfoot{margin-top:18px}.mfoot button{font:inherit;font-size:13px;padding:8px 12px;border:1px solid var(--ink);background:#fff;border-radius:8px;cursor:pointer}.mfoot .mdlbtn{background:#6b4226;color:#fff;border-color:#6b4226;border-radius:999px}.mfoot .mdlbtn.ghost{background:#fff;color:#6b4226}
 @media(max-width:700px){nav{overflow-x:auto;flex-wrap:nowrap;scrollbar-width:none;max-width:100%}nav button{white-space:nowrap;flex:none;padding:10px 10px}}
-@media(max-width:900px){.mgrid{grid-template-columns:minmax(0,1fr)}#mdetail{position:static}}
+@media(max-width:900px){.mgrid{grid-template-columns:minmax(0,1fr)}#mdetail{position:static;max-height:none;overflow:visible}}
 </style>
 <script type="importmap">{"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.165.0/build/three.module.js","three/addons/":"https://cdn.jsdelivr.net/npm/three@0.165.0/examples/jsm/"}}</script>
 </head>
@@ -1315,7 +1316,7 @@ function renderManual(){
         ${ms.length?`<ul>${ms.map(({m,mi})=>{const s=mSrcs(br,m); const sel=MSEL&&MSEL.join()===[ii,bi,mi].join(); return `<li><button class="mmod ${sel?"on":""}" data-k="${ii},${bi},${mi}"><span class="mlv sm">소</span>${m.n}<small>${m.tag||""}</small>${s.some(x=>x.k==="ko")?`<i class="mk mk-ko">한글</i>`:s.length?`<i class="mk mk-mfr">원문</i>`:""}</button></li>`;}).join("")}</ul>`:`<p class="mnone">${br.note||"모델 정리 예정"}</p>`}</div>`).join("")}</div>`:""}</div>`;
   }).join("")||`<p class="mnone">검색 결과가 없어요.</p>`;
   el.querySelectorAll(".mimph").forEach(b=>b.onclick=()=>{ const i=+b.dataset.ii; MOPEN.has(i)?MOPEN.delete(i):MOPEN.add(i); renderManual(); });
-  el.querySelectorAll(".mmod").forEach(b=>b.onclick=()=>{ MSEL=b.dataset.k.split(",").map(Number); renderManual(); renderManualDetail(); if(window.innerWidth<900) document.getElementById("mdetail").scrollIntoView({behavior:"smooth"}); });
+  el.querySelectorAll(".mmod").forEach(b=>b.onclick=()=>{ MSEL=b.dataset.k.split(",").map(Number); renderManual(); renderManualDetail(); {const dd=document.getElementById("mdetail"); const r=dd.getBoundingClientRect(); if(window.innerWidth<900||r.top<0||r.top>window.innerHeight*0.5) dd.scrollIntoView({behavior:"smooth",block:"start"});} });
   if(!MSEL){ MSEL=[0,0,0]; renderManualDetail(); }
 }
 
@@ -1347,13 +1348,14 @@ async function downloadManual(list,title,fname,msgEl){
   const r=await saveFile(fname,html);
   if(msgEl) msgEl.textContent=r==="saved"?"저장했어요. 파일을 열어 인쇄 → PDF로 저장도 할 수 있어요.":r==="declined"?"저장을 취소했어요.":"이 화면에서는 저장이 막혀 있어요.";
 }
+const MAN_PAGES={"manuals/ceado_rev_series_ko.pdf":{dir:"manuals/ceado_rev/",n:15}};
 function renderManualDetail(){
-  const d=document.getElementById("mdetail"); if(!MSEL){ d.innerHTML=""; return; }
+  const d=document.getElementById("mdetail"); if(!MSEL){ d.innerHTML=""; return; } d.scrollTop=0;
   const [ii,bi,mi]=MSEL, im=MANUAL_DATA[ii], br=im.brands[bi], m=br.models[mi]; if(!m){ d.innerHTML=""; return; }
   const G=MG[m.g], srcs=mSrcs(br,m), hasKo=srcs.some(s=>s.k==="ko");
   d.innerHTML=`<div class="mcrumb"><span><i>대</i>${im.n}</span>›<span><i>중</i>${br.b}</span>›<span><i>소</i>${m.n}</span></div>
    <h2>${m.n} <small>${br.b.replace(/^[^A-Za-z]+/,"")} · ${m.tag||""}</small></h2>
-   <div class="mmeta"><span>제조사 ${br.maker}</span><span>${G?G.t:""}</span></div>
+   <div class="mmeta"><span>제조사 ${br.maker}</span><span>${G?G.t:""}</span></div>${(()=>{const pg=srcs.map(x=>MAN_PAGES[x.u]).find(Boolean); return pg?`<section class="msec mpages"><h3>사용자 매뉴얼 <small>${pg.n}쪽 · 아래로 넘겨 보세요</small></h3>${Array.from({length:pg.n},(_,i)=>`<img loading="${i<2?"eager":"lazy"}" src="${pg.dir}${String(i+1).padStart(2,"0")}.jpg" alt="매뉴얼 ${i+1}쪽">`).join("")}</section>`:"";})()}
    ${hasKo?`<section class="msec mko"><h3>한글 원본 매뉴얼 받기</h3><div class="mkobtns">${srcs.filter(x=>x.k==="ko").map(x=>(/^manuals\//.test(x.u)?`<button class="mdlbtn mlocal" data-u="${x.u}">⬇ ${x.t} · 바로 저장</button>`:`<a class="mdlbtn" href="${x.u}" target="_blank" rel="noopener" download>⬇ ${x.t}</a>`)).join("")}</div><p class="mnote">누르면 제조사·수입사 자료실의 원본(PDF 또는 게시글)이 새 창으로 열려요. 게시글로 열리면 첨부파일을 눌러 받으면 돼요.</p></section>`:""}<section class="msec"><h3>매뉴얼 원본</h3>
     ${srcs.length?`<ul class="msrc">${srcs.map(s=>`<li><i class="mk ${MK_LABEL[s.k][1]}">${MK_LABEL[s.k][0]}</i><a href="${s.u}" target="_blank" rel="noopener">${s.t} ↗</a></li>`).join("")}</ul>`:`<p class="mnote">공개된 매뉴얼 링크를 찾지 못했어요. 수입사(${im.n})에 요청하세요.</p>`}
     ${hasKo?"":`<p class="mnote">한글 매뉴얼은 확인되지 않아, 아래에 제조사 원문 기준의 핵심 사용 요령을 한글로 정리했어요. 원문 전체 번역본은 수입사 또는 제조사에 요청하세요.</p>`}
