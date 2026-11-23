@@ -49,9 +49,10 @@ for it in req.get('images',[]):
 from urllib.parse import quote, unquote, urlparse, parse_qs
 import time
 def ddg(q):
-    r=requests.post('https://html.duckduckgo.com/html/',data={'q':q,'kl':'kr-kr'},headers=UA,timeout=25)
+    r=requests.get('https://www.bing.com/search',params={'q':q,'setlang':'en','cc':'US'},headers=UA,timeout=25)
+    open('out/_bing_last.html','w').write(r.text)
     s=BeautifulSoup(r.text,'html.parser'); out=[]
-    for a in s.select('a.result__a'):
+    for a in s.select('li.b_algo h2 a'):
         h=a.get('href','')
         if 'uddg=' in h: h=unquote(parse_qs(urlparse(h).query).get('uddg',[''])[0])
         if h.startswith('http') and 'duckduckgo' not in h and not re.search(r'youtube|facebook|instagram|pinterest|amazon\.|ebay\.|aliexpress|coupang',h): out.append([h,a.get_text(' ',strip=True)])
