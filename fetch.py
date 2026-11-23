@@ -18,6 +18,10 @@ for it in req.get('pages',[]):
         html=r.text; log['status']=r.status_code
         if it.get('save'): open(d+'/page.html','w').write(html)
         s=BeautifulSoup(html,'html.parser')
+        if it.get('text'):
+            for t in s(['script','style','noscript','svg']): t.decompose()
+            txt=re.sub(r'\n\s*\n+','\n',s.get_text('\n',strip=True))
+            open(d+'/text.txt','w').write(txt[:200000])
         log['title']=(s.title.string or '').strip() if s.title else ''
         cands=[]
         for m in s.select('meta[property="og:image"],meta[name="twitter:image"]'):
