@@ -1,0 +1,39 @@
+{
+ "url": "https://blkorea.co.kr/product/search.html?keyword=BTB",
+ "status": 200,
+ "title": "비엘코리아 | 업소용 커피머신·카페창업 전문",
+ "imgs": [
+  [
+   "out/r03/00.jpg",
+   "https://blkorea.co.kr/web/upload/share-image-1-8d6feedbae871a568e692aa1ac3ced24.png",
+   [
+    700,
+    366
+   ]
+  ],
+  [
+   "out/r03/01.jpg",
+   "https://blkorea.co.kr/web/upload/category/logo/v2_a19554d7ef20e9771607a85c1e7ab718_ty9fcgPWsx_top.jpg",
+   [
+    581,
+    308
+   ]
+  ],
+  [
+   "out/r03/02.jpg",
+   "https://blkorea.co.kr/web/product/medium/202609/1bc8bb9c8e572ca403cd3f76ea273db5.jpg",
+   [
+    300,
+    300
+   ]
+  ],
+  [
+   "out/r03/03.jpg",
+   "https://blkorea.co.kr/web/upload/category/logo/v2_a19554d7ef20e9771607a85c1e7ab718_oA2ygFcN3r_bottom.jpg",
+   [
+    581,
+    308
+   ]
+  ]
+ ]
+}
