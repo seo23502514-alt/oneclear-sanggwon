@@ -1,45 +1,4 @@
-{
-"pages": [],
-"images": [
-{
-"id": "dc_f09aa3fb",
-"url": "https://oopy.lazyrockets.com/api/v2/notion/image?src=https%3A%2F%2Fs3-us-west-2.amazonaws.com%2Fsecure.notion-static.com%2Ff09aa3fb-d478-48ba-b0c9-e601203c07f4%2F2222222.png&blockId=5f8eb0d7-f963-433a-8ee2-4236201c1acf",
-"ref": "https://blog.designcoffee.com/"
-},
-{
-"id": "dc_2366ba1b",
-"url": "https://oopy.lazyrockets.com/api/v2/notion/image?src=https%3A%2F%2Fs3-us-west-2.amazonaws.com%2Fsecure.notion-static.com%2F2366ba1b-68de-4518-bfee-fad18c5aa960%2FDDDDDD.png&blockId=86aecbd6-fb67-42c6-a0b7-09ba0af281d1",
-"ref": "https://blog.designcoffee.com/"
-},
-{
-"id": "dc_9b04c7b7",
-"url": "https://oopy.lazyrockets.com/api/v2/notion/image?src=https%3A%2F%2Fs3-us-west-2.amazonaws.com%2Fsecure.notion-static.com%2F9b04c7b7-e49f-4f9e-ada2-f170606e5cc2%2FRhea_in.jpg&blockId=1584138b-61cf-475d-aee2-d4de4a71a7ea",
-"ref": "https://blog.designcoffee.com/"
-},
-{
-"id": "dc_5803fce7",
-"url": "https://oopy.lazyrockets.com/api/v2/notion/image?src=https%3A%2F%2Fs3-us-west-2.amazonaws.com%2Fsecure.notion-static.com%2F5803fce7-dfe7-4909-ab6e-c3d3c79f541d%2F5%EA%B5%AC-2-copy-1-2048x1408.png&blockId=6f5514f2-46af-4b09-a22b-5c8fe81dd08f",
-"ref": "https://blog.designcoffee.com/"
-},
-{
-"id": "dc_a8d810e3",
-"url": "https://oopy.lazyrockets.com/api/v2/notion/image?src=https%3A%2F%2Fs3-us-west-2.amazonaws.com%2Fsecure.notion-static.com%2Fa8d810e3-e64c-45c5-bfb3-ed2d5877f9d2%2Flogo_main_low.png&blockId=bc90dc55-92fe-44e9-bb6f-58fefdee8990",
-"ref": "https://blog.designcoffee.com/"
-},
-{
-"id": "dc_12b6a847",
-"url": "https://oopy.lazyrockets.com/api/v2/notion/image?src=https%3A%2F%2Fs3-us-west-2.amazonaws.com%2Fsecure.notion-static.com%2F12b6a847-91c9-4b51-89c2-2ca178e7748d%2F20180802141444.png&blockId=1085f863-2388-4ac6-86ca-a99aca827db5",
-"ref": "https://blog.designcoffee.com/"
-},
-{
-"id": "icevan4",
-"url": "https://icevan.co.kr/img/main_img4.png",
-"ref": "https://icevan.co.kr/"
-},
-{
-"id": "icevan080",
-"url": "https://icevan.co.kr/img/main_080MW.png",
-"ref": "https://icevan.co.kr/"
-}
-]
-}
+{"pages":[
+{"id":"r15","url":"https://opencook.co.kr/product/detail.html?product_no=132&cate_no=65&display_group=1","n":4},
+{"id":"r03","url":"https://blkorea.co.kr/product/search.html?keyword=BTB","n":12,"save":1}
+]}
