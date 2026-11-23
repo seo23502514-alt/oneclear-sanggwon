@@ -1,0 +1,47 @@
+{
+ "url": "https://search.danawa.com/dsearch.php?query=%EC%95%84%EC%9D%B4%EB%A0%88%EC%95%84",
+ "status": 200,
+ "title": "아이레아 : 다나와 통합검색",
+ "imgs": [
+  [
+   "out/q04/00.jpg",
+   "https://img.danawa.com/new/tour/img/logo/sns_danawa.jpg",
+   [
+    270,
+    270
+   ]
+  ],
+  [
+   "out/q04/01.jpg",
+   "https://img.danuri.io/catalog-image/189/968/108/9295dd294b88441bb4781b52dae8af24.jpg?v=20261112080808&shrink=340:*",
+   [
+    340,
+    340
+   ]
+  ],
+  [
+   "out/q04/02.jpg",
+   "https://img.danuri.io/catalog-image/594/215/124/fd4fd4ce85fb4af3ac8c87596045b364.png?v=20261120080430&shrink=340:*",
+   [
+    340,
+    340
+   ]
+  ],
+  [
+   "out/q04/03.jpg",
+   "https://img.danuri.io/catalog-image/658/215/124/3b31f8989f20430ea7d503646a68725d.png?v=20261119223328&shrink=340:*",
+   [
+    340,
+    340
+   ]
+  ],
+  [
+   "out/q04/04.jpg",
+   "https://img.danuri.io/catalog-image/601/215/124/11dfa427f4874b30b4706bee78fc9787.png?v=20261120052754&shrink=340:*",
+   [
+    340,
+    340
+   ]
+  ]
+ ]
+}

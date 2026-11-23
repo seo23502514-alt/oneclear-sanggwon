@@ -1,0 +1,47 @@
+{
+ "url": "https://prima-coffee.com/equipment/el-rocio/zarre-el-ro-pp",
+ "status": 200,
+ "title": "Cafe - Accessories - Prima Coffee Equipment",
+ "imgs": [
+  [
+   "out/q10b/00.jpg",
+   "https://prima-coffee.com/product_images/uploaded_images/espresso-grinders.jpg",
+   [
+    600,
+    600
+   ]
+  ],
+  [
+   "out/q10b/01.jpg",
+   "https://prima-coffee.com/product_images/uploaded_images/coffee-grinders.jpg",
+   [
+    600,
+    600
+   ]
+  ],
+  [
+   "out/q10b/02.jpg",
+   "https://prima-coffee.com/product_images/uploaded_images/coffee-brewers.jpg",
+   [
+    600,
+    600
+   ]
+  ],
+  [
+   "out/q10b/03.jpg",
+   "https://prima-coffee.com/product_images/uploaded_images/espresso-machines.jpg",
+   [
+    600,
+    600
+   ]
+  ],
+  [
+   "out/q10b/04.jpg",
+   "https://prima-coffee.com/product_images/uploaded_images/water-filtration.jpg",
+   [
+    600,
+    600
+   ]
+  ]
+ ]
+}

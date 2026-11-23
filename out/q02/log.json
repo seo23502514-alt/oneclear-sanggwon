@@ -1,0 +1,31 @@
+{
+ "url": "http://www.daesangjubang.com/goods/goods_view.php?goodsNo=23673",
+ "status": 200,
+ "title": "대상주방-대상주방에 오신걸 환영합니다~",
+ "imgs": [
+  [
+   "out/q02/00.jpg",
+   "http://www.daesangjubang.com/data/skin/front/skinfree_dp2018_D/img/ugn/320x250.png",
+   [
+    320,
+    250
+   ]
+  ],
+  [
+   "out/q02/01.jpg",
+   "http://www.daesangjubang.com/data/skin/front/skinfree_dp2018_D/img/ugn/320x425.png",
+   [
+    320,
+    425
+   ]
+  ],
+  [
+   "out/q02/02.jpg",
+   "https://godomall.speedycdn.net/4cdf417669460b6504700d9390e57c57/goods/23673/image/detail/23673_detail_082.JPG",
+   [
+    500,
+    500
+   ]
+  ]
+ ]
+}
