@@ -1,47 +1,6 @@
 {
- "url": "https://search.danawa.com/dsearch.php?query=XC160L",
+ "url": "https://search.danawa.com/dsearch.php?query=KSR-1050R-SP",
  "status": 200,
- "title": "XC160L : 다나와 통합검색",
- "imgs": [
-  [
-   "out/q15/00.jpg",
-   "https://img.danawa.com/new/tour/img/logo/sns_danawa.jpg",
-   [
-    270,
-    270
-   ]
-  ],
-  [
-   "out/q15/01.jpg",
-   "https://ep-cdn.011st.com/11dims/resize/900x900/quality/75/11src/pd/v2/2/1/6/4/3/3/TnkUO/9773216433_B.webp",
-   [
-    695,
-    700
-   ]
-  ],
-  [
-   "out/q15/02.jpg",
-   "https://ep-cdn.011st.com/11dims/resize/900x900/quality/75/11src/product/9734276816/B.webp?791879687",
-   [
-    700,
-    670
-   ]
-  ],
-  [
-   "out/q15/03.jpg",
-   "https://ep-cdn.011st.com/11dims/resize/900x900/quality/75/11src/product/9734273672/B.webp?824092971",
-   [
-    700,
-    687
-   ]
-  ],
-  [
-   "out/q15/04.jpg",
-   "https://sep-item.ssgcdn.com/55/43/50/item/1000897504355_i1_350.jpg",
-   [
-    350,
-    350
-   ]
-  ]
- ]
+ "title": "KSR-1050R-SP : 다나와 통합검색",
+ "imgs": []
 }
