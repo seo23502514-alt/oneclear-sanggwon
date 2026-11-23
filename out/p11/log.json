@@ -1,0 +1,39 @@
+{
+ "url": "https://onlinemall.co.kr/m/product.html?branduid=3481957",
+ "status": 200,
+ "title": "[유니크 제과쇼케이스 SKJRF-B120B (1200mm/사각)]",
+ "imgs": [
+  [
+   "out/p11/00.jpg",
+   "https://onlinemall.co.kr/shopimages/lnpi112/mobile/7/3481957_represent?1571278983",
+   [
+    700,
+    700
+   ]
+  ],
+  [
+   "out/p11/01.jpg",
+   "http://lnpi112.mireene.com/lnpi/etc/ship05.JPG",
+   [
+    700,
+    443
+   ]
+  ],
+  [
+   "out/p11/02.jpg",
+   "http://lnpi112.mireene.com/lnpi/etc/ship02-2.JPG",
+   [
+    444,
+    700
+   ]
+  ],
+  [
+   "out/p11/03.jpg",
+   "http://lnpi112.mireene.com/lnpi/uds/SKJRF01_01.jpg",
+   [
+    183,
+    700
+   ]
+  ]
+ ]
+}

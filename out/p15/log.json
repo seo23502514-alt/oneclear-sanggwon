@@ -1,0 +1,47 @@
+{
+ "url": "https://opencook.co.kr/category/%EC%A0%9C%EA%B3%BC%EC%87%BC%EC%BC%80%EC%9D%B4%EC%8A%A4/65/",
+ "status": 200,
+ "title": "제과쇼케이스 - opencook",
+ "imgs": [
+  [
+   "out/p15/00.jpg",
+   "https://opencook.co.kr/layout_dp/img/top_sb_b1.jpg",
+   [
+    190,
+    285
+   ]
+  ],
+  [
+   "out/p15/01.jpg",
+   "https://opencook.co.kr/layout_dp/img/top_sb_b2.jpg",
+   [
+    190,
+    285
+   ]
+  ],
+  [
+   "out/p15/02.jpg",
+   "https://opencook.co.kr/layout_dp/img/top_sb_b3.jpg",
+   [
+    190,
+    285
+   ]
+  ],
+  [
+   "out/p15/03.jpg",
+   "https://opencook.co.kr/layout_dp/img/top_sb_b4.jpg",
+   [
+    190,
+    285
+   ]
+  ],
+  [
+   "out/p15/04.jpg",
+   "https://opencook.co.kr/layout_dp/img/top_sb_b5.jpg",
+   [
+    190,
+    285
+   ]
+  ]
+ ]
+}

@@ -1,0 +1,39 @@
+{
+ "url": "http://www.uniquemall.net/product/?lc=prod_1-1",
+ "status": 200,
+ "title": "유니크몰",
+ "imgs": [
+  [
+   "out/p14/00.jpg",
+   "http://uniquemall.net/img/logo2.png",
+   [
+    300,
+    149
+   ]
+  ],
+  [
+   "out/p14/01.jpg",
+   "http://www.uniquemall.net/upload/20260408014317.png",
+   [
+    501,
+    501
+   ]
+  ],
+  [
+   "out/p14/02.jpg",
+   "http://www.uniquemall.net/upload/20260408013816.png",
+   [
+    500,
+    501
+   ]
+  ],
+  [
+   "out/p14/03.jpg",
+   "http://www.uniquemall.net/img/footer_sub4-1.png",
+   [
+    700,
+    127
+   ]
+  ]
+ ]
+}
