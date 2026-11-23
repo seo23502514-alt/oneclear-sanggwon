@@ -1,0 +1,72 @@
+MH20i
+Home
+-
+CMMs, probes, software and retrofits
+-
+Hardware
+-
+Manual systems
+-
+MH20i
+MH20i
+Manual indexable probe head that combines the TP20 kinematic stylus module mount with two axis indexing, enabling flexible stylus changing and repeatable probe re-orientation.
+The A-axis rotates through ±180° in the X-Y plane. The B-axis rotates through 90° in the Z plane. A lever locks the head in one of up to 168 repeatable positions, set at 15° increments.
+The head is capable of carrying the full range of
+TP20
+modules, which can be changed without re-qualification, providing qualification has taken place in each position with each stylus / module combination.
+Length
+61 mm
+Diameter
+48 mm
+Weight
+210 g
+Probe mounting
+TP20 kinematic mount
+Head mounting
+MS range of shanks
+Suitable interface
+PI 200-3
+Number of probe sockets
+1
+Probe status indication
+1 LED
+Cable connection
+5 pin DIN 180º socket
+A-axis indexing
+0° to 90° in 15° repeatable steps
+B-axis indexing
+180° in 15° repeatable steps
+Repeatability of position
+1.5 µm (0.00006 in) (TP20 and 10 mm stylus fitted)
+2.5 µm (0.0001 in) (EM2 extended module and 10 mm stylus)
+Maximum extension bar
+EM2 extension module - 75 mm (2.95 in)
+Breathe new life into your inspection process
+Upgrade your current probing system and see your costs reduce overnight.
+Unbeatable upgrade offers for manual CMMs
+Extended warranty
+For peace of mind a
+3-year warranty
+is available for your new CMM products during the first 3 months from purchase. Contact your vendor.
+Product information
+Brochure:  MH20 and MH20i Manual probe heads with modular flexibility
+Brochure:  MH20 and MH20i Manual probe heads with modular flexibility
+Brochure: MH20 and MH20i Manual probe heads with modular flexibility
+[467kB]
+Download manuals
+Technical information
+Manual systems
+MH20i indexable head for use with TP20 stylus modules
+MH20 positioning head for use with TP20 stylus modules
+MH8 indexing head for use with M8 mounted probes
+MIH indexing head with integral LCD position display
+PH1 positioning head with offset probe mount
+PH6 fixed head with one probe socket
+PH6M fixed head with autojoint
+TP20 modules
+CMM probes, software and retrofits
+Hardware
+Software
+Retrofit
+Support and downloads
+5-axis technology

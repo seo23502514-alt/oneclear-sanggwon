@@ -1,0 +1,4 @@
+{
+ "url": "https://caffe.co.kr/shop/step_submain.php?b_code=B20131205113227&c_code=&m_code=M20131205115607&orderby_bq=&research_b=goods_name",
+ "err": "HTTPSConnectionPool(host='caffe.co.kr', port=443): Max retries exceeded with url: /shop/step_submain.php?b_code=B20131205113227&c_code=&m_code=M20131205115607&orderby_bq=&research_b=goods_name (Caused by SSLError(SSLCertVerificationError(1, '[SSL: CERTIFICATE_VERIFY_FAILED] certificate verify failed: self-signed certificate (_ssl.c:1081)')))"
+}

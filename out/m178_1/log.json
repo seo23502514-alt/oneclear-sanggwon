@@ -1,0 +1,4 @@
+{
+ "url": "https://jubangtown.kr/category/%ED%8C%8C%EB%8B%88%EB%8B%88%EA%B7%B8%EB%A6%B4/196/",
+ "err": "HTTPSConnectionPool(host='jubangtown.kr', port=443): Max retries exceeded with url: /category/%ED%8C%8C%EB%8B%88%EB%8B%88%EA%B7%B8%EB%A6%B4/196/ (Caused by NameResolutionError(\"HTTPSConnection(host='jubangtown.kr', port=443): Failed to resolve 'jubangtown.kr' ([Errno -2] Name or service not known)\"))"
+}

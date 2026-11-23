@@ -1,0 +1,4 @@
+{
+ "url": "http://www.korea3651.com/unique/product_stand/",
+ "err": "HTTPConnectionPool(host='www.korea3651.com', port=80): Max retries exceeded with url: /unique/product_stand/ (Caused by NameResolutionError(\"HTTPConnection(host='www.korea3651.com', port=80): Failed to resolve 'www.korea3651.com' ([Errno -2] Name or service not known)\"))"
+}
