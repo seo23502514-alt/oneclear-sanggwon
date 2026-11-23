@@ -46,3 +46,31 @@ for it in req.get('images',[]):
     os.makedirs('out/img',exist_ok=True)
     try: wh=img(it['url'],it.get('ref',it['url']),f"out/img/{it['id']}.jpg"); print(it['id'],wh)
     except Exception as e: print(it['id'],'ERR',e)
+from urllib.parse import quote, unquote, urlparse, parse_qs
+import time
+def ddg(q):
+    r=requests.post('https://html.duckduckgo.com/html/',data={'q':q,'kl':'kr-kr'},headers=UA,timeout=25)
+    s=BeautifulSoup(r.text,'html.parser'); out=[]
+    for a in s.select('a.result__a'):
+        h=a.get('href','')
+        if 'uddg=' in h: h=unquote(parse_qs(urlparse(h).query).get('uddg',[''])[0])
+        if h.startswith('http') and 'duckduckgo' not in h and not re.search(r'youtube|facebook|instagram|pinterest|amazon\.|ebay\.|aliexpress|coupang',h): out.append([h,a.get_text(' ',strip=True)])
+    return out
+for it in req.get('search',[]):
+    d=f"out/{it['id']}"; os.makedirs(d,exist_ok=True); log={'q':it['q'],'res':[]}
+    try: res=ddg(it['q'])
+    except Exception as e: res=[]; log['err']=str(e)
+    log['all']=res[:8]
+    for k,(u,t) in enumerate(res[:it.get('k',3)]):
+        try:
+            r=requests.get(u,headers=UA,timeout=25)
+            if r.encoding is None or r.encoding.lower()=='iso-8859-1': r.encoding=r.apparent_encoding
+            if 'pdf' in r.headers.get('content-type',''): 
+                open(f'{d}/{k}.pdf','wb').write(r.content); log['res'].append([u,t,'pdf']); continue
+            s=BeautifulSoup(r.text,'html.parser')
+            for x in s(['script','style','noscript','svg']): x.decompose()
+            txt=re.sub(r'\n\s*\n+','\n',s.get_text('\n',strip=True))
+            open(f'{d}/{k}.txt','w').write(txt[:200000]); log['res'].append([u,t,r.status_code])
+        except Exception as e: log['res'].append([u,t,'ERR '+str(e)[:60]])
+    json.dump(log,open(d+'/log.json','w'),ensure_ascii=False,indent=1)
+    time.sleep(2)
