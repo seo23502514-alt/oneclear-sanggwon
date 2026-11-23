@@ -1,0 +1,6 @@
+{
+ "q": "이지스터 2.8kg 로스터 사양",
+ "res": [],
+ "err": "('Connection aborted.', ConnectionResetError(104, 'Connection reset by peer'))",
+ "all": []
+}

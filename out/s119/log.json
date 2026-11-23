@@ -1,0 +1,6 @@
+{
+ "q": "바리스타스페이스 스팀피처 사양",
+ "res": [],
+ "err": "HTTPSConnectionPool(host='html.duckduckgo.com', port=443): Max retries exceeded with url: /html/ (Caused by ConnectTimeoutError(<HTTPSConnection(host='html.duckduckgo.com', port=443) at 0x7d5edb8bb9d0>, 'Connection to html.duckduckgo.com timed out. (connect timeout=25)'))",
+ "all": []
+}

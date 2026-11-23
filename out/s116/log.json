@@ -1,0 +1,6 @@
+{
+ "q": "코맥 넉박스 CKB03-2 크기",
+ "res": [],
+ "err": "HTTPSConnectionPool(host='html.duckduckgo.com', port=443): Max retries exceeded with url: /html/ (Caused by ConnectTimeoutError(<HTTPSConnection(host='html.duckduckgo.com', port=443) at 0x7d5edb8bb4d0>, 'Connection to html.duckduckgo.com timed out. (connect timeout=25)'))",
+ "all": []
+}
