@@ -1444,10 +1444,58 @@ function manualDocHtml(title,body){
 <style>body{font-family:"Pretendard","Apple SD Gothic Neo","Malgun Gothic",sans-serif;color:#2b2118;max-width:860px;margin:32px auto;padding:0 20px;line-height:1.6}h1{font-size:24px;border-bottom:3px solid #6b4226;padding-bottom:8px}h2{font-size:20px;margin-top:36px;color:#6b4226}h2 small{font-size:13px;color:#8a7a6a;font-weight:400}h3{font-size:15px;margin:20px 0 6px;color:#6b4226}h4{font-size:14px;margin:12px 0 4px}table{border-collapse:collapse;width:100%;font-size:13px}th{width:120px;text-align:left;background:#f6efe7;padding:6px 8px;border:1px solid #e5d8c8;vertical-align:top}td{padding:6px 8px;border:1px solid #e5d8c8}ul{margin:4px 0 8px;padding-left:20px}li{margin:2px 0}.note{font-size:12.5px;color:#7a6a5a}.doc{page-break-after:always}.disc{font-size:12px;color:#7a6a5a;background:#faf6f1;padding:10px 12px;border-radius:8px}@media print{body{margin:0}a{color:inherit}}</style></head><body>
 <h1>${_esc(title)}</h1><p class="disc">카페 장비 시각가이드 · 장비 매뉴얼에서 만든 한글 요약본입니다(${new Date().toLocaleDateString("ko-KR")}). 제조사 원문 매뉴얼의 전체 번역이 아니며, 안전·수치·교체 주기는 원문 매뉴얼과 수입사 안내가 우선합니다. 인쇄 메뉴에서 'PDF로 저장'하면 PDF로 보관할 수 있어요.</p>${body}</body></html>`;
 }
+// ----- 한글(.hwpx) 파일 만들기: 한컴오피스 한글에서 바로 열리는 OWPML 문서 -----
+let _hwpxReady=null;
+function loadHwpx(){ if(window.HWPX_TPL&&window.JSZip) return Promise.resolve(); if(_hwpxReady) return _hwpxReady;
+  _hwpxReady=loadPptx().then(()=>window.HWPX_TPL?0:new Promise((ok,no)=>{ const sc=document.createElement("script"); sc.src="lib/hwpx-tpl.js"; sc.onload=()=>ok(); sc.onerror=()=>no(new Error("tpl")); document.head.appendChild(sc); })).catch(e=>{_hwpxReady=null; throw e;}); return _hwpxReady; }
+const _hx=t=>String(t==null?"":t).replace(/[\u0000-\u0008\u000B\u000C\u000E-\u001F]/g,"").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;");
+// 글자모양: 0 본문 · 7 제목 · 8 제품명 · 9 소제목 · 10 작은 회색 · 11 굵게
+function HwpxDoc(){ let id=1; const out=[], txt=[];
+  const P=(runs,pb)=>{ runs=runs.filter(r=>r&&r[0]!==""); txt.push(runs.map(r=>r[0]).join(""));
+    return `<hp:p id="${id++}" paraPrIDRef="0" styleIDRef="0" pageBreak="${pb?1:0}" columnBreak="0" merged="0">${(runs.length?runs:[["",0]]).map(([t,c])=>`<hp:run charPrIDRef="${c||0}">${t===""?"<hp:t/>":`<hp:t>${_hx(t)}</hp:t>`}</hp:run>`).join("")}</hp:p>`; };
+  const cell=(lines,c,bf,col,row,w)=>`<hp:tc name="" header="0" hasMargin="0" protect="0" editable="0" dirty="0" borderFillIDRef="${bf}"><hp:subList id="" textDirection="HORIZONTAL" lineWrap="BREAK" vertAlign="CENTER" linkListIDRef="0" linkListNextIDRef="0" textWidth="0" textHeight="0" hasTextRef="0" hasNumRef="0">${(lines.length?lines:[""]).map(l=>P([[l,c]])).join("")}</hp:subList><hp:cellAddr colAddr="${col}" rowAddr="${row}"/><hp:cellSpan colSpan="1" rowSpan="1"/><hp:cellSz width="${w}" height="282"/><hp:cellMargin left="510" right="510" top="141" bottom="141"/></hp:tc>`;
+  return {
+    p(runs,pb){ out.push(P(runs,pb)); },
+    t(text,c,pb){ out.push(P([[String(text),c||0]],pb)); },
+    li(text){ out.push(P([["• "+text,0]])); },
+    gap(){ out.push(P([])); },
+    table(rows,w1){ if(!rows.length) return; const W=42520; w1=w1||10200; const w2=W-w1;
+      const tr=rows.map((r,i)=>`<hp:tr>${cell([r[0]],11,4,0,i,w1)}${cell([].concat(r[1]),0,3,1,i,w2)}</hp:tr>`).join("");
+      out.push(`<hp:p id="${id++}" paraPrIDRef="0" styleIDRef="0" pageBreak="0" columnBreak="0" merged="0"><hp:run charPrIDRef="0"><hp:tbl id="${id++}" zOrder="0" numberingType="TABLE" textWrap="TOP_AND_BOTTOM" textFlow="BOTH_SIDES" lock="0" dropcapstyle="None" pageBreak="CELL" repeatHeader="0" rowCnt="${rows.length}" colCnt="2" cellSpacing="0" borderFillIDRef="3" noAdjust="0"><hp:sz width="${W}" widthRelTo="ABSOLUTE" height="${282*rows.length}" heightRelTo="ABSOLUTE" protect="0"/><hp:pos treatAsChar="1" affectLSpacing="0" flowWithText="1" allowOverlap="0" holdAnchorAndSO="0" vertRelTo="PARA" horzRelTo="COLUMN" vertAlign="TOP" horzAlign="LEFT" vertOffset="0" horzOffset="0"/><hp:outMargin left="0" right="0" top="0" bottom="0"/><hp:inMargin left="510" right="510" top="141" bottom="141"/>${tr}</hp:tbl></hp:run></hp:p>`); },
+    async blob(title){ await loadHwpx(); const T=window.HWPX_TPL, z=new window.JSZip(), now=new Date().toISOString().replace(/\.\d+Z$/,"Z");
+      z.file("mimetype",T.mimetype,{compression:"STORE"});
+      ["version.xml","Contents/header.xml"].forEach(k=>z.file(k,T[k]));
+      z.file("Contents/section0.xml",T._sec0+out.join("")+T._secEnd);
+      z.file("Contents/content.hpf",T["Contents/content.hpf"].replace("<opf:title/>",`<opf:title>${_hx(title)}</opf:title>`).replace(/<opf:meta name="(CreatedDate|ModifiedDate)" content="text"\/>/g,`<opf:meta name="$1" content="text">${now}</opf:meta>`));
+      z.file("Preview/PrvText.txt",txt.join("\r\n").slice(0,1000));
+      ["settings.xml","META-INF/container.xml","META-INF/container.rdf","META-INF/manifest.xml"].forEach(k=>z.file(k,T[k]));
+      return z.generateAsync({type:"blob",mimeType:"application/hwp+zip",compression:"DEFLATE"}); } };
+}
+const HWPX_DISC=()=>`카페 장비 시각가이드 · 장비 매뉴얼에서 만든 한글 요약본입니다(${new Date().toLocaleDateString("ko-KR")}). 제조사 원문 매뉴얼의 전체 번역이 아니며, 안전·수치·교체 주기는 원문 매뉴얼과 수입사 안내가 우선합니다.`;
+function hwpxManualSection(D,im,br,m,pb){
+  const G=MG[m.g], srcs=mSrcs(br,m), kc=m.kc||br.kc, S=_strip;
+  D.p([[m.n,8],["   "+br.b+(m.tag?" · "+m.tag:""),10]],pb);
+  const rows=[["제조사",br.maker||"-"],["장비 유형",G?G.t:"-"]];
+  if(kc) rows.push(["KC 전기안전",kc.map(k=>k.no+(k.st?" ("+k.st+")":"")+(k.who?" · 인증 주체 "+k.who:"")+(k.org?" · "+k.org:"")+(k.note?" · "+k.note:""))]);
+  (m.spec||[]).forEach(r=>rows.push([S(r[0]),S(r[1])]));
+  D.table(rows);
+  if(m.pts&&m.pts.length){ D.gap(); D.t("이 모델 포인트",9); m.pts.forEach(p=>D.li(S(p))); }
+  if(br.note){ D.gap(); D.t(br.note,10); }
+  if(G){ D.gap(); D.t("사용자 매뉴얼 (한글 요약 가이드)",9); D.t(`${G.t} 공통 운용 요령입니다. 수치·주기는 원문 매뉴얼과 수입사 지침이 우선입니다.`,10);
+    G.s.forEach(x=>{ D.t(x[0],11); x[1].forEach(t=>D.li(S(t))); }); }
+  D.gap(); D.t("매뉴얼 원본 · 근거 자료",9);
+  if(srcs.length) srcs.forEach(x=>{ D.li(`[${MK_LABEL[x.k][0]}] ${x.t}`); D.t("   "+x.u,10); }); else D.t("공개된 원본 링크를 찾지 못했어요. 수입사·제조사에 요청하세요.");
+  D.gap(); D.t(im.dom?"제조사 (국산)":im.seller?"판매처":im.ovs?"해외 브랜드 (국내 수입사 미확인)":"수입회사",9);
+  D.p([[im.n,11],[im.en?"  "+im.en:"",0]]); if(im.note) D.t(im.note);
+  (im.basis||[]).forEach(x=>{ D.li(x.t); D.t("   "+x.u,10); });
+}
 async function downloadManual(list,title,fname,msgEl){
-  const html=manualDocHtml(title,list.map(x=>manualDocSection(x.im,x.br,x.m)).join(""));
-  const r=await saveFile(fname,html);
-  if(msgEl) msgEl.textContent=r==="saved"?"저장했어요. 파일을 열어 인쇄 → PDF로 저장도 할 수 있어요.":r==="declined"?"저장을 취소했어요.":"이 화면에서는 저장이 막혀 있어요.";
+  if(msgEl) msgEl.textContent="한글 파일을 만드는 중…";
+  try{ const D=HwpxDoc(); D.t(title,7); D.t(HWPX_DISC(),10); D.gap();
+    list.forEach((x,i)=>hwpxManualSection(D,x.im,x.br,x.m,i>0));
+    const r=await saveFile(fname,await D.blob(title));
+    if(msgEl) msgEl.textContent=r==="saved"?"저장했어요. 한컴오피스 한글(2014 이상)·한컴독스·네이버웍스 등에서 열 수 있어요.":r==="declined"?"저장을 취소했어요.":"이 화면에서는 저장이 막혀 있어요.";
+  }catch(e){ if(msgEl) msgEl.textContent="한글 파일을 만들지 못했어요. 새로고침 후 다시 시도해 주세요."; }
 }
 const _coKey=n=>n.replace(/\(주\)|㈜|주식회사|\(유\)|유한회사/g,"").replace(/^[\s()·\-]+/,"").trim();
 (()=>{const seen={}; for(let i=MANUAL_DATA.length-1;i>=0;i--){const im=MANUAL_DATA[i]; const f=MANUAL_DATA.findIndex(x=>x.n===im.n); if(f!==i){ MANUAL_DATA[f].brands.push(...im.brands); MANUAL_DATA.splice(i,1);} }})();
@@ -1460,7 +1508,7 @@ function renderManualDetail(){
   const G=MG[m.g], srcs=mSrcs(br,m), hasKo=srcs.some(s=>s.k==="ko");
   d.innerHTML=`<div class="mcrumb"><span><i>대</i>${im.n}</span>›<span><i>중</i>${br.b}</span>›<span><i>소</i>${m.n}</span></div>
    <h2>${m.n} <small>${br.b.replace(/^[^A-Za-z]+/,"")} · ${m.tag||""}</small></h2>
-   <div class="mmeta"><span>제조사 ${br.maker}</span><span>${G?G.t:""}</span></div>${(PHOTOS[photoKey(br,m)]||m.img)?`<img class="mphoto" ${PHOTOS[photoKey(br,m)]?`src="${PHOTOS[photoKey(br,m)]}"`:(packOf(m.img)!=null?`data-auto="${m.img}"`:`src="${m.img}"`)} alt="${m.n} 사진">${(!PHOTOS[photoKey(br,m)]&&m.imgsrc)?`<div class="mphotosrc">사진: 웹 검색 이미지 · <a href="${m.imgsrc}" target="_blank" rel="noopener">출처 페이지</a> (모델과 다르면 📷 사진 바꾸기)</div>`:""}`:""}<div class="mact"><label class="mdlbtn ghost mphotobtn">📷 ${(PHOTOS[photoKey(br,m)]||m.img)?"사진 바꾸기":"사진 넣기"}<input type="file" accept="image/*" class="js-photo" hidden></label><button class="mdlbtn js-mdl">⬇ 한글 매뉴얼 (.html)</button><button class="mdlbtn js-spec">⬇ 사양서 (PPT)</button><button class="mdlbtn ghost js-specb">⬇ 이 브랜드 사양서 (PPT)</button><span class="mnote js-msg"></span></div>${(()=>{const pg=srcs.map(x=>MAN_PAGES[x.u]).find(Boolean); return pg?`<section class="msec mpages"><h3>사용자 매뉴얼 <small>${pg.n}쪽 · 아래로 넘겨 보세요</small></h3>${Array.from({length:pg.n},(_,i)=>`<img loading="${i<2?"eager":"lazy"}" src="${pg.dir}${String(i+1).padStart(2,"0")}.jpg" alt="매뉴얼 ${i+1}쪽">`).join("")}</section>`:"";})()}
+   <div class="mmeta"><span>제조사 ${br.maker}</span><span>${G?G.t:""}</span></div>${(PHOTOS[photoKey(br,m)]||m.img)?`<img class="mphoto" ${PHOTOS[photoKey(br,m)]?`src="${PHOTOS[photoKey(br,m)]}"`:(packOf(m.img)!=null?`data-auto="${m.img}"`:`src="${m.img}"`)} alt="${m.n} 사진">${(!PHOTOS[photoKey(br,m)]&&m.imgsrc)?`<div class="mphotosrc">사진: 웹 검색 이미지 · <a href="${m.imgsrc}" target="_blank" rel="noopener">출처 페이지</a> (모델과 다르면 📷 사진 바꾸기)</div>`:""}`:""}<div class="mact"><label class="mdlbtn ghost mphotobtn">📷 ${(PHOTOS[photoKey(br,m)]||m.img)?"사진 바꾸기":"사진 넣기"}<input type="file" accept="image/*" class="js-photo" hidden></label><button class="mdlbtn js-mdl">⬇ 한글 매뉴얼 (한글파일 .hwpx)</button><button class="mdlbtn js-spec">⬇ 사양서 (PPT)</button><button class="mdlbtn ghost js-specb">⬇ 이 브랜드 사양서 (PPT)</button><span class="mnote js-msg"></span></div>${(()=>{const pg=srcs.map(x=>MAN_PAGES[x.u]).find(Boolean); return pg?`<section class="msec mpages"><h3>사용자 매뉴얼 <small>${pg.n}쪽 · 아래로 넘겨 보세요</small></h3>${Array.from({length:pg.n},(_,i)=>`<img loading="${i<2?"eager":"lazy"}" src="${pg.dir}${String(i+1).padStart(2,"0")}.jpg" alt="매뉴얼 ${i+1}쪽">`).join("")}</section>`:"";})()}
    ${hasKo?`<section class="msec mko"><h3>한글 원본 매뉴얼 받기</h3><div class="mkobtns">${srcs.filter(x=>x.k==="ko").map(x=>(/^manuals\//.test(x.u)?`<button class="mdlbtn mlocal" data-u="${x.u}">⬇ ${x.t} · 바로 저장</button>`:`<a class="mdlbtn" href="${x.u}" target="_blank" rel="noopener" download>⬇ ${x.t}</a>`)).join("")}</div><p class="mnote">누르면 제조사·수입사 자료실의 원본(PDF 또는 게시글)이 새 창으로 열려요. 게시글로 열리면 첨부파일을 눌러 받으면 돼요.</p></section>`:""}<section class="msec"><h3>매뉴얼 원본</h3>
     ${srcs.length?`<ul class="msrc">${srcs.map(s=>`<li><i class="mk ${MK_LABEL[s.k][1]}">${MK_LABEL[s.k][0]}</i><a href="${s.u}" target="_blank" rel="noopener">${s.t} ↗</a></li>`).join("")}</ul>`:`<p class="mnote">공개된 매뉴얼 링크를 찾지 못했어요. 수입사(${im.n})에 요청하세요.</p>`}
     ${hasKo?"":`<p class="mnote">한글 매뉴얼은 확인되지 않아, 아래에 제조사 원문 기준의 핵심 사용 요령을 한글로 정리했어요. 원문 전체 번역본은 수입사 또는 제조사에 요청하세요.</p>`}
@@ -1475,7 +1523,7 @@ function renderManualDetail(){
     ${G.s.map((s,i)=>`<details ${i<3?"open":""}><summary>${s[0]}</summary><ul>${s[1].map(x=>`<li>${x}</li>`).join("")}</ul></details>`).join("")}</section>`:""}
    <section class="msec"><h3>${im.dom?"제조사 (국산)":im.seller?"판매처":im.ovs?"해외 브랜드 (국내 수입사 미확인)":"수입회사"}</h3><p><b>${im.n}</b> <small>${im.en}</small></p><p class="mnote">${im.note}</p>
     <ul class="msrc">${(im.basis||[]).map(s=>`<li><i class="mk mk-imp">근거</i><a href="${s.u}" target="_blank" rel="noopener">${s.t} ↗</a></li>`).join("")}${im.site?`<li><i class="mk mk-imp">자료실</i><a href="${im.site}" target="_blank" rel="noopener">수입사 자료·제품 페이지 ↗</a></li>`:""}</ul></section>
-   <div class="mfoot"><button id="mdl" class="mdlbtn">⬇ 한글 매뉴얼 다운로드 (.html)</button> <button class="mdlbtn js-spec">⬇ 사양서 (PPT)</button> <button id="mdlb" class="mdlbtn ghost">⬇ 이 브랜드 전체</button> <span id="mdlmsg" class="mnote"></span><br><button id="mtodict">장비 사전에서 ${CL[br.c]||"장비"} 보기</button></div>`;
+   <div class="mfoot"><button id="mdl" class="mdlbtn">⬇ 한글 매뉴얼 다운로드 (한글파일 .hwpx)</button> <button class="mdlbtn js-spec">⬇ 사양서 (PPT)</button> <button id="mdlb" class="mdlbtn ghost">⬇ 이 브랜드 전체</button> <span id="mdlmsg" class="mnote"></span><br><button id="mtodict">장비 사전에서 ${CL[br.c]||"장비"} 보기</button></div>`;
   const fn=t=>t.replace(/[\\/:*?"<>|]/g,"").replace(/\s+/g,"_");
   document.querySelectorAll(".mlocal").forEach(b=>b.onclick=async()=>{ const msg=document.getElementById("mdlmsg"); b.disabled=true; try{ const r=await saveDataUrl(b.dataset.u.split("/").pop(),b.dataset.u); if(msg) msg.textContent=r==="saved"?"PDF를 저장했어요.":r==="declined"?"저장을 취소했어요.":"이 화면에서는 저장이 막혀 있어요."; }catch(e){ window.open(b.dataset.u,"_blank"); } b.disabled=false; });
   const _msgs=()=>[document.getElementById("mdlmsg"),...document.querySelectorAll(".js-msg")];
@@ -1483,17 +1531,19 @@ function renderManualDetail(){
   document.querySelectorAll(".js-mdl").forEach(b=>b.onclick=()=>document.getElementById("mdl").click());
   document.querySelectorAll(".js-spec").forEach(b=>b.onclick=()=>downloadSpec([{im,br,m}],`${br.b} ${m.n} 사양서`,fn(`${br.b}_${m.n}_사양서.pptx`),_msgs()));
   document.querySelectorAll(".js-specb").forEach(b=>b.onclick=()=>downloadSpec(br.models.map(x=>({im,br,m:x})),`${br.b} 장비 사양서`,fn(`${br.b}_사양서_${br.models.length}개모델.pptx`),_msgs()));
-  document.getElementById("mdl").onclick=()=>downloadManual([{im,br,m}],`${m.n} 한글 매뉴얼`,fn(`${br.b}_${m.n}_한글매뉴얼.html`),document.getElementById("mdlmsg"));
-  document.getElementById("mdlb").onclick=()=>downloadManual(br.models.map(x=>({im,br,m:x})),`${br.b} 한글 매뉴얼 (${br.models.length}개 모델)`,fn(`${br.b}_한글매뉴얼_전체.html`),document.getElementById("mdlmsg"));
+  document.getElementById("mdl").onclick=()=>downloadManual([{im,br,m}],`${m.n} 한글 매뉴얼`,fn(`${br.b}_${m.n}_한글매뉴얼.hwpx`),document.getElementById("mdlmsg"));
+  document.getElementById("mdlb").onclick=()=>downloadManual(br.models.map(x=>({im,br,m:x})),`${br.b} 한글 매뉴얼 (${br.models.length}개 모델)`,fn(`${br.b}_한글매뉴얼_전체.hwpx`),document.getElementById("mdlmsg"));
   document.getElementById("mtodict").onclick=()=>{ document.querySelector('nav button[data-v="dict"]').click(); const q=document.getElementById("q"); if(q){ q.value=({m:"에스프레소",g:"그라인더",ice:"제빙기",fr:"냉장고",fz:"냉동고",rf:"냉장고",sc_cake:"쇼케이스",sc_bev:"쇼케이스",sc_frz:"쇼케이스",sc_open:"쇼케이스",cold:"기타 냉장",blend:"블렌더",steam:"오토스팀",brew:"배치브루",wash:"식기세척기",heat:"오븐·그릴·레인지",roast:"로스터",shave:"빙수기",tool:"탬퍼"})[br.c]||""; q.dispatchEvent(new Event("input")); } };
 }
 (function(){ const q=document.getElementById("mq"); if(q) q.oninput=()=>{ MQ=q.value.trim(); renderManual(); };
   document.querySelectorAll("#mchips button").forEach(b=>b.onclick=()=>{ MC=b.dataset.c; document.querySelectorAll("#mchips button").forEach(x=>x.classList.toggle("on",x===b)); renderManual(); });
-  const all=document.getElementById("mdlall"); if(all) all.onclick=()=>{ const list=manualFlat().filter(x=>mMatch(x.im,x.br,x.m)); const lab=MC==="all"?"전체":(CL[MC]||({auto:"전자동",dom:"국산",ko:"한글원본"})[MC]); downloadManual(list,`카페 장비 한글 매뉴얼 — ${lab}${MQ?" · 검색 '"+MQ+"'":""} (${list.length}개 제품)`,`카페장비_한글매뉴얼_${lab}${MQ?"_"+MQ.replace(/\s+/g,"_"):""}.html`,document.getElementById("mdlallmsg")); };
+  const all=document.getElementById("mdlall"); if(all) all.onclick=()=>{ const list=manualFlat().filter(x=>mMatch(x.im,x.br,x.m)); const lab=MC==="all"?"전체":(CL[MC]||({auto:"전자동",dom:"국산",ko:"한글원본"})[MC]); downloadManual(list,`카페 장비 한글 매뉴얼 — ${lab}${MQ?" · 검색 '"+MQ+"'":""} (${list.length}개 제품)`,`카페장비_한글매뉴얼_${lab}${MQ?"_"+MQ.replace(/\s+/g,"_"):""}.hwpx`,document.getElementById("mdlallmsg")); };
   const ka=document.getElementById("mkoall"); if(ka) ka.onclick=async()=>{ const list=manualFlat().filter(x=>mMatch(x.im,x.br,x.m)&&hasKoM(x.br,x.m)); const by={}; list.forEach(x=>{const c=CL[x.br.c]||"기타"; (by[c]=by[c]||[]).push(x);});
-    const body=Object.entries(by).map(([c,xs])=>`<h2>${_esc(c)} <small>${xs.length}개 제품</small></h2><table><tr><th>브랜드 · 모델</th><td><b>한글 원본 매뉴얼</b> (눌러서 받기)</td></tr>${xs.map(x=>`<tr><th>${_esc(x.br.b)}<br><small>${_esc(x.m.n)}</small></th><td>${mSrcs(x.br,x.m).filter(s=>s.k==="ko").map(s=>`<a href="${_esc(s.u)}" target="_blank">⬇ ${_esc(s.t)}</a>`).join("<br>")}</td></tr>`).join("")}</table>`).join("");
-    const html=manualDocHtml(`카페 장비 한글 원본 매뉴얼 모음 (${list.length}개 제품)`,'<p class="note">각 링크는 제조사·수입사·판매처 자료실의 원본 파일 주소예요. 눌러서 PDF를 받으세요. 게시글 주소는 첨부파일을 눌러 받으면 됩니다.</p>'+body);
-    const r=await saveFile(`카페장비_한글원본매뉴얼_모음_${list.length}개.html`,html); const m=document.getElementById("mdlallmsg"); if(m) m.textContent=r==="saved"?`한글 원본 매뉴얼 ${list.length}개 제품의 받기 링크 모음을 저장했어요.`:r==="declined"?"저장을 취소했어요.":"이 화면에서는 저장이 막혀 있어요."; };
+    const m=document.getElementById("mdlallmsg"); if(m) m.textContent="한글 파일을 만드는 중…";
+    try{ const T=`카페 장비 한글 원본 매뉴얼 모음 (${list.length}개 제품)`, D=HwpxDoc(); D.t(T,7); D.t(HWPX_DISC(),10); D.t("각 주소는 제조사·수입사·판매처 자료실의 원본 파일 주소예요. 주소를 브라우저에 붙여 넣어 PDF를 받으세요. 게시글 주소는 첨부파일을 눌러 받으면 됩니다.",10); D.gap();
+      Object.entries(by).forEach(([c,xs])=>{ D.p([[c,8],["   "+xs.length+"개 제품",10]]); D.table(xs.map(x=>[x.br.b+" · "+x.m.n,mSrcs(x.br,x.m).filter(s=>s.k==="ko").flatMap(s=>[s.t,s.u])]),12000); D.gap(); });
+      const r=await saveFile(`카페장비_한글원본매뉴얼_모음_${list.length}개.hwpx`,await D.blob(T)); if(m) m.textContent=r==="saved"?`한글 원본 매뉴얼 ${list.length}개 제품의 받기 주소 모음을 한글 파일로 저장했어요.`:r==="declined"?"저장을 취소했어요.":"이 화면에서는 저장이 막혀 있어요.";
+    }catch(e){ if(m) m.textContent="한글 파일을 만들지 못했어요. 새로고침 후 다시 시도해 주세요."; } };
   renderManual(); })();
 
 // 장비 사전
