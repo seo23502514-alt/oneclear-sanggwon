@@ -1,5 +1,5 @@
 {
-  "updated": "2026-11-24 07:26",
+  "updated": "2026-11-25 07:30",
   "items": [
     {
       "id": "web-ex-rest-area-direct-cafe",
@@ -18,26 +18,6 @@
       "url": "",
       "news": "https://www.newspim.com/news/view/20261030000317",
       "search": "직계약 휴게소 입찰",
-      "sui": false,
-      "seen": "2026-11-01"
-    },
-    {
-      "id": "web-geoje-jangseungpo-haneul-cafe",
-      "title": "장승포 도시재생 공동이용시설(하늘카페 등 3곳) 운영자 모집",
-      "org": "경남 거제시",
-      "cat": "운영·임대",
-      "kind": "임대",
-      "src": "관공서",
-      "where": "방문·이메일(거제시도시재생지원센터)",
-      "posted": "2026-10-28",
-      "close": "2026-11-17",
-      "open": "",
-      "price": 0,
-      "priceLabel": "사용료 면제(공공요금·운영비 운영자 부담)",
-      "note": "하늘카페(장승포해안로 9, 마을카페) 포함 3곳. 거제시 주민등록 성인 또는 거제 주사무소 법인·단체(예비창업자 가능), 접수 11.11~17, 서면+발표심사, 운영 2년. 문의 055-639-4648",
-      "url": "",
-      "news": "https://www.gibnews.kr/news/articleView.html?idxno=61414",
-      "search": "장승포 도시재생 공동이용시설 운영자",
       "sui": false,
       "seen": "2026-11-01"
     },
